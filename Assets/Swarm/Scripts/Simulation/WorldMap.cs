@@ -13,7 +13,7 @@ namespace Swarm.Simulation
         public byte Variant;
     }
 
-    public enum FlowerKind : byte { Daisy, Pink, Poppy, Corn, Violet, Sun }
+    public enum FlowerKind : byte { Daisy, Pink, Poppy, Corn, Violet, Sun, Linden }
 
     /// <summary>Процедурная карта: улей в центре, деревья/камни, луга с цветами.</summary>
     public sealed class WorldMap
@@ -21,6 +21,10 @@ namespace Swarm.Simulation
         public readonly float Width, Height;
         public readonly Vector2 HivePos;
         public readonly List<Obstacle> Obstacles = new List<Obstacle>(48);
+        public readonly List<Vector2> Ponds = new List<Vector2>(4);
+        public const float PondRadius = 22f;
+        public Vector2 NestPos;
+        public readonly Biome Biome;
         public readonly uint Seed;
 
         public WorldMap(SimConfig cfg, uint seed)
@@ -29,6 +33,14 @@ namespace Swarm.Simulation
             Width = cfg.WorldWidth;
             Height = cfg.WorldHeight;
             HivePos = new Vector2(Width * 0.5f, Height * 0.5f);
+            Biome = cfg.Biome;
+        }
+
+        public bool NearPond(Vector2 p, float pad)
+        {
+            for (int i = 0; i < Ponds.Count; i++)
+                if ((Ponds[i] - p).sqrMagnitude < (PondRadius + pad) * (PondRadius + pad)) return true;
+            return false;
         }
 
         public bool InsideObstacle(Vector2 p, float pad)
@@ -90,19 +102,34 @@ namespace Swarm.Simulation
         public void Generate(Rng rng, FlowerField flowers)
         {
             Obstacles.Clear();
-            // --- деревья: держатся подальше от улья и друг от друга
+            Ponds.Clear();
+            int treeCount = Biome == Biome.Garden ? 11 : Biome == Biome.Swamp ? 18 : 15;
+            int clusterCount = Biome == Biome.Garden ? 20 : Biome == Biome.Swamp ? 11 : 15;
+            int pondCount = Biome == Biome.Swamp ? 4 : 1;
+            // --- пруды (вода для жары; на болоте их много)
             int attempts = 0;
+            while (Ponds.Count < pondCount && attempts++ < 300)
+            {
+                var p = new Vector2(rng.Range(50f, Width - 50f), rng.Range(60f, Height - 50f));
+                float dh = (p - HivePos).magnitude;
+                if (dh < 110f || dh > 330f) continue;
+                bool near = false;
+                foreach (var q in Ponds) near |= (q - p).magnitude < 120f;
+                if (!near) Ponds.Add(p);
+            }
+            // --- деревья: держатся подальше от улья и друг от друга
+            attempts = 0;
             int trees = 0;
-            while (trees < 15 && attempts++ < 600)
+            while (trees < treeCount && attempts++ < 600)
             {
                 var p = new Vector2(rng.Range(30f, Width - 30f), rng.Range(40f, Height - 30f));
                 if ((p - HivePos).magnitude < 110f) continue;
-                if (InsideObstacle(p, 52f)) continue;
+                if (InsideObstacle(p, 52f) || NearPond(p, 18f)) continue;
                 Obstacles.Add(new Obstacle { Pos = p, Radius = 11f, Kind = ObstacleKind.Tree, Variant = (byte)rng.Range(0, 3) });
                 trees++;
             }
             AddScatter(rng, ObstacleKind.Rock, 9, 7f, 70f, 26f);
-            AddScatter(rng, ObstacleKind.Bush, 8, 9f, 75f, 28f);
+            AddScatter(rng, ObstacleKind.Bush, Biome == Biome.Garden ? 14 : 8, 9f, 75f, 28f);
             AddScatter(rng, ObstacleKind.Stump, 3, 7f, 80f, 30f);
 
             // --- луга: кластеры цветов, ценность растёт с удалением от улья
@@ -110,12 +137,12 @@ namespace Swarm.Simulation
             int clusters = 0;
             attempts = 0;
             float maxDist = new Vector2(Width * 0.5f, Height * 0.5f).magnitude;
-            while (clusters < 15 && attempts++ < 800)
+            while (clusters < clusterCount && attempts++ < 800)
             {
                 var c = new Vector2(rng.Range(40f, Width - 40f), rng.Range(50f, Height - 40f));
                 float dist = (c - HivePos).magnitude;
                 if (dist < 70f) continue;
-                if (InsideObstacle(c, 22f)) continue;
+                if (InsideObstacle(c, 22f) || NearPond(c, 14f)) continue;
                 bool nearOther = false;
                 for (int i = 0; i < flowers.Count; i++)
                     if ((flowers.Pos[i] - c).sqrMagnitude < 40f * 40f) { nearOther = true; break; }
@@ -127,13 +154,59 @@ namespace Swarm.Simulation
                 {
                     var p = c + new Vector2(rng.Signed, rng.Signed) * 18f;
                     p = ClampToWorld(p, 16f);
-                    if (InsideObstacle(p, 8f)) continue;
+                    if (InsideObstacle(p, 8f) || NearPond(p, 6f)) continue;
                     FlowerKind kind = PickKind(rng, t);
                     float nectar = NectarOf(kind) * rng.Range(0.85f, 1.15f);
                     flowers.Add(p, kind, nectar, rng.Value);
                 }
                 clusters++;
             }
+
+            // --- место для осиного гнезда: далеко от улья, у края карты
+            NestPos = new Vector2(Width * 0.15f, Height * 0.88f);
+            for (int a = 0; a < 200; a++)
+            {
+                var p = new Vector2(rng.Range(30f, Width - 30f), rng.Range(40f, Height - 30f));
+                if ((p - HivePos).magnitude < 300f || InsideObstacle(p, 16f) || NearPond(p, 10f)) continue;
+                NestPos = p;
+                break;
+            }
+        }
+
+        /// <summary>Пытается прорастить новый цветок: чаще рядом с существующими, иногда на пустом месте.</summary>
+        public bool TrySprout(Rng rng, FlowerField flowers, SimConfig cfg)
+        {
+            if (flowers.Count >= FlowerField.Capacity) return false;
+            float maxDist = new Vector2(Width * 0.5f, Height * 0.5f).magnitude;
+            for (int attempt = 0; attempt < 12; attempt++)
+            {
+                Vector2 p;
+                if (flowers.Count > 0 && rng.Value < 0.7f)
+                {
+                    Vector2 near = flowers.Pos[rng.Range(0, flowers.Count)];
+                    float a = rng.Value * 6.2832f, d = rng.Range(10f, 28f);
+                    p = near + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * d;
+                }
+                else p = new Vector2(rng.Range(30f, Width - 30f), rng.Range(40f, Height - 30f));
+                p = ClampToWorld(p, 16f);
+                if ((p - HivePos).magnitude < 60f) continue;
+                if (InsideObstacle(p, 10f) || NearPond(p, 6f)) continue;
+                bool overlap = false;
+                for (int f = 0; f < flowers.Count; f++)
+                    if ((flowers.Pos[f] - p).sqrMagnitude < 9f * 9f) { overlap = true; break; }
+                if (overlap) continue;
+
+                float t = Mathf.Clamp01(((p - HivePos).magnitude - 70f) / (maxDist - 70f));
+                bool rare = rng.Value < cfg.RareChance;
+                FlowerKind kind = rare ? FlowerKind.Sun : PickKind(rng, t);
+                float nectar = NectarOf(kind) * rng.Range(0.85f, 1.15f) * (rare ? cfg.RareNectarMul : 1f);
+                flowers.Add(p, kind, nectar, rng.Value);
+                int i = flowers.Count - 1;
+                flowers.Sprout[i] = cfg.SproutGrowTime;
+                flowers.Rare[i] = rare;
+                return true;
+            }
+            return false;
         }
 
         static FlowerKind PickKind(Rng rng, float t)
@@ -154,6 +227,7 @@ namespace Swarm.Simulation
                 case FlowerKind.Poppy: return 18f;
                 case FlowerKind.Violet: return 20f;
                 case FlowerKind.Corn: return 26f;
+                case FlowerKind.Linden: return 32f;
                 default: return 45f;
             }
         }

@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Swarm.Simulation
 {
     public enum BeeTask : byte { Follow, Gather, Attack, Deliver, Guard, Scout, Ball }
-    public enum BeeRole : byte { Swarm, Guard }
+    public enum BeeRole : byte { Swarm, Guard, Squad }
 
     /// <summary>
     /// Рой как структура массивов. Центр роя («лидер») ведёт игрок, каждая пчела — boid со своим характером.
@@ -20,7 +20,7 @@ namespace Swarm.Simulation
     {
         public readonly int Capacity;
         public readonly Vector2[] Pos, Vel;
-        public readonly float[] Carry, Phase, SpeedMul, WanderMul;
+        public readonly float[] Carry, Phase, SpeedMul, WanderMul, Hp, MaxHp, Stuck;
         public readonly BeeTask[] Task;
         public readonly BeeRole[] Role;
         public readonly bool[] Scout;
@@ -36,10 +36,16 @@ namespace Swarm.Simulation
         public float FieldCarry;
         public int GatheringCount, AttackingCount, ScoutingCount;
 
-        // стражи
-        public int GuardWanted;
+        // защитники улья (Role.Guard) — отдельная каста, в рой и цель не входят
         public int GuardCount;
         public int SwarmCount => Count - GuardCount;
+        // отряд второго пальца (входит в рой и в цель)
+        public int SquadCount;
+        public bool SquadActive;
+        public Vector2 SquadTarget;
+        readonly int[] _squadFlowers = new int[4];
+        readonly float[] _squadFlowerDist = new float[4];
+        int _squadFlowerCount;
 
         // тепловой шар
         public bool Balling;
@@ -81,11 +87,28 @@ namespace Swarm.Simulation
             Phase = new float[Capacity];
             SpeedMul = new float[Capacity];
             WanderMul = new float[Capacity];
+            Hp = new float[Capacity];
+            MaxHp = new float[Capacity];
+            Stuck = new float[Capacity];
             Task = new BeeTask[Capacity];
             Role = new BeeRole[Capacity];
             Scout = new bool[Capacity];
             Dead = new bool[Capacity];
             Grid = new SpatialGrid(cfg.WorldWidth, cfg.WorldHeight, 6f, Capacity);
+        }
+
+        public float ScoutChance = 0.07f;
+
+        public bool SpawnDefender(Vector2 p, Rng rng, float hp)
+        {
+            if (!Spawn(p, rng)) return false;
+            int i = Count - 1;
+            Role[i] = BeeRole.Guard;
+            Scout[i] = false;
+            Hp[i] = MaxHp[i] = hp;
+            SpeedMul[i] = 1.05f;
+            GuardCount++;
+            return true;
         }
 
         public bool Spawn(Vector2 p, Rng rng)
@@ -98,7 +121,9 @@ namespace Swarm.Simulation
             Phase[i] = rng.Value * 100f;
             SpeedMul[i] = 0.88f + rng.Value * 0.24f;
             WanderMul[i] = 0.6f + rng.Value * 0.8f;
-            Scout[i] = rng.Value < 0.07f;
+            Scout[i] = rng.Value < ScoutChance;
+            Hp[i] = MaxHp[i] = 1f;
+            Stuck[i] = 0f;
             Task[i] = BeeTask.Follow;
             Role[i] = BeeRole.Swarm;
             Dead[i] = false;
@@ -125,6 +150,7 @@ namespace Swarm.Simulation
                 {
                     Pos[i] = Pos[last]; Vel[i] = Vel[last]; Carry[i] = Carry[last];
                     Phase[i] = Phase[last]; SpeedMul[i] = SpeedMul[last]; WanderMul[i] = WanderMul[last];
+                    Hp[i] = Hp[last]; MaxHp[i] = MaxHp[last]; Stuck[i] = Stuck[last];
                     Scout[i] = Scout[last]; Task[i] = Task[last]; Role[i] = Role[last]; Dead[i] = Dead[last];
                 }
                 Dead[last] = false;
@@ -185,7 +211,8 @@ namespace Swarm.Simulation
             Vector2 entrance = world.HivePos + HiveEntranceOffset;
 
             // ---------------- тепловой шар: палец удерживается у врага
-            float maxSpd = cfg.LeaderSpeed * colony.SpeedMul;
+            float maxSpd = cfg.LeaderSpeed * colony.SpeedMul * sim.Mods.Speed * sim.Sky.SpeedMul(time);
+            Vector2 wind = sim.Sky.Wind;
             int ballE = -1;
             if (input.Active && input.Hold && SwarmCount >= cfg.BallMinBees)
             {
@@ -213,7 +240,7 @@ namespace Swarm.Simulation
             {
                 LeaderVel = Vector2.MoveTowards(LeaderVel, Vector2.zero, cfg.LeaderBrake * dt);
             }
-            LeaderPos += LeaderVel * dt;
+            LeaderPos += (LeaderVel + wind * 0.8f) * dt;
             world.PushOut(ref LeaderPos, ref LeaderVel, 4f);
             LeaderPos = world.ClampToWorld(LeaderPos, 12f);
 
@@ -242,27 +269,43 @@ namespace Swarm.Simulation
             }
             Vector2 perp = new Vector2(-Heading.y, Heading.x);
 
-            // ---------------- стражи: назначаются у улья, снимаются в любом месте
             int guards = 0;
             for (int i = 0; i < Count; i++) if (Role[i] == BeeRole.Guard) guards++;
-            if (guards < GuardWanted)
-            {
-                float rr = cfg.GuardRecruitRadius * cfg.GuardRecruitRadius;
-                for (int i = 0; i < Count && guards < GuardWanted; i++)
-                    if (Role[i] == BeeRole.Swarm && (Pos[i] - entrance).sqrMagnitude < rr) { Role[i] = BeeRole.Guard; guards++; }
-            }
-            else if (guards > GuardWanted)
-            {
-                for (int i = 0; i < Count && guards > GuardWanted; i++)
-                    if (Role[i] == BeeRole.Guard) { Role[i] = BeeRole.Swarm; guards--; }
-            }
             GuardCount = guards;
 
-            Radius = cfg.SwarmRadiusBase + cfg.SwarmRadiusPerSqrtBee * Mathf.Sqrt(Mathf.Max(1, SwarmCount));
+            // ---------------- отряд второго пальца: набор при касании, роспуск при отпускании
+            if (input.Active2 && !SquadActive && SwarmCount >= 12)
+            {
+                SquadActive = true;
+                SquadTarget = input.Target2;
+                int want = Mathf.Min(40, Mathf.RoundToInt(SwarmCount * 0.3f));
+                // берём пчёл, ближайших к месту второго касания (простой отбор по порогу расстояния)
+                float thr = 0f;
+                for (int pass = 0; pass < 12 && SquadCount < want; pass++)
+                {
+                    thr += 25f;
+                    for (int i = 0; i < Count && SquadCount < want; i++)
+                        if (Role[i] == BeeRole.Swarm && (Pos[i] - input.Target2).sqrMagnitude < thr * thr) { Role[i] = BeeRole.Squad; SquadCount++; }
+                }
+            }
+            else if (!input.Active2 && SquadActive)
+            {
+                SquadActive = false;
+                for (int i = 0; i < Count; i++) if (Role[i] == BeeRole.Squad) Role[i] = BeeRole.Swarm;
+                SquadCount = 0;
+            }
+            if (SquadActive) SquadTarget = Vector2.MoveTowards(SquadTarget, input.Target2, maxSpd * 1.1f * dt);
+            int squad = 0;
+            for (int i = 0; i < Count; i++) if (Role[i] == BeeRole.Squad) squad++;
+            SquadCount = squad;
+            if (SquadActive) CollectFlowersAt(flowers, SquadTarget, 30f, _squadFlowers, _squadFlowerDist, ref _squadFlowerCount);
+
+            Radius = cfg.SwarmRadiusBase + cfg.SwarmRadiusPerSqrtBee * Mathf.Sqrt(Mathf.Max(1, SwarmCount - SquadCount));
+            float squadR = 6f + 2.6f * Mathf.Sqrt(Mathf.Max(1, SquadCount));
 
             // ---------------- контекст: цветы, улей, враги
             CollectFlowers(flowers, Radius + cfg.GatherReach, _nearFlowers, _nearFlowerDist, ref _nearFlowerCount);
-            CollectFlowers(flowers, (Radius + cfg.GatherReach) * cfg.ScoutReachMul, _farFlowers, _farFlowerDist, ref _farFlowerCount);
+            CollectFlowers(flowers, (Radius + cfg.GatherReach) * cfg.ScoutReachMul * sim.Mods.ScoutReach, _farFlowers, _farFlowerDist, ref _farFlowerCount);
             bool atHive = (LeaderPos - entrance).magnitude < cfg.HiveReach + Radius * 0.5f;
 
             int candCount = 0, guardCandCount = 0;
@@ -275,22 +318,26 @@ namespace Swarm.Simulation
                 float sq = (enemies.Pos[e] - LeaderPos).sqrMagnitude;
                 if (sq < candRange * candRange) _enemyCand[candCount++] = e;
                 if (sq < (Radius + 60f) * (Radius + 60f)) enemyNear = true;
-                // стражи вступают в бой только с грабителями улья
-                if (enemies.Mode[e] != EnemyMode.Hunt && (enemies.Pos[e] - entrance).sqrMagnitude < guardRange * guardRange)
+                // защитники встречают любого врага у улья
+                if ((enemies.Pos[e] - entrance).sqrMagnitude < guardRange * guardRange)
                     _guardCand[guardCandCount++] = e;
             }
 
             Grid.Build(Pos, Count);
 
             float beeMax = maxSpd * cfg.BeeSpeedFactor;
-            float cap = cfg.CarryBase * colony.CarryMul;
+            float cap = cfg.CarryBase * colony.CarryMul * sim.Mods.Carry;
+            float collectRate = cfg.CollectRate * sim.Mods.Collect * flowers.CollectMul;
+            var hz = sim.Hazards;
             float sepDist = cfg.SeparationDist;
             float sepSq = sepDist * sepDist;
             float aggroSq = cfg.AggroRadius * cfg.AggroRadius;
             float leashSq = cfg.LeashDistance * cfg.LeashDistance;
             float stragglerSq = (Radius * 1.6f + 24f) * (Radius * 1.6f + 24f);
             float ballRangeSq = cfg.BallJoinRange * cfg.BallJoinRange;
-            float invCount = 1f / Mathf.Max(1, SwarmCount);
+            float invCount = 1f / Mathf.Max(1, SwarmCount - SquadCount);
+            float invSquad = 1f / Mathf.Max(1, SquadCount);
+            int squadIdx = 0;
             float s = Speed01;
             TotalCarry = 0f;
             FieldCarry = 0f;
@@ -306,11 +353,32 @@ namespace Swarm.Simulation
                 Vector2 v = Vel[i];
                 float ph = Phase[i];
                 BeeTask task;
+
+                // застряла в паутине — бьётся на месте, пока рой не порвёт сеть
+                if (Stuck[i] > 0f)
+                {
+                    if (!hz.StillStuck(p))
+                        Stuck[i] = 0f;
+                    else
+                    {
+                        Stuck[i] += dt;
+                        Vel[i] = new Vector2(Mathf.Sin(time * 40f + ph), Mathf.Cos(time * 37f + ph)) * 6f;
+                        Task[i] = BeeTask.Follow;
+                        TotalCarry += Carry[i];
+                        if (Role[i] == BeeRole.Swarm) { FieldCarry += Carry[i]; swarmIdx++; }
+                        else if (Role[i] == BeeRole.Squad) { FieldCarry += Carry[i]; squadIdx++; }
+                        else guardIdx++;
+                        continue;
+                    }
+                }
                 Vector2 target;
                 int targetIdx = -1;
 
                 if (Role[i] == BeeRole.Guard)
                 {
+                    // солдат у летка лечится
+                    if (Hp[i] < MaxHp[i] && (p - entrance).sqrMagnitude < 50f * 50f)
+                        Hp[i] = Mathf.Min(MaxHp[i], Hp[i] + cfg.DefenderRegen * sim.Mods.DefenderRegen * dt);
                     // --- страж: кружит у летка, атакует врагов у улья, сдаёт ношу
                     float ga = time * (0.7f + 0.2f * Mathf.Sin(ph)) * ((guardIdx & 1) == 0 ? 1f : -1f) + ph;
                     float gr = 16f + (guardIdx % 4) * 5f;
@@ -333,6 +401,41 @@ namespace Swarm.Simulation
                         target = enemies.Pos[targetIdx] + new Vector2(Mathf.Cos(oa), Mathf.Sin(oa)) * (EnemySystem.RadiusOf(enemies.Type[targetIdx]) + 2f);
                     }
                     else if (Carry[i] > 0f)
+                    {
+                        task = BeeTask.Deliver;
+                        target = entrance;
+                    }
+                }
+                else if (Role[i] == BeeRole.Squad)
+                {
+                    // --- отряд: своя маленькая формация у второго пальца, собирает и жалит там
+                    float k = Mathf.Sqrt((squadIdx + 0.5f) * invSquad);
+                    float ang = squadIdx * 2.39996f + time * 0.4f;
+                    squadIdx++;
+                    task = BeeTask.Follow;
+                    target = SquadTarget + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang) * 0.82f) * (squadR * k);
+                    float best = aggroSq;
+                    for (int e = 0; e < enemies.Count; e++)
+                    {
+                        if (_attackers[e] >= EnemySystem.MaxStingers(enemies.Type[e], cfg)) continue;
+                        float sq = (enemies.Pos[e] - p).sqrMagnitude;
+                        if (sq < best) { best = sq; targetIdx = e; }
+                    }
+                    if (targetIdx >= 0)
+                    {
+                        task = BeeTask.Attack;
+                        _attackers[targetIdx]++;
+                        float oa = ph * 7f + time * 9f;
+                        target = enemies.Pos[targetIdx] + new Vector2(Mathf.Cos(oa), Mathf.Sin(oa)) * (EnemySystem.RadiusOf(enemies.Type[targetIdx]) + 2f);
+                    }
+                    else if (Carry[i] < cap - 0.01f && _squadFlowerCount > 0)
+                    {
+                        task = BeeTask.Gather;
+                        targetIdx = _squadFlowers[i % _squadFlowerCount];
+                        float oa = ph * 3f + time * 4f;
+                        target = flowers.Pos[targetIdx] + new Vector2(Mathf.Cos(oa) * 3f, Mathf.Sin(oa) * 2f);
+                    }
+                    else if (Carry[i] > 0f && (SquadTarget - entrance).sqrMagnitude < 50f * 50f)
                     {
                         task = BeeTask.Deliver;
                         target = entrance;
@@ -442,6 +545,7 @@ namespace Swarm.Simulation
                 }
                 desired += sep * (cfg.SeparationForce * (task == BeeTask.Ball ? 0.35f : 1f));
 
+                desired += wind;
                 v = Vector2.MoveTowards(v, desired, cfg.BeeAccel * dt);
                 float vm = v.magnitude;
                 float vmax = beeMax * 1.35f;
@@ -449,6 +553,7 @@ namespace Swarm.Simulation
                 p += v * dt;
                 world.PushOut(ref p, ref v, 1.5f);
                 p = world.ClampToWorld(p, 3f);
+                if (hz.CatchInWeb(p)) Stuck[i] = 0.001f;
 
                 // --- действия
                 if (task == BeeTask.Gather || task == BeeTask.Scout)
@@ -456,7 +561,13 @@ namespace Swarm.Simulation
                     if (task == BeeTask.Gather) GatheringCount++; else ScoutingCount++;
                     if ((target - p).sqrMagnitude < 25f)
                     {
-                        float got = flowers.Take(targetIdx, Mathf.Min(cfg.CollectRate * dt, cap - Carry[i]), cfg.FlowerRegrowTime, sim.Events);
+                        float got = flowers.Take(targetIdx, Mathf.Min(collectRate * dt, cap - Carry[i]), cfg.FlowerRegrowTime, sim.Events);
+                        if (task == BeeTask.Scout && got > 0f) sim.Fog.ScoutVisit(sim, targetIdx);
+                        if (got > 0f && flowers.Rare[targetIdx] && !flowers.RareCredited[targetIdx])
+                        {
+                            flowers.RareCredited[targetIdx] = true;
+                            sim.Stats.RareFound++;
+                        }
                         Carry[i] += got;
                         sim.Stats.NectarCollected += got;
                         if (got > 0f && sim.Rng.Value < dt * 1.5f)
@@ -481,8 +592,16 @@ namespace Swarm.Simulation
                 Vel[i] = v;
                 Task[i] = task;
                 TotalCarry += Carry[i];
-                if (Role[i] == BeeRole.Swarm) FieldCarry += Carry[i];
+                if (Role[i] != BeeRole.Guard) FieldCarry += Carry[i];
             }
+        }
+
+        void CollectFlowersAt(FlowerField flowers, Vector2 c, float reach, int[] list, float[] dist, ref int count)
+        {
+            Vector2 keep = LeaderPos;
+            LeaderPos = c;
+            CollectFlowers(flowers, reach, list, dist, ref count);
+            LeaderPos = keep;
         }
 
         void CollectFlowers(FlowerField flowers, float reach, int[] list, float[] dist, ref int count)

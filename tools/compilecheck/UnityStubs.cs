@@ -225,6 +225,12 @@ namespace UnityEngine
     }
     public class AndroidJavaClass : AndroidJavaObject { public AndroidJavaClass(string className) : base(className) { } }
 
+    public static class JsonUtility
+    {
+        public static string ToJson(object obj) => "";
+        public static T FromJson<T>(string json) => default(T);
+    }
+    public class TextAsset : Object { public string text => ""; }
     public static class Resources { public static T Load<T>(string path) where T : Object => null; }
 
     public static class Debug
@@ -249,6 +255,7 @@ namespace UnityEngine
         public static bool isBatchMode => false;
         public static bool isPlaying => false;
         public static string dataPath => "";
+        public static string version => "";
         public static void Quit() { }
     }
 
@@ -273,6 +280,8 @@ namespace UnityEngine
         public static void SetInt(string key, int value) { }
         public static float GetFloat(string key, float defaultValue) => defaultValue;
         public static void SetFloat(string key, float value) { }
+        public static string GetString(string key, string defaultValue) => defaultValue;
+        public static void SetString(string key, string value) { }
         public static void Save() { }
     }
 

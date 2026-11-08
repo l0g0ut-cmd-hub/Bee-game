@@ -201,6 +201,71 @@ namespace Swarm.Presentation
                         audio?.Play(Sfx.Alarm);
                         if (_sound) Haptics.Pulse(60, 180, 0f);
                         break;
+                    case SimEventType.BeeHurt:
+                        Emit(Spr.KCross, e.Pos, new Vector2(0f, 10f), 0.25f, new Color32(255, 120, 100, 255), true, drag: 1f);
+                        break;
+                    case SimEventType.FlowerSprouted:
+                        for (int k = 0; k < 5; k++)
+                            Emit(Spr.Leaf, e.Pos + new Vector2(S * 4f, -10f), new Vector2(S * 10f, 14f + R * 8f), 0.6f, White, drag: 2f);
+                        audio?.Play(Sfx.Sprout, e.Value > 0.5f ? 1.3f : 1f);
+                        break;
+                    case SimEventType.ScoutDance:
+                        // разведчица «станцевала»: метка на карте + золотая вспышка
+                        Emit(Spr.KRing0, e.Pos, Vector2.zero, 0.6f, Honey, true, drag: 0f, sprEnd: Spr.KRing2);
+                        for (int k = 0; k < 8; k++)
+                            Emit(Spr.KStar, e.Pos, new Vector2(S, S) * 30f, 0.7f, Honey, true, drag: 2f);
+                        Text(e.Pos + new Vector2(0f, 14f), 0, Honey, 2);
+                        audio?.Play(Sfx.Sprout, 1.5f);
+                        if (_sound) Haptics.Pulse(15, 90);
+                        break;
+                    case SimEventType.BirdIncoming:
+                        audio?.Play(Sfx.Bird);
+                        break;
+                    case SimEventType.BirdStrike:
+                        for (int k = 0; k < 10; k++)
+                            Emit(k % 2 == 0 ? Spr.Petal : Spr.KSmokeA, e.Pos + new Vector2(S * 8f, S * 6f), new Vector2(S, S) * 40f, 0.6f, k % 2 == 0 ? new Color32(80, 190, 180, 255) : new Color32(255, 255, 255, 140), z: 2f, vz: 20f, drag: 2.5f);
+                        Feedback(e.Value >= 3 ? Tier.Large : Tier.Medium);
+                        audio?.Play(Sfx.Swipe, 1.3f);
+                        break;
+                    case SimEventType.WebTorn:
+                        for (int k = 0; k < 10; k++)
+                            Emit(Spr.Pixel, e.Pos + new Vector2(S * 10f, S * 10f), new Vector2(S, S) * 30f, 0.7f, new Color32(235, 240, 245, 220), drag: 2f);
+                        if (_sound) Feedback(Tier.Small);
+                        break;
+                    case SimEventType.BearSwipe:
+                        Emit(Spr.KSlash, e.Pos + new Vector2(S * 6f, 4f), Vector2.zero, 0.25f, new Color32(255, 230, 200, 255), true, drag: 0f, flip: R < 0.5f);
+                        Emit(Spr.KSmokeB, e.Pos + new Vector2(0f, -8f), new Vector2(S * 10f, 6f), 0.5f, new Color32(200, 170, 130, 150), drag: 2f);
+                        Feedback(Tier.Medium);
+                        audio?.Play(Sfx.Swipe);
+                        break;
+                    case SimEventType.BearRepelled:
+                        Feedback(Tier.Large);
+                        audio?.Play(Sfx.Upgrade, 0.8f);
+                        break;
+                    case SimEventType.NestDestroyed:
+                        Emit(Spr.KBurst, e.Pos, Vector2.zero, 0.3f, Honey, true, drag: 0f);
+                        Emit(Spr.KRing0, e.Pos, Vector2.zero, 0.5f, White, true, drag: 0f, sprEnd: Spr.KRing2);
+                        for (int k = 0; k < 20; k++)
+                            Emit(k % 2 == 0 ? Spr.Pixel2 : Spr.Petal, e.Pos, new Vector2(S, S) * 60f, 0.8f, new Color32(200, 195, 185, 255), z: 3f, vz: 30f, drag: 2f);
+                        Feedback(Tier.Large);
+                        audio?.Play(Sfx.KillBig, 0.8f);
+                        break;
+                    case SimEventType.LindenBloom:
+                        for (int k = 0; k < 12; k++)
+                            Emit(Spr.KSpark, e.Pos + new Vector2(S * 24f, S * 18f), new Vector2(0f, 10f), 0.9f, Honey, true, drag: 1f);
+                        audio?.Play(Sfx.Sprout, 0.8f);
+                        break;
+                    case SimEventType.DefendersHired:
+                        for (int k = 0; k < 10; k++)
+                            Emit(Spr.KSpark, e.Pos + new Vector2(S * 10f, S * 6f), new Vector2(S * 10f, 16f), 0.6f, new Color32(255, 150, 120, 255), true);
+                        audio?.Play(Sfx.Hatch, 0.8f);
+                        break;
+                    case SimEventType.NightFall:
+                        audio?.Play(Sfx.Night);
+                        break;
+                    case SimEventType.Dawn:
+                        audio?.Play(Sfx.Sprout, 0.7f);
+                        break;
                     case SimEventType.Upgrade:
                         for (int k = 0; k < 14; k++)
                             Emit(k % 3 == 0 ? Spr.KStar : Spr.KSpark, e.Pos + new Vector2(S * 16f, R * 30f), new Vector2(S * 12f, 18f + R * 16f), 0.8f + R * 0.4f, k % 2 == 0 ? Honey : White, true);
@@ -325,10 +390,10 @@ namespace Swarm.Presentation
                 // «поп»: первые доли секунды число вдвое крупнее, потом оседает
                 int scale = t.Life > 0.98f ? 2 : 1;
                 _buf.Clear();
-                if (t.Value >= 0) _buf.Append('+');
-                _buf.Append(t.Value);
+                if (t.Icon == 2) _buf.Append('!');
+                else { if (t.Value >= 0) _buf.Append('+'); _buf.Append(t.Value); }
                 int w = PixelFont.Measure(_buf, scale);
-                float x = t.Pos.x - (w + (t.Icon != 0 ? 9 : 0)) * 0.5f;
+                float x = t.Pos.x - (w + (t.Icon == 1 ? 9 : 0)) * 0.5f;
                 PixelFont.Draw(_text, _buf, x, t.Pos.y, c, scale);
                 if (t.Icon == 1) _text.Add(Spr.IconHoney, x + w + 5f, t.Pos.y + 3f * scale, new Color32(255, 255, 255, c.a));
             }

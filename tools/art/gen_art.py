@@ -776,6 +776,208 @@ for name, rows in ICONS.items():
     add(name, cv)
 
 
+# ------------------------------------------------------------------ новые существа и объекты (сборка 5)
+SOLDIER_MAP = dict(BEE_MAP)
+SOLDIER_MAP.update({'y': HONEY[2], 'Y': HONEY[3], 'h': HONEY[4], 'd': HONEY[1], 'r': RED[2], 'R': RED[3]})
+SOLDIER_BODY = [
+    '..kkkkkkkkk..',
+    '.kdYhKYhKrkk.',
+    'skdyyKyyKRekk',
+    'skddyKdyKrKKk',
+    '.kddyKdyKKKk.',
+    '..kkkkkkkkk..',
+]
+
+
+def make_soldier(up):
+    cv = Canvas(13, 11)
+    cv.pattern(SOLDIER_BODY, SOLDIER_MAP, 0, 3)
+    wings = ['....vv.vv....', '...vWwvWwv...', '...vwwvwwv...'] if up else ['.............', '..vvv.vvv....', '.vWwwvWwwv...']
+    cv.pattern(wings, SOLDIER_MAP, 0, 0)
+    cv.pattern(['...k.k.k.k...', '..k.......k..'][0:1], SOLDIER_MAP, 0, 9)
+    return cv
+
+
+add('SoldierA', make_soldier(True))
+add('SoldierB', make_soldier(False))
+
+
+def bird(frame):
+    # щурка: бирюзовое брюшко, рыжая спина, жёлтое горло, клюв — вид сбоку в полёте
+    TEAL = [hx('12403f'), hx('1d6e6a'), hx('2ba39b'), hx('5fd1c4')]
+    cv = Canvas(24, 14)
+    body = Canvas(24, 14)
+    body.ellipse(12, 8, 8.5, 3.2, TEAL)
+    body.ellipse(17.5, 7, 3.2, 2.8, [ORANGE[1], ORANGE[2], ORANGE[3], ORANGE[4]])
+    body.ellipse(19.5, 8.3, 1.6, 1.2, [HONEY[3], HONEY[4], HONEY[5]])
+    for x in range(21, 24):
+        body.set(x, 7 + (x - 21) // 2, INK[1])
+    for x in range(1, 5):
+        body.set(x, 9 + (x % 2), TEAL[1])
+    if frame == 0:
+        body.ellipse(11, 3.5, 5.5, 2.4, [WOOD[1], WOOD[2], ORANGE[2], ORANGE[3]])
+    else:
+        body.ellipse(11, 11.5, 5.5, 1.8, [WOOD[1], WOOD[2], ORANGE[2]])
+    body.outline(INK[0])
+    body.set(19, 6, INK[0])
+    return body
+
+
+add('BirdA', bird(0))
+add('BirdB', bird(1))
+
+spider = Canvas(11, 9)
+spider.pattern(['k...k...k..', '.k.kkk.k...', '..kKKKk....', 'kkKrKKKkk..', '..kKKKk....', '.k.kkk.k...', 'k...k...k..'],
+               {'k': INK[0], 'K': INK[2], 'r': RED[2]}, 0, 1)
+add('Spider', spider)
+
+
+def web():
+    cv = Canvas(31, 31)
+    c = 15
+    W1 = (235, 240, 245, 210)
+    W2 = (235, 240, 245, 120)
+    for a in range(8):
+        ang = a / 8 * math.tau + 0.2
+        for r in range(1, 16):
+            cv.set(int(round(c + math.cos(ang) * r)), int(round(c + math.sin(ang) * r)), W1)
+    for ring in (4, 7, 10, 13):
+        n = ring * 7
+        for k in range(n):
+            ang = k / n * math.tau
+            x, y = int(round(c + math.cos(ang) * ring)), int(round(c + math.sin(ang) * ring))
+            if not cv.opaque(x, y):
+                cv.set(x, y, W2)
+    return cv
+
+
+add('Web', web())
+
+
+def bear(frame, flash=False):
+    BR = [hx('2b170f'), hx('4a2a1a'), hx('6e4128'), hx('945a36'), hx('b9784a')]
+    cv = Canvas(34, 26)
+    cv.ellipse(15, 15, 12, 8, BR)
+    cv.ellipse(26.5, 11.5, 5.5, 5, BR)
+    cv.ellipse(30.5, 12.5, 2.4, 1.9, [BR[3], WOOD[4], STRAW[4]])
+    cv.ellipse(24.5, 7, 1.7, 1.7, BR[1:])
+    cv.ellipse(28.5, 7, 1.7, 1.7, BR[1:])
+    lift = 1 if frame else 0
+    for lx in (7, 12, 19, 23):
+        up = lift if lx in (7, 19) else 1 - lift
+        cv.rect(lx, 20 - up, 3, 4, BR[1])
+    cv.set(32, 12, INK[0])
+    cv.outline(BR[0])
+    cv.set(28, 10, INK[0])
+    cv.set(28, 9, WHITE[3])
+    if flash:
+        for y in range(cv.h):
+            for x in range(cv.w):
+                if cv.opaque(x, y):
+                    cv.set(x, y, (255, 255, 255, 255))
+    return cv
+
+
+add('BearA', bear(0))
+add('BearB', bear(1))
+add('BearFlash', bear(0, True))
+
+
+def nest():
+    P = [hx('4d4a45'), hx('726d63'), hx('9a948a'), hx('c4bdb1'), hx('e3ddd2')]
+    cv = Canvas(24, 30)
+    for y in range(3, 28):
+        t = (y - 3) / 25
+        half = 10 * math.sin(min(1.0, 0.18 + t * 1.05) * math.pi / 1.15) ** 0.8
+        band = y % 3
+        for x in range(int(12 - half), int(12 + half) + 1):
+            u = (x + 0.5 - 12) / max(1.0, half)
+            sh = 0.6 - 0.4 * u - 0.15 * t - (0.25 if band == 0 else 0)
+            cv.set(x, y, ramp_pick(P, sh, x, y))
+    for y in range(0, 4):
+        cv.set(12, y, WOOD[1])
+    cv.ellipse(12, 25, 2.6, 2.0, [INK[0], INK[1]])
+    cv.outline(P[0])
+    return cv
+
+
+add('Nest', nest(), (12, 2))
+
+for fr in range(2):
+    a = Canvas(6, 4)
+    a.pattern(['.k..k.', 'kKkKKk', '.k..k.', 'k....k'] if fr == 0 else ['k....k', 'kKkKKk', '.k..k.', '.k..k.'], {'k': INK[0], 'K': RED[0]})
+    add('Ant%s' % 'AB'[fr], a)
+
+
+def linden(frame, dry=False):
+    cv = Canvas(15, 13)
+    rnd = random.Random(31 + frame)
+    cv.ellipse(7.5, 5, 6, 3.5, LEAF[2:6])
+    if not dry:
+        for i in range(9):
+            x, y = rnd.randrange(2, 13), rnd.randrange(2, 11)
+            cv.set(x, y, HONEY[5]); cv.set(x + 1, y, WHITE[3]); cv.set(x, y + 1, HONEY[4])
+    else:
+        for i in range(4):
+            x, y = rnd.randrange(3, 12), rnd.randrange(3, 9)
+            cv.set(x, y, WOOD[3])
+    for y in range(8, 13):
+        cv.set(7 + (frame if y < 10 else 0), y, WOOD[2])
+    cv.outline(LEAF[0])
+    return cv
+
+
+add('FlowerLindenA', linden(0), (7, 0))
+add('FlowerLindenB', linden(1), (7, 0))
+add('FlowerLindenDry', linden(0, True), (7, 0))
+
+
+def pond():
+    WATER = [hx('17344f'), hx('1f4f73'), hx('2f6f99'), hx('4b97bf'), hx('86c2de')]
+    cv = Canvas(56, 38)
+    rnd = random.Random(5)
+    for y in range(38):
+        for x in range(56):
+            u = (x + 0.5 - 28) / 26
+            v = (y + 0.5 - 19) / 16
+            d = u * u + v * v + (rnd.random() - 0.5) * 0.06
+            if d <= 1.0:
+                if d > 0.82:
+                    c = ramp_pick([DIRT[1], DIRT[2], GRASS[2]], 0.5 - u * 0.3, x, y)
+                else:
+                    c = ramp_pick(WATER, 0.25 + (-v) * 0.35 + (rnd.random() - 0.5) * 0.12, x, y)
+                cv.set(x, y, c)
+    for (x, y) in ((18, 12), (19, 12), (30, 17), (31, 17), (24, 23)):
+        cv.set(x, y, WATER[4])
+    for i in range(5):
+        x, y = rnd.randrange(8, 48), rnd.randrange(6, 30)
+        if 0.55 < ((x - 28) / 26) ** 2 + ((y - 19) / 16) ** 2 < 0.8:
+            cv.set(x, y, LEAF[4]); cv.set(x + 1, y, LEAF[5])
+    return cv
+
+
+add('Pond', pond())
+
+rain = Canvas(2, 5); rain.pattern(['.#', '.#', '#.', '#.', '#.'], {'#': (200, 225, 255, 200)}); add('RainDrop', rain)
+
+ICONS2 = {
+    'IconQueen': ['........', 'y.y.y.y.', 'yYyYyYy.', 'yYYYYYy.', 'kyyyyyk.', '.kkkkk..', '........', '........'],
+    'IconMoon': ['..WWW...', '.WWw....', 'WWw.....', 'WWw.....', 'WWw.....', '.WWw....', '..WWW...', '........'],
+    'IconRain': ['.ssss...', 'sSSSSs..', 'ssssss..', '.b.b.b..', 'b.b.b...', '.b.b.b..', '........', '........'],
+    'IconWind': ['......w.', 'wwwwwvw.', '.....w..', '.wwwww..', '........', 'wwwwvw..', '....w...', '........'],
+    'IconHeat': ['..rr....', '..rR....', '..rR....', '..rR....', '.rRRr...', '.rRRr...', '..rr....', '........'],
+    'IconWater': ['...b....', '..bb....', '.bbbb...', '.bWbb...', 'bWbbbb..', '.bbbb...', '..bb....', '........'],
+    'IconTrophy': ['yyyyyyy.', 'yYYYYYy.', '.yYYYy..', '..yYy...', '...y....', '..yyy...', '.kkkkk..', '........'],
+    'IconLock': ['..sss...', '.s...s..', '.s...s..', 'kkkkkkk.', 'kSSSSSk.', 'kSSkSSk.', 'kkkkkkk.', '........'],
+    'IconScout': ['..vv.vv.', '.vwwvwwv', '..kkkkk.', '.kyKyKyk', 'kyyKyKkk', '.kyKyKk.', '..kkkk..', '...rr...'],
+    'IconSquad': ['.k...k..', 'kyk.kyk.', '.k...k..', '...k....', '..kyk...', '...k....', '.k...k..', 'kyk.kyk.'],
+}
+for name, rows in ICONS2.items():
+    cv = Canvas(8, 8)
+    cv.pattern(rows, ICON_MAP)
+    add(name, cv)
+
+
 # ------------------------------------------------------------------ частицы из Kenney Particle Pack (CC0)
 # Исходники 512 px пикселизируются под стиль игры: обрезка по содержимому, уменьшение,
 # альфа квантуется в 3 уровня упорядоченным дизерингом. Цвет даёт vertex color при отрисовке.

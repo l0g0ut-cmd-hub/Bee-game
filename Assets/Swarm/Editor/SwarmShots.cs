@@ -70,35 +70,41 @@ namespace Swarm.EditorTools
         static void Scenarios()
         {
             var cfg = SimConfig.Default();
+            var profile = new Game.Profile();
+            profile.LevelStars[0] = 3; profile.LevelStars[1] = 1;
+            profile.EndlessBest = 1234f;
+            profile.Achievements = (1 << (int)Game.Achievement.FirstHoney) | (1 << (int)Game.Achievement.Cook10) | (1 << (int)Game.Achievement.ThreeStars);
+            { var bi = Resources.Load<TextAsset>("BuildInfo"); _gui.VersionText = bi != null ? bi.text.Trim() : "?"; }
 
-            // 1. Главное меню: витрина с роем на фоне
+            // 1. Главное меню: витрина с роем на фоне, версия внизу
             var attract = new GameSim(cfg, 4242u) { AttractMode = true };
             Snap(attract);
             Play(attract, 7f, s => NearestFlower(s), menu: true);
-            Shot("01_menu", attract, () => _gui.DrawMenu(_t, 0f, false), menu: true);
+            Shot("01_menu", attract, () => _gui.DrawMenu(_t, profile, false), menu: true);
+            Shot("02_levels", attract, () => _gui.DrawLevels(profile, _t), menu: true);
+            Shot("03_achievements", attract, () => _gui.DrawAchievements(profile), menu: true);
 
-            // 2. Старт партии: подсказка обучения
-            var sim = new GameSim(cfg, 777u);
+            // 4. Старт партии (лето, сад): подсказка обучения, туман войны
+            var sim = new GameSim(Levels.Make(GameMode.Campaign, 1), 777u);
             _gui.TutorialStep = 0;
             _fx.Clear();
             Snap(sim);
             Play(sim, 1.2f, s => s.Swarm.LeaderPos);
-            Shot("02_start", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            Shot("04_start_fog", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
 
-            // 3. Сбор: рой 70 пчёл остановился на лугу — «облако»
+            // 5. Сбор: рой 70 пчёл — «облако»
             Grow(sim, 70);
             _gui.TutorialStep = 4;
             Play(sim, 7f, s => NearestFlower(s));
-            Shot("03_cloud_gather", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            Shot("05_cloud_gather", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
             _log.Append($"PROBE|cloud|R {sim.Swarm.Radius:F1} speed01 {sim.Swarm.Speed01:F2} gather {sim.Swarm.GatheringCount} scout {sim.Swarm.ScoutingCount}\n");
 
-            // 4. Полёт: «комета» со шлейфом
+            // 6. Полёт: «комета»
             Vector2 far = new Vector2(sim.World.Width - sim.Swarm.LeaderPos.x, sim.World.Height - sim.Swarm.LeaderPos.y);
             Play(sim, 1.6f, s => far);
-            Shot("04_comet", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
-            _log.Append($"PROBE|comet|speed01 {sim.Swarm.Speed01:F2} heading {sim.Swarm.Heading}\n");
+            Shot("06_comet", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
 
-            // 5. Телеграф: осы замирают и дрожат перед рывком
+            // 7. Телеграф ос
             Vector2 lp = sim.Swarm.LeaderPos;
             sim.Enemies.Spawn(EnemyType.Wasp, lp + new Vector2(55f, 30f), sim.Rng);
             sim.Enemies.Spawn(EnemyType.Wasp, lp + new Vector2(-50f, 35f), sim.Rng);
@@ -113,11 +119,11 @@ namespace Swarm.EditorTools
                 for (int e = 0; e < sim.Enemies.Count; e++) windup |= sim.Enemies.Act[e] == EnemyAct.Windup;
             }
             Play(sim, 0.15f, s => s.Swarm.LeaderPos);
-            Shot("05_windup", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            Shot("07_windup", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
             _log.Append($"PROBE|windup|seen {windup} after {waited:F2}s\n");
             Play(sim, 3f, s => s.Swarm.LeaderPos);
 
-            // 6. Тепловой шар: палец удерживается на шершне
+            // 8. Тепловой шар
             sim.Enemies.Clear();
             Grow(sim, 80);
             lp = sim.Swarm.LeaderPos;
@@ -125,35 +131,86 @@ namespace Swarm.EditorTools
             sim.Enemies.DashCd[0] = 99f;
             _gui.ShowWave(WaveMessage.Hornet);
             Play(sim, 0.9f, s => s.Enemies.Count > 0 ? s.Enemies.Pos[0] : s.Swarm.LeaderPos, hold: true);
-            Shot("06_heat_ball", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            Shot("08_heat_ball", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
             _log.Append($"PROBE|ball|balling {sim.Swarm.Balling} inBall {sim.Swarm.BallCount} hornets {sim.Enemies.Count} " +
-                        $"heatLost {sim.Stats.LostToHeat} hornetHp {(sim.Enemies.Count > 0 ? sim.Enemies.Hp[0] : 0f):F1}\n");
+                        $"heatLost {sim.Stats.LostToHeat}\n");
             Play(sim, 2.5f, s => s.Enemies.Count > 0 ? s.Enemies.Pos[0] : s.Swarm.LeaderPos, hold: true);
             _log.Append($"PROBE|ball_end|hornets {sim.Enemies.Count} killed {sim.Stats.HornetsKilled} heatLost {sim.Stats.LostToHeat}\n");
 
-            // 7-8. Улей: стражи и меню
+            // 9. Тень птицы над роем
             sim.Enemies.Clear();
-            sim.CycleGuards(); sim.CycleGuards();   // 10 стражей
+            Play(sim, 1f, s => NearestFlower(s));
+            var hz = sim.Hazards;
+            hz.BState[0] = BirdState.Shadow;
+            hz.BTimer[0] = 99f;
+            hz.BTarget[0] = sim.Swarm.LeaderPos;
+            hz.BDir[0] = new Vector2(0.8f, 0.6f).normalized;
+            Play(sim, 0.5f, s => s.Swarm.LeaderPos);
+            Shot("09_bird_shadow", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            hz.BState[0] = BirdState.None;
+
+            // 10. Паутина
+            if (hz.WebCount > 0)
+            {
+                Vector2 wp = hz.WPos[0];
+                Play(sim, 3f, s => wp);
+                Shot("10_web", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            }
+
+            // 11-12. Улей: матка, защитники, меню
             Play(sim, 6f, s => s.World.HivePos + BeeSwarm.HiveEntranceOffset);
-            sim.Colony.Honey = Mathf.Max(sim.Colony.Honey, 180f);
+            sim.Colony.Honey = Mathf.Max(sim.Colony.Honey, 260f);
+            sim.HireDefenders(); sim.HireDefenders(); sim.HireDefenders();
             Play(sim, 1f, s => s.World.HivePos + BeeSwarm.HiveEntranceOffset);
-            _log.Append($"PROBE|hive|atHive {sim.SwarmAtHive} guards {sim.Swarm.GuardCount}/{sim.Swarm.GuardWanted}\n");
-            Shot("07_hive_menu", sim, () => _gui.DrawHive(sim, _t));
-            Play(sim, 4f, s => NearestFlower(s));
-            Shot("08_guards_stay", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            _log.Append($"PROBE|hive|atHive {sim.SwarmAtHive} defenders {sim.Swarm.GuardCount} honey {sim.Colony.Honey:F0}\n");
+            Shot("11_hive_menu", sim, () => _gui.DrawHive(sim, _t));
+            Play(sim, 3f, s => NearestFlower(s));
+            Shot("12_defenders", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
 
-            // 9. Большой рой над лугом
+            // 13. Выбор перка
+            sim.PerkOffer[0] = (PerkId)0; sim.PerkOffer[1] = (PerkId)3; sim.PerkOffer[2] = (PerkId)6;
+            Shot("13_perk", sim, () => _gui.DrawPerk(sim, _t));
+
+            // 14. Медведь у улья
+            sim.Enemies.Spawn(EnemyType.Bear, sim.World.HivePos + new Vector2(60f, -40f), sim.Rng);
+            _gui.ShowWave(WaveMessage.Bear);
+            Play(sim, 3f, s => s.World.HivePos + new Vector2(30f, -30f));
+            Shot("14_bear", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            sim.Enemies.Clear();
+
+            // 15. Дождь
+            sim.Sky.Current = Weather.Rain;
+            sim.Sky.WeatherBlend = 1f;
+            sim.Sky.WeatherTimer = 99f;
             Grow(sim, 170);
-            Play(sim, 6f, s => NearestFlower(s));
-            Shot("09_big_swarm", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            Play(sim, 3f, s => NearestFlower(s));
+            Shot("15_rain_big_swarm", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            sim.Sky.Current = Weather.Clear;
+            sim.Sky.WeatherBlend = 0f;
 
-            // 10. Пауза с настройками
-            Shot("10_pause", sim, () => _gui.DrawPause(false, true, true));
+            // 16. Ночь
+            sim.Time = sim.Sky.DayLength * 2f - sim.Sky.NightLength * 0.5f;
+            Play(sim, 1.5f, s => NearestFlower(s));
+            Shot("16_night", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
 
-            // 11. Итоги: зимовка на две звезды
+            // 17. Пауза
+            Shot("17_pause", sim, () => _gui.DrawPause(false, true, true));
+
+            // 18. Итоги с новым достижением
             sim.Result = SimResult.Wintered;
             sim.Stars = 2;
-            Shot("11_result", sim, () => _gui.DrawResult(sim, _t, false, 0f));
+            var fresh = new System.Collections.Generic.List<Game.Achievement> { Game.Achievement.BearRepeller };
+            Shot("18_result", sim, () => _gui.DrawResult(sim, _t, false, 0f, fresh));
+
+            // 19. Выживание: HUD с кругами
+            var end = new GameSim(Levels.Make(GameMode.Endless, 0), 31u);
+            _fx.Clear();
+            Snap(end);
+            Grow(end, 60);
+            Play(end, 4f, s => NearestFlower(s));
+            end.Time = 700f;
+            Play(end, 0.2f, s => NearestFlower(s));
+            Shot("19_endless", end, () => _gui.DrawHud(end, _screen, _t, Dt));
         }
 
         // ------------------------------------------------------------------ прогон

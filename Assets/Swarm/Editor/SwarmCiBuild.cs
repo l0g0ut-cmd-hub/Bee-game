@@ -29,6 +29,20 @@ namespace Swarm.EditorTools
 
                 SwarmProjectSetup.EnsureScene();
                 SwarmProjectSetup.ConfigurePlayer();
+                // версия: из BuildInfo.txt (его пишет CI; работает и когда Unity запущена в контейнере без env)
+                string ver = null, code = null;
+                string infoPath = Path.Combine(Application.dataPath, "Swarm/Resources/BuildInfo.txt");
+                if (File.Exists(infoPath))
+                {
+                    string first = File.ReadAllText(infoPath).Trim().Split(' ')[0];   // «0.2.7»
+                    ver = first;
+                    code = first.Substring(first.LastIndexOf('.') + 1);
+                }
+                if (string.IsNullOrEmpty(ver)) ver = Environment.GetEnvironmentVariable("SWARM_VERSION");
+                if (!string.IsNullOrEmpty(ver)) PlayerSettings.bundleVersion = ver;
+                if (int.TryParse(code, out int vc) && vc > 0) PlayerSettings.Android.bundleVersionCode = vc;
+                AssetDatabase.Refresh();   // подхватить BuildInfo.txt, записанный CI перед сборкой
+                probe.Append("PROBE|version|" + PlayerSettings.bundleVersion + " code " + PlayerSettings.Android.bundleVersionCode + "\n");
 
                 string buildDir = Path.GetFullPath(Path.Combine(Application.dataPath, "../build"));
                 Directory.CreateDirectory(buildDir);

@@ -13,6 +13,7 @@ static class Program
 
     static int Main(string[] args)
     {
+        if (args.Length > 0 && args[0] == "ballcheck") { BallCheck(); return 0; }
         int seeds = args.Length > 0 ? int.Parse(args[0]) : 6;
         bool verbose = args.Length > 1;
         int wins = 0;
@@ -34,9 +35,31 @@ static class Program
         return 0;
     }
 
+    static void BallCheck()
+    {
+        var sim = new GameSim(SimConfig.Default(), 777u);
+        while (sim.Swarm.Count < 80 && sim.Swarm.Spawn(sim.Swarm.LeaderPos, sim.Rng)) { }
+        for (int i = 0; i < 120; i++) { sim.Step(1f / 60f, new SimInput { Active = true, Target = sim.Swarm.LeaderPos }); sim.Events.Clear(); }
+        Vector2 lp = sim.Swarm.LeaderPos;
+        sim.Enemies.Spawn(EnemyType.Hornet, lp + new Vector2(40f, 50f), sim.Rng);
+        sim.Enemies.DashCd[0] = 99f;
+        for (int i = 0; i < 200; i++)
+        {
+            var tgt = sim.Enemies.Count > 0 ? sim.Enemies.Pos[0] : sim.Swarm.LeaderPos;
+            sim.Step(1f / 60f, new SimInput { Active = true, Target = tgt, Hold = true });
+            sim.Events.Clear();
+            if (i % 20 == 0)
+                Console.WriteLine($"i={i} balling={sim.Swarm.Balling} inBall={sim.Swarm.BallCount} swarmCount={sim.Swarm.SwarmCount} R={sim.Swarm.Radius:F1} " +
+                    $"dist={(sim.Enemies.Count > 0 ? (sim.Enemies.Pos[0] - sim.Swarm.LeaderPos).magnitude : -1):F1} hp={(sim.Enemies.Count > 0 ? sim.Enemies.Hp[0] : 0):F1} stingers={(sim.Enemies.Count > 0 ? sim.Enemies.Stingers[0] : 0)}");
+        }
+    }
+
     static (SimResult result, float time) RunOne(uint seed, float skill, bool verbose, ref long steps)
     {
-        var cfg = SimConfig.Default();
+        int lvl = int.TryParse(Environment.GetEnvironmentVariable("LEVEL"), out var lv) ? lv : 1;
+        var mode = Environment.GetEnvironmentVariable("ENDLESS") == "1" ? GameMode.Endless : GameMode.Campaign;
+        var cfg = Levels.Make(mode, lvl);
+        if (mode == GameMode.Endless) cfg.SessionTime = 1200f; // для стенда ограничиваем
         var sim = new GameSim(cfg, seed);
         var rnd = new Random((int)seed);
         const float dt = 1f / 60f;
@@ -103,24 +126,39 @@ static class Program
             }
 
             // --- покупки в улье
+            // --- матка: расплод на полную, пока не пора копить мёд
+            bool saving = sw.SwarmCount >= cfg.GoalBees
+                          || (sim.TimeLeft < 120f && sw.SwarmCount >= cfg.Winter2Bees)
+                          || (skill >= 1f && sim.Time > 420f && sw.SwarmCount >= cfg.GoalBees - 15 && col.Honey < cfg.GoalHoney);
+            sim.BroodIndex = saving ? 0 : (skill >= 1f ? 4 : 3);
+
+            // --- перки: умный бот по приоритету, слабый — первый попавшийся
+            if (sim.PerkPending)
+            {
+                int pick = 0;
+                if (skill >= 1f)
+                {
+                    PerkId[] pref = { PerkId.SweetNectar, PerkId.ThickStings, PerkId.BigCrop, PerkId.FertileQueen, PerkId.Evasion, PerkId.HeatProof, PerkId.SwiftWings, PerkId.IronGuards, PerkId.Scouting };
+                    int best = 99;
+                    for (int k = 0; k < 3; k++)
+                        for (int r = 0; r < pref.Length; r++)
+                            if (pref[r] == sim.PerkOffer[k] && r < best) { best = r; pick = k; }
+                }
+                sim.ChoosePerk(pick);
+            }
+
+            // --- покупки в улье
             if (sim.SwarmAtHive && sw.FieldCarry < 0.5f)
             {
-                int wantGuardIdx = sim.Time > 250f ? 2 : (sim.Time > 80f ? 1 : 0);
-                while (!NoGuard && col.GuardIndex < wantGuardIdx) sim.CycleGuards();
                 for (int guard = 0; guard < 20; guard++)
                 {
                     bool bought = false;
-                    bool goalBees = sw.Count >= cfg.GoalBees;
-                    if (goalBees) break; // копим мёд
-                    // к концу лета умный бот не перевыкупает потери, если до цели рукой подать
-                    if (skill >= 1f && sim.Time > 420f && sw.Count >= cfg.GoalBees - 15 && col.Honey < cfg.GoalHoney) break;
-                    // баннер «лето на исходе — копи мёд» (за 2 минуты до конца) видят все игроки
-                    if (sim.TimeLeft < 120f && sw.Count >= cfg.Winter2Bees) break;
-                    if (sw.Count + cfg.HatchBatch > col.MaxBees && sim.CanUpgrade(UpgradeType.Comb)) bought = sim.TryUpgrade(UpgradeType.Comb);
-                    else if (sim.CanHatch) bought = sim.TryHatch();
-                    else if (col.Level[(int)UpgradeType.Carry] < 2 && sim.CanUpgrade(UpgradeType.Carry)) bought = sim.TryUpgrade(UpgradeType.Carry);
-                    else if (col.Level[(int)UpgradeType.Sting] < 2 && sim.Time > 150 && sim.CanUpgrade(UpgradeType.Sting)) bought = sim.TryUpgrade(UpgradeType.Sting);
-                    else if (col.Level[(int)UpgradeType.Speed] < 1 && sim.CanUpgrade(UpgradeType.Speed)) bought = sim.TryUpgrade(UpgradeType.Speed);
+                    int wantDef = NoGuard ? 0 : (sim.Time > 250f ? 12 : (sim.Time > 90f ? 6 : 0));
+                    if (sw.SwarmCount + 3 >= col.MaxBees && sim.CanUpgrade(UpgradeType.Comb)) bought = sim.TryUpgrade(UpgradeType.Comb);
+                    else if (!saving && col.Level[(int)UpgradeType.Carry] < 2 && sim.CanUpgrade(UpgradeType.Carry)) bought = sim.TryUpgrade(UpgradeType.Carry);
+                    else if (!saving && col.Level[(int)UpgradeType.Sting] < 2 && sim.Time > 150 && sim.CanUpgrade(UpgradeType.Sting)) bought = sim.TryUpgrade(UpgradeType.Sting);
+                    else if (!saving && col.Level[(int)UpgradeType.Speed] < 1 && sim.CanUpgrade(UpgradeType.Speed)) bought = sim.TryUpgrade(UpgradeType.Speed);
+                    else if (sw.GuardCount < wantDef && sim.CanHireDefenders && col.Honey > sim.DefenderCost + 40) bought = sim.HireDefenders();
                     if (!bought) break;
                 }
             }
@@ -150,14 +188,14 @@ static class Program
                 nextLog += 30f;
                 Console.WriteLine($"  t={sim.Time,5:F0} bees={sw.Count,3}/{col.MaxBees,3} honey={col.Honey,6:F0} carry={sw.TotalCarry,5:F1} " +
                                   $"lv[spd {col.Level[0]} car {col.Level[1]} sti {col.Level[2]} comb {col.Level[3]}] enemies={sim.Enemies.Count,2} " +
-                                  $"lost={sim.Stats.BeesLost,3} stolen={sim.Stats.HoneyStolen,4:F0} R={sw.Radius:F1} " +
-                                  $"G{sw.GatheringCount} A{sw.AttackingCount} S{sw.ScoutingCount} B{sw.BallCount} guard{sw.GuardCount}/{sw.GuardWanted} st={state} hold={hold} lead={sw.LeaderPos} tgt={heldTarget} atHive={sim.SwarmAtHive}");
+                                  $"lost={sim.Stats.BeesLost,3} stolen={sim.Stats.HoneyStolen,4:F0} R={sw.Radius:F1} def={sw.GuardCount} brood={sim.BroodShare:F2} perks={sim.PerkStage} sprouts={sim.Stats.FlowersSprouted} " +
+                                  $"G{sw.GatheringCount} A{sw.AttackingCount} S{sw.ScoutingCount} B{sw.BallCount} st={state} hold={hold} lead={sw.LeaderPos} tgt={heldTarget} atHive={sim.SwarmAtHive}");
             }
         }
         var st = sim.Stats;
-        Console.WriteLine($" seed {seed,6}: {sim.Result,-10} ★{sim.Stars} post={sim.Waves.Postponements} t={sim.Time,5:F0}s bees={sim.Swarm.Count,3} honey={sim.Colony.Honey,4:F0} " +
+        Console.WriteLine($" seed {seed,6}: {sim.Result,-10} ★{sim.Stars} post={sim.Waves.Postponements} t={sim.Time,5:F0}s bees={sim.Swarm.SwarmCount,3} honey={sim.Colony.Honey,4:F0} " +
                           $"delivered={st.HoneyDelivered,5:F0} hatched={st.BeesHatched,3} lost={st.BeesLost,3} kills w{st.WaspsKilled}/h{st.HornetsKilled} " +
-                          $"stolen={st.HoneyStolen,4:F0} heat/dash/bite={st.LostToHeat}/{st.LostToDash}/{st.LostToBite} guards={st.LostGuards} spread avg={spreadAcc / Math.Max(1, spreadN):F1} max={maxSpread:F0} inObstacle={stuck}");
+                          $"stolen={st.HoneyStolen,4:F0} night={sim.Sky.Day(sim.Time)}d nest={(sim.Enemies.NestAlive ? 1 : 0)} ants={st.AntsKilled} cooked={st.HornetsCooked} heat/dash/bite/bird/spider={st.LostToHeat}/{st.LostToDash}/{st.LostToBite}/{st.LostToBird}/{st.LostToSpider} guards={st.LostGuards} bears={st.BearsRepelled} sprouts={st.FlowersSprouted} spread avg={spreadAcc / Math.Max(1, spreadN):F1} max={maxSpread:F0} inObstacle={stuck}");
         return (sim.Result, sim.Time);
     }
 }

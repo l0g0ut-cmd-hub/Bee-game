@@ -11,7 +11,7 @@ namespace Swarm.Simulation
         public float WorldHeight = 900f;
         public float SessionTime = 600f;     // «лето»: 10 минут
         public int GoalBees = 120;
-        public int GoalHoney = 350;
+        public int GoalHoney = 600;
 
         // --- рой
         public int MaxBeesHard = 256;        // ёмкость массивов
@@ -50,14 +50,25 @@ namespace Swarm.Simulation
         public float BallJoinRange = 150f;    // пчёлы ближе этого к цели сбиваются в шар
         public float BallStingerMul = 2.5f;   // в шаре вокруг врага помещается больше пчёл
         public float HeatDamageMul = 2.2f;    // прогрев: урон пчёл в шаре
-        public float HeatDeathRate = 0.03f;   // гибель от перегрева: на пчелу в шаре в секунду
+        public float HeatDeathRate = 0.05f;   // гибель от перегрева: на пчелу в шаре в секунду
 
-        // --- стражи улья
-        public int[] GuardSteps = { 0, 5, 10, 20 };
-        public float GuardRecruitRadius = 80f;
-        public float GuardDefendRadius = 85f;
-        public float GuardStingMul = 2f;      // дома стражи жалят сильнее
+        // --- защитники улья: отдельная нанимаемая каста, в цель роя не входят
+        public int DefenderBatch = 3;
+        public int DefenderMax = 24;
+        public int DefenderCostBase = 24;
+        public int DefenderCostPer = 3;       // цена партии растёт с числом защитников
+        public float DefenderHp = 2f;         // выдерживают укус
+        public float DefenderRegen = 0.12f;   // лечение у летка, «жизней» в секунду
+        public float GuardDefendRadius = 95f;
+        public float GuardStingMul = 2.5f;    // солдаты жалят сильнее
         public float RaidBiteSlow = 1.7f;     // оса, занятая грабежом, кусается реже
+
+        // --- цветы, вырастающие сами
+        public float SproutIntervalMin = 12f, SproutIntervalMax = 20f;
+        public int SproutMax = 25;            // сколько новых цветов может вырасти за лето
+        public float SproutGrowTime = 6f;
+        public float RareChance = 0.12f;      // редкий золотой цветок
+        public float RareNectarMul = 3f;
 
         // --- зимовка (если цель лета не выполнена к концу)
         public int Winter2Bees = 85, Winter2Honey = 240;
@@ -70,6 +81,7 @@ namespace Swarm.Simulation
 
         // --- экономика
         public int HatchBatch = 5;
+        public float BroodRate = 0.8f;       // пчёл в секунду при расплоде 100%
         public int HatchCostBase = 20;
         public float HatchCostPerBee = 0.08f; // стоимость партии растёт с размером колонии
 
@@ -83,6 +95,20 @@ namespace Swarm.Simulation
         public int[] CombCap = { 40, 65, 95, 130, 170 };
         public int[] CombCost = { 30, 70, 120, 180 };
 
+        // --- уровень / режим
+        public Biome Biome = Biome.Meadow;
+        public float WaveMul = 1f;            // множитель размера волн
+        public bool Endless;                  // выживание: лето не кончается, волны крепчают по кругу
+        public bool SkyEnabled = true;        // день/ночь и погода
+        public bool NestEnabled = true;       // осиное гнездо на карте
+        public float WindStrength = 16f;
+        public float BirdIntervalMin = 38f, BirdIntervalMax = 60f;
+        public float[] LindenTimes = { 210f, 430f };
+        public int LindenFlowers = 6;
+        public float LindenLife = 70f;
+
         public static SimConfig Default() => new SimConfig();
+
+        public SimConfig Clone() => (SimConfig)MemberwiseClone();
     }
 }

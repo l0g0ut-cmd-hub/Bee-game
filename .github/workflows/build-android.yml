@@ -81,12 +81,21 @@ jobs:
           bash "$RUNNER_TEMP/gc-install.sh" "$GAMECI_VERSION" "$GAME_CI_INSTALL" 2>&1 | tee -a "$RUNNER_TEMP/ci.log"
           echo "$GAME_CI_INSTALL" >> "$GITHUB_PATH"
 
+      - name: Stamp build version
+        run: |
+          SHA=$(echo "$GITHUB_SHA" | cut -c1-7 | tr 'a-f' 'A-F')
+          echo "0.2.${GITHUB_RUN_NUMBER} · ${SHA}" > Assets/Swarm/Resources/BuildInfo.txt
+          echo "SWARM_VERSION=0.2.${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+          echo "SWARM_VERSION_CODE=${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+          cat Assets/Swarm/Resources/BuildInfo.txt
+
       - name: Build APK
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         run: |
           set -o pipefail
+          export SWARM_VERSION SWARM_VERSION_CODE
           game-ci build . \
             --engine unity \
             --engine-version "$UNITY_VERSION" \

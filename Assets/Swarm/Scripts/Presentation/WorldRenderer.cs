@@ -38,6 +38,13 @@ namespace Swarm.Presentation
         readonly System.Random _rnd = new System.Random(12345);
         float _hiveBounce, _hiveGlow;
         GameSim _builtFor;
+        int _flowerSeen;
+        int _fogVersion = -1;
+        Color32 _tint = new Color32(255, 255, 255, 255);
+        readonly QuadBatch _fog, _night, _nightGlow, _weather;
+        struct Drop { public Vector2 Pos; public float Life; }
+        readonly Drop[] _rain = new Drop[90];
+        readonly Mote[] _flies = new Mote[24];
 
         static readonly Color32 White = new Color32(255, 255, 255, 255);
 
@@ -53,7 +60,11 @@ namespace Swarm.Presentation
             _canopy = new QuadBatch("L5_Canopy", 64, a, OrderCanopy, L, root);
             _cloud = new QuadBatch("L6_Clouds", 8, a, OrderCloud, L, root);
             _glow = new QuadBatch("L8_Glow", 160, SpriteAtlas.Additive, 8, L, root);
-            _overlay = new QuadBatch("L9_Overlay", 400, a, OrderOverlay, L, root);
+            _overlay = new QuadBatch("L9_Overlay", 500, a, OrderOverlay, L, root);
+            _fog = new QuadBatch("L11_Fog", 2600, a, 11, L, root);
+            _weather = new QuadBatch("L12_Weather", 200, a, 12, L, root);
+            _night = new QuadBatch("L13_Night", 4, a, 13, L, root);
+            _nightGlow = new QuadBatch("L14_NightGlow", 120, SpriteAtlas.Additive, 14, L, root);
         }
 
         static Color32 A(byte a) => new Color32(255, 255, 255, a);
@@ -63,6 +74,9 @@ namespace Swarm.Presentation
         {
             _builtFor = sim;
             var world = sim.World;
+            _tint = world.Biome == Biome.Garden ? new Color32(255, 246, 222, 255)
+                  : world.Biome == Biome.Swamp ? new Color32(186, 212, 196, 255) : White;
+            _fogVersion = -1;
             var rng = new Rng(world.Seed * 2654435761u + 17u);
 
             // земля: тайлы 16x16 с вариациями
@@ -73,7 +87,7 @@ namespace Swarm.Presentation
                 {
                     int v = rng.Range(0, 100);
                     int tile = v < 40 ? 0 : v < 62 ? 1 : v < 78 ? 2 : v < 88 ? 3 : v < 95 ? 4 : 5;
-                    _ground.Add((int)Spr.Grass0 + tile, x * 16, y * 16, White);
+                    _ground.Add((int)Spr.Grass0 + tile, x * 16, y * 16, _tint);
                 }
             _ground.End();
 
@@ -92,6 +106,7 @@ namespace Swarm.Presentation
                 _flat.Add(Spr.PatchDirt, p.x, p.y, White, rng.Value < 0.5f);
             }
             _flat.Add(Spr.Clearing, world.HivePos.x, world.HivePos.y + 4f, White);
+            foreach (var pd in world.Ponds) _flat.Add(Spr.Pond, pd.x, pd.y, White);
             foreach (var o in world.Obstacles)
             {
                 if (o.Kind == ObstacleKind.Tree)
@@ -153,6 +168,7 @@ namespace Swarm.Presentation
                 _standing.Add(new StandItem { Kind = StandKind.Mushroom, Variant = (byte)rng.Range(0, 2), Pos = p });
             }
             _standing.Sort((a, b) => b.Pos.y.CompareTo(a.Pos.y));
+            _flowerSeen = sim.Flowers.Count;
             _trees.Sort((a, b) => world.Obstacles[b].Pos.y.CompareTo(world.Obstacles[a].Pos.y));
             _canopyAlpha = new float[_trees.Count];
             for (int i = 0; i < _canopyAlpha.Length; i++) _canopyAlpha[i] = 1f;
@@ -178,6 +194,15 @@ namespace Swarm.Presentation
         public void Draw(GameSim sim, PixelScreen screen, float time, float dt)
         {
             if (sim != _builtFor) Build(sim);
+            if (sim.Flowers.Count < _flowerSeen) Build(sim);   // новая партия на той же карте
+            while (_flowerSeen < sim.Flowers.Count)
+            {
+                var item = new StandItem { Kind = StandKind.Flower, Index = (short)_flowerSeen, Pos = sim.Flowers.Pos[_flowerSeen] + new Vector2(0f, -13f) };
+                int lo = 0, hi = _standing.Count;
+                while (lo < hi) { int mid = (lo + hi) >> 1; if (_standing[mid].Pos.y > item.Pos.y) lo = mid + 1; else hi = mid; }
+                _standing.Insert(lo, item);
+                _flowerSeen++;
+            }
             var view = screen.WorldViewRect(48f);
             var world = sim.World;
             var flowers = sim.Flowers;
@@ -195,7 +220,7 @@ namespace Swarm.Presentation
             {
                 var it = _standing[k];
                 if (!view.Contains(it.Pos)) continue;
-                float wind = Wind(it.Pos, time);
+                float wind = Wind(it.Pos, time) + sim.Sky.Wind.x * 0.06f;
                 switch (it.Kind)
                 {
                     case StandKind.Tuft:
@@ -220,7 +245,7 @@ namespace Swarm.Presentation
                         _stand.Add(Spr.Trunk, it.Pos.x, it.Pos.y, White);
                         break;
                     case StandKind.Flower:
-                        DrawFlower(it.Index, it.Pos, flowers, wind, swarm.LeaderPos);
+                        DrawFlower(it.Index, it.Pos, flowers, wind, swarm.LeaderPos, time);
                         break;
                     case StandKind.Hive:
                         _stand.Add(Spr.Hive, it.Pos.x, it.Pos.y + (_hiveBounce > 0f ? 1f : 0f), White);
@@ -255,10 +280,13 @@ namespace Swarm.Presentation
                 float ph = swarm.Phase[i];
                 bool loaded = swarm.Carry[i] > cap * 0.3f;
                 int fr = ((int)(time * 26f + ph) & 1) == 0 ? 0 : 1;
-                int spr = loaded ? (int)Spr.BeeLoadA + fr : (int)Spr.BeeA + fr;
-                float bob = Mathf.Sin(time * 7f + ph) * 1.2f;
+                var role = swarm.Role[i];
+                int spr = role == BeeRole.Guard ? (int)Spr.SoldierA + fr : (loaded ? (int)Spr.BeeLoadA + fr : (int)Spr.BeeA + fr);
+                float bob = swarm.Stuck[i] > 0f ? 0f : Mathf.Sin(time * 7f + ph) * 1.2f;
+                Color32 bc = role == BeeRole.Squad ? new Color32(200, 228, 255, 255) : White;
+                if (role == BeeRole.Guard && swarm.Hp[i] < swarm.MaxHp[i] - 0.05f) bc = new Color32(255, 190, 180, 255);
                 _shadow.Add(Spr.ShadowS, p.x, p.y - 6f, A(60));
-                _fly.Add(spr, p.x, p.y + bob, White, swarm.Vel[i].x < 0f);
+                _fly.Add(spr, p.x, p.y + bob, bc, swarm.Vel[i].x < 0f);
             }
 
             // --- враги
@@ -267,7 +295,9 @@ namespace Swarm.Presentation
             {
                 Vector2 p = en.Pos[i];
                 if (!view.Contains(p)) continue;
-                bool hornet = en.Type[i] == EnemyType.Hornet;
+                var et = en.Type[i];
+                if (et == EnemyType.Nest || et == EnemyType.Ant || et == EnemyType.Bear) { DrawGroundEnemy(en, i, p, time); continue; }
+                bool hornet = et == EnemyType.Hornet;
                 int fr = ((int)(time * 22f + en.Phase[i]) & 1);
                 int spr;
                 bool windup = en.Act[i] == EnemyAct.Windup;
@@ -300,6 +330,7 @@ namespace Swarm.Presentation
                 if (en.Stolen[i] > 0.5f) _fly.Add(Spr.HoneyDrop, p.x, p.y - 6f, White);
             }
 
+            DrawHazards(sim, view, time);
             DrawAmbient(sim, view, time, dt);
 
             // --- кроны: прозрачнеют, если под ними рой
@@ -330,17 +361,219 @@ namespace Swarm.Presentation
                 _cloud.AddStretched((int)Spr.ShadowXL, cx - 60f, cy - 20f, 150f, 70f, new Color32(255, 255, 255, 18));
             }
 
+            DrawMarks(sim, view, time);
+            DrawSky(sim, screen, view, time, dt);
+            DrawFog(sim);
+
             _shadow.End(); _stand.End(); _fly.End(); _canopy.End(); _cloud.End(); _overlay.End(); _glow.End();
         }
 
-        void DrawFlower(int f, Vector2 basePos, FlowerField flowers, float wind, Vector2 leader)
+        // ------------------------------------------------------------ наземные враги
+        void DrawGroundEnemy(EnemySystem en, int i, Vector2 p, float time)
         {
+            var et = en.Type[i];
+            if (et == EnemyType.Ant)
+            {
+                int fr = ((int)(time * 10f + en.Phase[i]) & 1);
+                _shadow.Add(fr == 0 ? Spr.AntA : Spr.AntB, p.x, p.y, White, en.Vel[i].x < 0f);
+                if (en.Stolen[i] > 0.3f) _shadow.Add(Spr.Pollen, p.x, p.y + 2f, White);
+                return;
+            }
+            if (et == EnemyType.Nest)
+            {
+                float sway = Mathf.Round(Mathf.Sin(time * 1.3f) * 0.6f);
+                _shadow.Add(Spr.ShadowL, p.x, p.y - 4f, A(80));
+                _stand.Add(en.Flash[i] > 0.06f ? Spr.Nest : Spr.Nest, p.x + sway, p.y - 4f, en.Flash[i] > 0.06f ? new Color32(255, 200, 200, 255) : White);
+                HpBar(p.x, p.y + 24f, 22f, en.Hp[i] / en.MaxHp[i]);
+                return;
+            }
+            // медведь
+            int bf = ((int)(time * 6f) & 1);
+            int bs = en.Flash[i] > 0.06f ? (int)Spr.BearFlash : (bf == 0 ? (int)Spr.BearA : (int)Spr.BearB);
+            bool flip = en.Vel[i].x < 0f;
+            _shadow.Add(Spr.ShadowXL, p.x, p.y - 8f, A(110));
+            _shadow.Add(Spr.KRing2, p.x, p.y - 8f, new Color32(238, 70, 60, 120));
+            _fly.Add(bs, p.x, p.y, White, flip);
+            HpBar(p.x, p.y + 16f, 26f, en.Hp[i] / en.MaxHp[i]);
+            if (en.Stolen[i] > 1f) _fly.Add(Spr.HoneyDrop, p.x + (flip ? -10f : 10f), p.y + 2f, White);
+        }
+
+        void HpBar(float x, float y, float w, float frac)
+        {
+            _overlay.Rect(x - w * 0.5f - 1f, y - 1f, w + 2f, 4f, new Color32(23, 18, 28, 220));
+            _overlay.Rect(x - w * 0.5f, y, Mathf.Max(1f, w * frac), 2f, new Color32(238, 106, 82, 255));
+        }
+
+        // ------------------------------------------------------------ паутина и птицы
+        void DrawHazards(GameSim sim, Rect view, float time)
+        {
+            var hz = sim.Hazards;
+            for (int w = 0; w < hz.WebCount; w++)
+            {
+                if (hz.WStrength[w] <= 0f || !view.Contains(hz.WPos[w])) continue;
+                float k = hz.WStrength[w] / 100f;
+                byte a = (byte)(110 + 120 * k);
+                _fly.Add(Spr.Web, hz.WPos[w].x, hz.WPos[w].y, new Color32(255, 255, 255, a));
+                _fly.Add(Spr.Spider, hz.SpiderPos[w].x, hz.SpiderPos[w].y + Mathf.Round(Mathf.Sin(time * 3f + w) * 0.6f), White);
+            }
+            for (int b = 0; b < HazardSystem.MaxBirds; b++)
+            {
+                var st = hz.BState[b];
+                if (st == BirdState.None) continue;
+                Vector2 tg = hz.BTarget[b];
+                if (st == BirdState.Shadow)
+                {
+                    float k = 1f - hz.BTimer[b] / HazardSystem.ShadowTime;   // 0 → 1 к моменту пике
+                    float r = HazardSystem.StrikeRadius * (0.6f + 0.6f * k);
+                    _shadow.AddStretched((int)Spr.ShadowXL, tg.x - r * 1.3f, tg.y - r * 0.55f, r * 2.6f, r * 1.1f, new Color32(255, 255, 255, (byte)(60 + 110 * k)));
+                    bool blink = ((int)(time * (6f + 10f * k)) & 1) == 0;
+                    _overlay.Add(Spr.KRing2, tg.x, tg.y, new Color32(238, 70, 60, (byte)(blink ? 220 : 120)));
+                    float dist = (1f - k) * 220f;
+                    Vector2 bp = tg - hz.BDir[b] * dist + new Vector2(0f, 40f * (1f - k));
+                    if (view.Contains(bp))
+                        _canopy.Add(((int)(time * 12f) & 1) == 0 ? Spr.BirdA : Spr.BirdB, bp.x, bp.y, White, hz.BDir[b].x < 0f);
+                }
+                else
+                {
+                    float k = 1f - hz.BTimer[b] / 0.9f;
+                    Vector2 bp = tg + hz.BDir[b] * (k * 240f) + new Vector2(0f, 50f * k);
+                    if (view.Contains(bp))
+                        _canopy.Add(((int)(time * 14f) & 1) == 0 ? Spr.BirdA : Spr.BirdB, bp.x, bp.y, White, hz.BDir[b].x < 0f);
+                }
+            }
+        }
+
+        // ------------------------------------------------------------ метки разведчиц и редкие цветы
+        void DrawMarks(GameSim sim, Rect view, float time)
+        {
+            var fog = sim.Fog;
+            for (int m = 0; m < FogMap.MaxMarks; m++)
+            {
+                if (fog.MarkTime[m] <= 0f) continue;
+                Vector2 p = fog.MarkPos[m];
+                if (!view.Contains(p)) continue;
+                float pulse = Mathf.Repeat(time * 1.5f, 1f);
+                _glow.Add(pulse < 0.33f ? Spr.KRing0 : pulse < 0.66f ? Spr.KRing1 : Spr.KRing2, p.x, p.y, new Color32(255, 210, 90, (byte)(200 * (1f - pulse))));
+                _overlay.Add(Spr.IconNectar, p.x, p.y + 14f + Mathf.Round(Mathf.Sin(time * 4f) * 1.5f), White);
+            }
+        }
+
+        // ------------------------------------------------------------ небо: дождь, жара, ночь
+        void DrawSky(GameSim sim, PixelScreen screen, Rect view, float time, float dt)
+        {
+            var sky = sim.Sky;
+            _weather.Begin(); _night.Begin(); _nightGlow.Begin();
+            var r = screen.WorldViewRect(0f);
+            float wb = sky.WeatherBlend;
+            if (sky.Current == Weather.Rain && wb > 0.02f)
+            {
+                _weather.Rect(r.x, r.y, r.width, r.height, new Color32(40, 60, 90, (byte)(60 * wb)));
+                int n = Mathf.RoundToInt(_rain.Length * wb);
+                for (int i = 0; i < n; i++)
+                {
+                    ref var d = ref _rain[i];
+                    d.Life -= dt;
+                    if (d.Life <= 0f || !r.Contains(d.Pos))
+                    {
+                        d.Pos = new Vector2(r.x + (float)_rnd.NextDouble() * r.width, r.y + (float)_rnd.NextDouble() * r.height);
+                        d.Life = 0.3f + (float)_rnd.NextDouble() * 0.4f;
+                    }
+                    d.Pos += new Vector2(-40f, -220f) * dt;
+                    _weather.Add(Spr.RainDrop, d.Pos.x, d.Pos.y, new Color32(200, 225, 255, 170));
+                }
+            }
+            else if (sky.Current == Weather.Heat && wb > 0.02f)
+                _weather.Rect(r.x, r.y, r.width, r.height, new Color32(255, 170, 70, (byte)(28 * wb)));
+            else if (sky.Current == Weather.Wind && wb > 0.02f)
+            {
+                for (int i = 0; i < 18; i++)
+                {
+                    ref var d = ref _rain[i];
+                    d.Life -= dt;
+                    if (d.Life <= 0f || !r.Contains(d.Pos))
+                    {
+                        d.Pos = new Vector2(r.x + (float)_rnd.NextDouble() * r.width, r.y + (float)_rnd.NextDouble() * r.height);
+                        d.Life = 0.6f + (float)_rnd.NextDouble() * 0.6f;
+                    }
+                    d.Pos += sky.Wind * 6f * dt;
+                    _weather.Add(Spr.KTrace, d.Pos.x, d.Pos.y, new Color32(255, 255, 255, (byte)(70 * wb)));
+                }
+            }
+            float dark = sky.Darkness(sim.Time);
+            if (dark > 0.01f)
+            {
+                _night.Rect(r.x, r.y, r.width, r.height, new Color32(18, 26, 70, (byte)(165 * dark)));
+                // светлячки и тёплый свет улья
+                for (int i = 0; i < _flies.Length; i++)
+                {
+                    ref var f = ref _flies[i];
+                    if (f.Life <= 0f || !r.Contains(f.Pos))
+                    {
+                        f.Pos = new Vector2(r.x + (float)_rnd.NextDouble() * r.width, r.y + (float)_rnd.NextDouble() * r.height);
+                        f.Life = 2f + (float)_rnd.NextDouble() * 4f;
+                        f.Phase = (float)_rnd.NextDouble() * 10f;
+                    }
+                    f.Life -= dt;
+                    f.Pos += new Vector2(Mathf.Sin(time + f.Phase), Mathf.Cos(time * 0.8f + f.Phase)) * 8f * dt;
+                    float tw = Mathf.Max(0f, Mathf.Sin(time * 2.5f + f.Phase));
+                    _nightGlow.Add(Spr.Pixel2, f.Pos.x, f.Pos.y, new Color32(200, 255, 120, (byte)(220 * tw * dark)));
+                }
+                Vector2 e = sim.World.HivePos + BeeSwarm.HiveEntranceOffset;
+                _nightGlow.AddStretched((int)Spr.Glow, e.x - 30f, e.y - 16f, 60f, 32f, new Color32(255, 190, 90, (byte)(150 * dark)));
+            }
+            _weather.End(); _night.End(); _nightGlow.End();
+        }
+
+        // ------------------------------------------------------------ туман войны (перестраивается только при открытии ячеек)
+        void DrawFog(GameSim sim)
+        {
+            var fog = sim.Fog;
+            if (fog.Version == _fogVersion) return;
+            _fogVersion = fog.Version;
+            _fog.Begin();
+            if (fog.Enabled)
+            {
+                float c = FogMap.Cell;
+                for (int y = -1; y <= fog.Rows; y++)
+                    for (int x = -1; x <= fog.Cols; x++)
+                    {
+                        bool inside = x >= 0 && y >= 0 && x < fog.Cols && y < fog.Rows;
+                        if (inside && fog.Revealed[y * fog.Cols + x]) continue;
+                        bool edge = false;
+                        for (int dy = -1; dy <= 1 && !edge; dy++)
+                            for (int dx = -1; dx <= 1 && !edge; dx++)
+                            {
+                                int nx = x + dx, ny = y + dy;
+                                if (nx >= 0 && ny >= 0 && nx < fog.Cols && ny < fog.Rows && fog.Revealed[ny * fog.Cols + nx]) edge = true;
+                            }
+                        if (!inside && !edge) continue;   // за краем карты туман не нужен
+                        _fog.Rect(x * c, y * c, c, c, edge ? new Color32(12, 24, 18, 165) : new Color32(10, 20, 15, 238));
+                    }
+            }
+            _fog.End();
+        }
+
+        void DrawFlower(int f, Vector2 basePos, FlowerField flowers, float wind, Vector2 leader, float time)
+        {
+            if (flowers.Gone[f]) return;
             int k = (int)flowers.Kind[f];
-            // спрайты цветов в атласе идут тройками: A, B, Dry — в порядке Daisy, Poppy, Corn, Violet, Pink, Sun
-            int baseSpr = (int)Spr.FlowerDaisyA + FlowerSpriteIndex(k) * 3;
-            int spr = !flowers.IsBlooming(f) ? baseSpr + 2 : baseSpr + (wind > 0.2f ? 1 : 0);
-            _stand.Add(spr, basePos.x, basePos.y, White);
+            // спрайты цветов в атласе идут тройками: A, B, Dry — в порядке Daisy, Poppy, Corn, Violet, Pink, Sun; липа отдельно
+            int baseSpr = flowers.Kind[f] == FlowerKind.Linden ? (int)Spr.FlowerLindenA : (int)Spr.FlowerDaisyA + FlowerSpriteIndex(k) * 3;
             Vector2 head = flowers.Pos[f];
+            if (flowers.Sprout[f] > 0f)
+            {
+                // росток: бутон, «подрастающий» снизу
+                float g = 1f - flowers.Sprout[f] / 6f;
+                _stand.Add(baseSpr + 2, basePos.x, basePos.y - Mathf.Round((1f - g) * 6f), new Color32(255, 255, 255, (byte)(140 + 115 * g)));
+                return;
+            }
+            int spr = !flowers.IsBlooming(f) ? baseSpr + 2 : baseSpr + (wind > 0.2f ? 1 : 0);
+            if (flowers.Rare[f] && flowers.IsBlooming(f))
+            {
+                float pulse = 0.6f + 0.4f * Mathf.Sin(time * 4f + f);
+                _glow.AddStretched((int)Spr.Glow, head.x - 14f, head.y - 9f, 28f, 18f, new Color32(255, 215, 80, (byte)(170 * pulse)));
+            }
+            _stand.Add(spr, basePos.x, basePos.y, flowers.Rare[f] ? new Color32(255, 238, 170, 255) : White);
             if (flowers.IsBlooming(f) && (head - leader).sqrMagnitude < 75f * 75f)
             {
                 float frac = flowers.Nectar[f] / flowers.MaxNectar[f];

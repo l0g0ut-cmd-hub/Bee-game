@@ -11,7 +11,6 @@ namespace Swarm.UI
         public const string Record = "РЕКОРД ";
         public const string SoundOn = "ЗВУК: ВКЛ";
         public const string SoundOff = "ЗВУК: ВЫКЛ";
-        public const string Version = "ПРОТОТИП V0.1";
 
         public const string Goal = "ЦЕЛЬ ДО КОНЦА ЛЕТА";
         public const string Hive = "УЛЕЙ";
@@ -20,7 +19,7 @@ namespace Swarm.UI
         public const string HintMove = "ВЕДИ РОЙ ПАЛЬЦЕМ";
         public const string HintFlowers = "ЛЕТИ К ЦВЕТАМ - ПЧЁЛЫ СОБЕРУТ НЕКТАР";
         public const string HintDeliver = "ОТНЕСИ НЕКТАР В УЛЕЙ";
-        public const string HintHatch = "ЖМИ \"УЛЕЙ\" - ВЫВОДИ НОВЫХ ПЧЁЛ";
+        public const string HintHatch = "ЖМИ \"УЛЕЙ\": МАТКА, ЗАЩИТНИКИ, УЛУЧШЕНИЯ";
 
         public const string WaveScouts = "ОСЫ-РАЗВЕДЧИЦЫ";
         public const string WaveWasps = "ОСЫ!";
@@ -42,6 +41,55 @@ namespace Swarm.UI
         public const string ShakeOn = "ТРЯСКА: ВКЛ";
         public const string ShakeOff = "ТРЯСКА: ВЫКЛ";
 
+        // --- меню и режимы
+        public const string ModeCampaign = "КАМПАНИЯ";
+        public const string ModeEndless = "ВЫЖИВАНИЕ";
+        public const string ModeDaily = "ЗАДАНИЕ ДНЯ";
+        public const string AchievementsTitle = "ДОСТИЖЕНИЯ";
+        public const string Back = "НАЗАД";
+        public const string NeedStars = "НУЖНО ЗВЁЗД: ";
+        public const string BestSurvive = "РЕКОРД ";
+        public const string DailySub = "ОДНА КАРТА У ВСЕХ НА СУТКИ";
+        public const string PerkTitle = "ДАР КОЛОНИИ";
+        public const string PerkSub = "ВЫБЕРИ ОДИН";
+        public const string Survive = "ПРОДЕРЖИСЬ";
+        public const string Round = "КРУГ ";
+        public const string Day = "ДЕНЬ ";
+        public const string NewAchievement = "ДОСТИЖЕНИЕ: ";
+        public const string Version = "V";
+
+        // --- события
+        public const string BearTitle = "МЕДВЕДЬ!";
+        public const string BearSub = "ИДЁТ ЗА МЁДОМ. ШАР ЕГО НЕ БЕРЁТ";
+        public const string BearGone = "МЕДВЕДЬ УШЁЛ!";
+        public const string AntsTitle = "МУРАВЬИ!";
+        public const string AntsSub = "КОЛОННА ИДЁТ К УЛЬЮ";
+        public const string RainTitle = "ДОЖДЬ";
+        public const string RainSub = "ОСЫ ПРЯЧУТСЯ, СБОР ХУЖЕ";
+        public const string WindTitle = "ВЕТЕР";
+        public const string WindSub = "СНОСИТ РОЙ";
+        public const string HeatTitle = "ЖАРА";
+        public const string HeatSub = "ПЧЁЛАМ НУЖНА ВОДА - ЛЕТИ К ПРУДУ";
+        public const string ClearTitle = "ЯСНО";
+        public const string NightTitle = "НОЧЬ";
+        public const string NightSub = "ЦВЕТЫ ЗАКРЫТЫ, ВРАГИ СПЯТ, МАТКА СТАРАЕТСЯ";
+        public const string LindenTitle = "ЗАЦВЕЛА ЛИПА!";
+        public const string LindenSub = "МНОГО НЕКТАРА, НО НЕНАДОЛГО";
+        public const string NestDown = "ГНЕЗДО УНИЧТОЖЕНО!";
+        public const string NestDownSub = "ОС СТАНЕТ МЕНЬШЕ";
+        public const string ScoutTitle = "РАЗВЕДЧИЦА НАШЛА НЕКТАР!";
+        public const string ScoutSub = "ЛЕТИ К МЕТКЕ";
+        public const string RareSprout = "ВЫРОС ЗОЛОТОЙ ЦВЕТОК!";
+        public const string HintBird = "ТЕНЬ ПТИЦЫ - УВОДИ РОЙ!";
+        public const string HintThirst = "ЖАЖДА! ЛЕТИ К ПРУДУ";
+        public const string HintSquad = "ВТОРЫМ ПАЛЬЦЕМ МОЖНО ОТПРАВИТЬ ОТРЯД";
+        public const string HintWeb = "ПЧЁЛЫ В ПАУТИНЕ - ПРОЛЕТИ РОЕМ, ЧТОБЫ ПОРВАТЬ";
+
+        // --- улей
+        public const string QueenName = "МАТКА";
+        public const string QueenSub = "РАСПЛОД ";
+        public const string DefName = "ЗАЩИТНИКИ";
+        public const string DefSub = "У УЛЬЯ: ";
         public const string HiveTitle = "УЛЕЙ";
         public const string HatchName = "ВЫВЕСТИ ПЧЁЛ";
         public const string HatchFull = "НУЖНО БОЛЬШЕ СОТ";
