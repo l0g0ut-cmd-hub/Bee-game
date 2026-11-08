@@ -40,7 +40,7 @@ namespace Swarm.EditorTools
             Debug.Log("[SWARM] Проект настроен: сцена " + ScenePath + ", Android/портрет/IL2CPP. Жми Play.");
         }
 
-        static void EnsureScene()
+        public static void EnsureScene()
         {
             if (!File.Exists(ScenePath))
             {
@@ -53,7 +53,7 @@ namespace Swarm.EditorTools
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
         }
 
-        static void ConfigurePlayer()
+        public static void ConfigurePlayer()
         {
             PlayerSettings.companyName = "HellFire";
             PlayerSettings.productName = "РОЙ";
@@ -70,9 +70,33 @@ namespace Swarm.EditorTools
             PlayerSettings.SetApplicationIdentifier(android, AppId);
             PlayerSettings.SetScriptingBackend(android, ScriptingImplementation.IL2CPP);
             PlayerSettings.SetManagedStrippingLevel(android, ManagedStrippingLevel.Low);
-            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.ARMv7;
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
             PlayerSettings.Android.bundleVersionCode = 1;
             PlayerSettings.Android.renderOutsideSafeArea = true;
+            PlayerSettings.Android.useCustomKeystore = false;     // debug-ключ: APK ставится на телефон как есть
+            EditorUserBuildSettings.androidBuildType = AndroidBuildType.Release;
+            ForceLegacyInputManager();
+        }
+
+        /// <summary>
+        /// Игра читает касания через классический Input. Если проект создан с «новым» вводом,
+        /// Input бросает исключение — переключаем Active Input Handling на Input Manager (Old).
+        /// </summary>
+        static void ForceLegacyInputManager()
+        {
+            Object[] assets = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/ProjectSettings.asset");
+            if (assets == null || assets.Length == 0) { Debug.LogWarning("[SWARM] ProjectSettings.asset не найден"); return; }
+            var so = new SerializedObject(assets[0]);
+            SerializedProperty p = so.FindProperty("activeInputHandler");
+            if (p == null) { Debug.LogWarning("[SWARM] activeInputHandler не найден"); return; }
+            if (p.intValue != 0)
+            {
+                p.intValue = 0; // 0 = Input Manager (Old), 1 = Input System, 2 = Both
+                so.ApplyModifiedProperties();
+                AssetDatabase.SaveAssets();
+                Debug.Log("[SWARM] Active Input Handling → Input Manager (Old)");
+            }
         }
 
         [MenuItem("SWARM/Build Android APK", priority = 20)]

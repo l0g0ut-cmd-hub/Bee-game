@@ -31,12 +31,15 @@ namespace Swarm.Presentation
         Material _outputMat;
         Transform _outputQuad;
         readonly Transform _root;
+        readonly int _forceW, _forceH;   // фиксированный «экран» для съёмки кадров в CI
 
         public static readonly Color ClearColor = new Color32(0x3f, 0x77, 0x3b, 0xff);
 
-        public PixelScreen(Transform root)
+        public PixelScreen(Transform root, int forceWidth = 0, int forceHeight = 0)
         {
             _root = root;
+            _forceW = forceWidth;
+            _forceH = forceHeight;
             WorldCam = MakeCam("WorldCamera", 0, ~((1 << LayerUI) | (1 << LayerOutput)), CameraClearFlags.SolidColor);
             WorldCam.backgroundColor = ClearColor;
             UiCam = MakeCam("UICamera", 1, 1 << LayerUI, CameraClearFlags.Depth);
@@ -81,8 +84,9 @@ namespace Swarm.Presentation
         /// <summary>Пересоздаёт RT при смене разрешения/безопасной зоны.</summary>
         public void Refresh(bool force = false)
         {
-            int sw = Screen.width, sh = Screen.height;
-            Rect safe = Screen.safeArea;
+            bool forced = _forceW > 0 && _forceH > 0;
+            int sw = forced ? _forceW : Screen.width, sh = forced ? _forceH : Screen.height;
+            Rect safe = forced ? new Rect(0f, 0f, sw, sh) : Screen.safeArea;
             if (!force && sw == _screenW && sh == _screenH && safe == _safe) return;
             _screenW = sw; _screenH = sh; _safe = safe;
 
@@ -92,7 +96,11 @@ namespace Swarm.Presentation
             SafeTop = Mathf.Ceil((sh - safe.yMax) / Scale);
             SafeBottom = Mathf.Ceil(safe.yMin / Scale);
 
-            if (Target != null) { Target.Release(); Object.Destroy(Target); }
+            if (Target != null)
+            {
+                Target.Release();
+                if (Application.isPlaying) Object.Destroy(Target); else Object.DestroyImmediate(Target);
+            }
             Target = new RenderTexture(Width, Height, 0, RenderTextureFormat.ARGB32)
             {
                 filterMode = FilterMode.Point,

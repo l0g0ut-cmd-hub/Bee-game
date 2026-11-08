@@ -78,6 +78,7 @@ namespace UnityEngine
     {
         public string name { get; set; }
         public static void Destroy(Object obj) { }
+        public static void DestroyImmediate(Object obj) { }
         public static void DontDestroyOnLoad(Object target) { }
         public static implicit operator bool(Object o) => o != null;
     }
@@ -152,12 +153,30 @@ namespace UnityEngine
         public TextureWrapMode wrapMode { get; set; }
     }
 
-    public sealed class Texture2D : Texture { public static Texture2D whiteTexture => null; }
+    public sealed class Texture2D : Texture
+    {
+        public Texture2D(int width, int height, TextureFormat textureFormat, bool mipChain) { }
+        public static Texture2D whiteTexture => null;
+        public void ReadPixels(Rect source, int destX, int destY) { }
+        public void Apply() { }
+        public Color32[] GetPixels32() => null;
+        public void SetPixels32(Color32[] colors) { }
+    }
+    public enum TextureFormat { RGBA32 = 4 }
+    public static class ImageConversion { public static byte[] EncodeToPNG(this Texture2D tex) => null; }
+    public static class SystemInfo
+    {
+        public static Rendering.GraphicsDeviceType graphicsDeviceType => default;
+        public static string graphicsDeviceName => "";
+    }
 
     public class RenderTexture : Texture
     {
         public RenderTexture(int width, int height, int depth, RenderTextureFormat format) { }
         public bool useMipMap { get; set; }
+        public static RenderTexture active { get; set; }
+        public int width => 0;
+        public int height => 0;
         public bool Create() => true;
         public void Release() { }
     }
@@ -183,6 +202,7 @@ namespace UnityEngine
         public bool useOcclusionCulling { get; set; }
         public RenderTexture targetTexture { get; set; }
         public static Camera[] allCameras => new Camera[0];
+        public void Render() { }
     }
 
     public sealed class AudioListener : Behaviour { public static float volume { get; set; } }
@@ -226,6 +246,8 @@ namespace UnityEngine
         public static int targetFrameRate { get; set; }
         public static bool isMobilePlatform => false;
         public static bool isBatchMode => false;
+        public static bool isPlaying => false;
+        public static string dataPath => "";
         public static void Quit() { }
     }
 
@@ -289,6 +311,7 @@ namespace UnityEngine.Rendering
     public enum ShadowCastingMode { Off, On, TwoSided, ShadowsOnly }
     public enum LightProbeUsage { Off = 0, BlendProbes = 1 }
     public enum ReflectionProbeUsage { Off, BlendProbes, BlendProbesAndSkybox, Simple }
+    public enum GraphicsDeviceType { Null = 4, OpenGLCore = 17, Vulkan = 21 }
 }
 
 namespace UnityEngine.SceneManagement
@@ -339,8 +362,16 @@ namespace UnityEditor
         public static void Exit(int returnValue) { }
     }
 
+    public sealed class SerializedProperty { public int intValue { get; set; } }
+    public sealed class SerializedObject
+    {
+        public SerializedObject(Object obj) { }
+        public SerializedProperty FindProperty(string propertyPath) => null;
+        public bool ApplyModifiedProperties() => true;
+    }
     public static class AssetDatabase
     {
+        public static Object[] LoadAllAssetsAtPath(string assetPath) => null;
         public static void SaveAssets() { }
         public static void Refresh() { }
     }
@@ -352,7 +383,13 @@ namespace UnityEditor
         public EditorBuildSettingsScene(string path, bool enabled) { }
     }
     public static class EditorBuildSettings { public static EditorBuildSettingsScene[] scenes { get; set; } }
-    public static class EditorUserBuildSettings { public static bool buildAppBundle { get; set; } }
+    public enum AndroidBuildType { Debug = 0, Development = 1, Release = 2 }
+    public enum AndroidSdkVersions { AndroidApiLevel26 = 26 }
+    public static class EditorUserBuildSettings
+    {
+        public static bool buildAppBundle { get; set; }
+        public static AndroidBuildType androidBuildType { get; set; }
+    }
 
     public enum UIOrientation { Portrait = 0, PortraitUpsideDown = 1, LandscapeRight = 2, LandscapeLeft = 3, AutoRotation = 4 }
     public enum ScriptingImplementation { Mono2x = 0, IL2CPP = 1 }
@@ -382,6 +419,8 @@ namespace UnityEditor
             public static AndroidArchitecture targetArchitectures { get; set; }
             public static int bundleVersionCode { get; set; }
             public static bool renderOutsideSafeArea { get; set; }
+            public static AndroidSdkVersions minSdkVersion { get; set; }
+            public static bool useCustomKeystore { get; set; }
         }
     }
 

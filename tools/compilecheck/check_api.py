@@ -15,6 +15,8 @@ STUBS = [os.path.join(HERE, 'UnityStubs.cs'), os.path.join(HERE, '..', 'simtest'
 SKIP_MEMBERS = {'Equals', 'GetHashCode', 'ToString'}
 # члены-заглушки, которые есть в стабах только ради компиляции самих стабов
 SKIP_TYPES = set()
+# типы из модулей, которых нет в пакете unity-types (сверить невозможно — выводятся отдельно)
+NOT_COVERED = {'UnityEngine.ImageConversion'}
 
 
 def load_dts(pkg):
@@ -155,12 +157,15 @@ def main():
     pkg = sys.argv[1]
     dts = load_dts(pkg)
     types = dts_types(dts)
-    problems, checked = [], 0
+    problems, checked, uncovered = [], 0, set()
     for path in STUBS:
         for full, kind, name, extra, ln in stub_members(path):
             if not full.startswith('UnityEngine'):
                 continue
             # вложенные типы d.ts кладёт как Outer.Inner внутри namespace Outer
+            if full in NOT_COVERED:
+                uncovered.add(full)
+                continue
             body = types.get(full)
             if body is None:
                 problems.append(f'{os.path.basename(path)}:{ln}: тип {full} не найден в Unity')
@@ -210,6 +215,8 @@ def main():
                     problems.append(f'{os.path.basename(path)}:{ln}: {full}.{name}({extra} арг.) — в Unity арности {sorted(ar)}')
                 checked += 1
     print(f'проверено членов: {checked}')
+    if uncovered:
+        print('не покрыто определениями (модули вне пакета):', ', '.join(sorted(uncovered)))
     if problems:
         print('\n'.join(problems))
         sys.exit(1)

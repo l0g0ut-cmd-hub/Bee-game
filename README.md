@@ -27,9 +27,21 @@ Unity -batchmode -quit -projectPath . -buildTarget Android \
   -executeMethod Swarm.EditorTools.SwarmProjectSetup.BuildAndroidBatch -logFile build.log
 ```
 
+### Облачная сборка (GitHub Actions, без ПК)
+
+Workflow `.github/workflows/build-android.yml` перенят из рабочей сборки первой игры: GameCI CLI + Unity 6000.0.36f1 на раннере GitHub.
+
+1. Один раз: Settings → Secrets and variables → Actions → добавить `UNITY_EMAIL` и `UNITY_PASSWORD` (тот же Unity-аккаунт).
+2. Каждый пуш в `main`, затрагивающий `Assets/`, `Packages/`, `ProjectSettings/`, запускает сборку (или вручную: Actions → Build Android APK → Run workflow).
+3. Результат:
+   - ветка **`apk-latest`** — `Swarm.apk`, `probe.txt` (замер симуляции в Unity), `shots/*.png` — **настоящие кадры игры**, отрендеренные Unity в CI;
+   - ветка **`ci-logs`** — лог сборки, секреты вырезаны.
+
+Лицензия Personal одна на обе игры — не запускать сборки двух репозиториев одновременно.
+
 ### Если что-то не так
 
-- **Ошибка `InvalidOperationException` про Input** — в Player Settings → Active Input Handling должно быть `Input Manager (Old)` или `Both`. Проект использует классический `Input` и не тянет пакет Input System.
+- **Ошибка `InvalidOperationException` про Input** — Active Input Handling должен быть `Input Manager (Old)` или `Both`. Setup Project и CI-сборка переключают это сами.
 - **Цвета блёклые/пересвеченные** — Player Settings → Color Space = `Gamma` (Setup Project выставляет это сам).
 
 ---
