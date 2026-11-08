@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Проверка компиляции всех скриптов Assets против стабов UnityEngine/UnityEditor. -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NoWarn>CS8632</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Assets/**/*.cs" />
+    <Compile Include="../simtest/UnityMathStub.cs" />
+    <Compile Include="UnityStubs.cs" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,29 @@
+# Unity
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/*.csproj
+/*.unityproj
+/*.sln
+*.suo
+*.user
+*.pidb
+*.booproj
+*.apk
+*.aab
+.vs/
+.idea/
+.vscode/
+crashlytics-build.properties
+
+# Инструменты
+tools/simtest/bin/
+tools/simtest/obj/
+tools/compilecheck/bin/
+tools/compilecheck/obj/
+__pycache__/
