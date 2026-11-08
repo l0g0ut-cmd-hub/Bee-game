@@ -24,6 +24,9 @@ namespace Swarm.UI
 
         public GameUI(PixelUI ui) { _ui = ui; }
 
+        /// <summary>Светлый кремовый для вторичного текста на коричневых панелях.</summary>
+        static readonly Color32 SubText = new Color32(255, 230, 180, 255);
+
         public void ShowWave(WaveMessage m)
         {
             _bannerTime = 3f;
@@ -37,6 +40,9 @@ namespace Swarm.UI
         }
 
         public void ClearBanner() { _bannerTime = 0f; }
+
+        /// <summary>Для съёмки кадров в CI: плавные проявления сразу в конечном состоянии.</summary>
+        public void SnapFades() { _hintAlpha = 1f; }
 
         string[] Wrap(string s, int maxW)
         {
@@ -175,7 +181,7 @@ namespace Swarm.UI
             if (sim.SwarmAtHive)
             {
                 float p = Mathf.Sin(time * 5f) > 0f ? 1f : 0f;
-                var hr = new Rect(Mathf.Round(W * 0.5f - 34), bottom + 2 + p, 68, 26);
+                var hr = new Rect(W - 76, bottom - 4 + p, 70, 26);
                 if (_ui.Button(20, hr, Strings.Hive, true, 1, Spr.IconComb)) a = UiAction.OpenHive;
             }
 
@@ -196,7 +202,7 @@ namespace Swarm.UI
         {
             bool met = value >= goal;
             _ui.Icon(met ? Spr.IconCheck : icon, x + 4, y + 3);
-            _ui.Bar(new Rect(x + 11, y + 1, w - 40, 4), value / (float)goal, met ? PixelUI.Green : PixelUI.Honey, new Color32(70, 50, 40, 255));
+            _ui.Bar(new Rect(x + 11, y + 1, w - 54, 4), value / (float)goal, met ? PixelUI.Green : PixelUI.Honey, new Color32(70, 50, 40, 255));
             _b.Clear().Append(Mathf.Min(value, goal)).Append('/').Append(goal);
             _ui.Text(_b, x + w + 2, y, met ? PixelUI.Green : PixelUI.White, 1, 2, false);
         }
@@ -278,7 +284,7 @@ namespace Swarm.UI
             _b.Clear().Append(Mathf.FloorToInt(col.Honey));
             int tw = PixelFont.Measure(_b);
             _ui.Icon(Spr.IconHoney, panel.center.x - tw * 0.5f - 6, y + 3);
-            _ui.Text(_b, panel.center.x - tw * 0.5f + 1, y, PixelUI.HoneyDark, 1, 0, false);
+            _ui.Text(_b, panel.center.x - tw * 0.5f + 1, y, PixelUI.Honey, 1, 0, true);
 
             y -= 10;
             float rowH = 36f;
@@ -289,11 +295,11 @@ namespace Swarm.UI
                 _ui.Icon(Spr.IconBee, x0 + 12, y + rowH * 0.5f, null, 2);
                 _ui.Text(Strings.HatchName, x0 + 24, y + 19, PixelUI.Ink, 1, 0, false);
                 bool full = sim.HatchAmount <= 0;
-                if (full) _ui.Text(Strings.HatchFull, x0 + 24, y + 8, PixelUI.HoneyDark, 1, 0, false);
+                if (full) _ui.Text(Strings.HatchFull, x0 + 24, y + 8, PixelUI.Red, 1, 0, false);
                 else
                 {
                     _b.Clear().Append('+').Append(sim.HatchAmount).Append("  ").Append(sim.Swarm.Count).Append('/').Append(col.MaxBees);
-                    _ui.Text(_b, x0 + 24, y + 8, new Color32(90, 60, 40, 255), 1, 0, false);
+                    _ui.Text(_b, x0 + 24, y + 8, SubText, 1, 0, false);
                 }
                 _b.Clear().Append(sim.HatchCost);
                 if (_ui.ButtonBuf(31, new Rect(x1 - 50, y + 6, 46, 20), _b, sim.CanHatch, Spr.IconHoney)) sim.TryHatch();
@@ -326,7 +332,7 @@ namespace Swarm.UI
             int max = col.MaxLevel(t);
             // пипсы уровня
             for (int i = 0; i < max; i++)
-                _ui.Fill(new Rect(x0 + 24 + PixelFont.Measure(name) + 5 + i * 5, y + 20, 3, 5), i < lv ? PixelUI.HoneyDark : new Color32(90, 60, 40, 120));
+                _ui.Fill(new Rect(x0 + 24 + PixelFont.Measure(name) + 5 + i * 5, y + 20, 3, 5), i < lv ? PixelUI.Honey : new Color32(46, 26, 14, 255));
 
             _b.Clear();
             switch (t)
@@ -348,7 +354,7 @@ namespace Swarm.UI
                     if (lv < max) _b.Append(" > ").AppendDecimal(cfg.SpeedMul[lv + 1], 2);
                     break;
             }
-            _ui.Text(_b, x0 + 24, y + 8, new Color32(90, 60, 40, 255), 1, 0, false);
+            _ui.Text(_b, x0 + 24, y + 8, SubText, 1, 0, false);
 
             var br = new Rect(x1 - 50, y + 6, 46, 20);
             if (col.IsMaxed(t))
@@ -395,14 +401,14 @@ namespace Swarm.UI
             Color32 tc;
             switch (sim.Result)
             {
-                case SimResult.Won: title = Strings.Won; sub = Strings.WonSub; tc = new Color32(60, 110, 40, 255); break;
-                case SimResult.LostSwarm: title = Strings.LostSwarm; sub = Strings.LostSwarmSub; tc = new Color32(140, 36, 49, 255); break;
-                default: title = Strings.LostSummer; sub = Strings.LostSummerSub; tc = new Color32(140, 36, 49, 255); break;
+                case SimResult.Won: title = Strings.Won; sub = Strings.WonSub; tc = PixelUI.Green; break;
+                case SimResult.LostSwarm: title = Strings.LostSwarm; sub = Strings.LostSwarmSub; tc = PixelUI.Red; break;
+                default: title = Strings.LostSummer; sub = Strings.LostSummerSub; tc = PixelUI.Red; break;
             }
             float y = panel.yMax - 26;
-            _ui.Text(title, panel.center.x, y, tc, 2, 1, false);
+            _ui.Text(title, panel.center.x, y, tc, 2, 1, true);
             y -= 13;
-            _ui.Text(sub, panel.center.x, y, new Color32(90, 60, 40, 255), 1, 1, false);
+            _ui.Text(sub, panel.center.x, y, SubText, 1, 1, true);
             y -= 8;
 
             var st = sim.Stats;
@@ -415,11 +421,11 @@ namespace Swarm.UI
 
             y -= 14;
             if (newRecord && Mathf.Repeat(time * 2f, 1f) < 0.7f)
-                _ui.Text(Strings.NewRecord, panel.center.x, y, PixelUI.HoneyDark, 1, 1, false);
+                _ui.Text(Strings.NewRecord, panel.center.x, y, PixelUI.Honey, 1, 1, true);
             else if (bestWin > 0f)
             {
                 _b.Clear().Append(Strings.Record).AppendTime(bestWin);
-                _ui.Text(_b, panel.center.x, y, new Color32(90, 60, 40, 255), 1, 1, false);
+                _ui.Text(_b, panel.center.x, y, SubText, 1, 1, true);
             }
 
             float bw = (panel.width - 24) * 0.5f;

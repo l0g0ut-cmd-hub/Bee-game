@@ -174,6 +174,7 @@ namespace Swarm.EditorTools
         static void Shot(string name, GameSim sim, Action drawUi, bool menu = false)
         {
             Follow(sim, menu);
+            _gui.SnapFades();
             _ui.Begin(_screen, _input);
             drawUi();
             _ui.End();
