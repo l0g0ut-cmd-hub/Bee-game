@@ -16,7 +16,7 @@ SKIP_MEMBERS = {'Equals', 'GetHashCode', 'ToString'}
 # члены-заглушки, которые есть в стабах только ради компиляции самих стабов
 SKIP_TYPES = set()
 # типы из модулей, которых нет в пакете unity-types (сверить невозможно — выводятся отдельно)
-NOT_COVERED = {'UnityEngine.ImageConversion'}
+NOT_COVERED = {'UnityEngine.ImageConversion', 'UnityEngine.AndroidJavaObject', 'UnityEngine.AndroidJavaClass'}
 
 
 def load_dts(pkg):

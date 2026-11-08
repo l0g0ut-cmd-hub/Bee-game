@@ -32,17 +32,39 @@ namespace Swarm.Simulation
         };
 
         int _next;
+        float _delay;       // накопленная отсрочка расписания
+        int _postponed;     // сколько раз подряд отложена текущая волна
         public int NextIndex => _next;
-        public float NextTime => _next < Schedule.Length ? Schedule[_next].Time : float.MaxValue;
+        public float NextTime => _next < Schedule.Length ? Schedule[_next].Time + _delay : float.MaxValue;
+        public int Postponements { get; private set; }
 
-        public void Reset() => _next = 0;
+        public void Reset() { _next = 0; _delay = 0f; _postponed = 0; Postponements = 0; }
 
+        /// <summary>
+        /// Директор поверх расписания: если рой только что понёс тяжёлые потери, волна откладывается
+        /// (до WaveMaxPostpones раз), а маленькой колонии приходит ослабленная волна. Лечит «спираль смерти».
+        /// </summary>
         public void Step(float time, GameSim sim)
         {
-            while (_next < Schedule.Length && time >= Schedule[_next].Time)
+            var cfg = sim.Cfg;
+            while (_next < Schedule.Length && time >= Schedule[_next].Time + _delay)
             {
-                Launch(Schedule[_next], sim);
+                if (_postponed < cfg.WaveMaxPostpones && sim.RecentLosses > sim.Swarm.Count * cfg.WaveLossThreshold)
+                {
+                    _delay += cfg.WavePostpone;
+                    _postponed++;
+                    Postponements++;
+                    return;
+                }
+                var w = Schedule[_next];
+                if (sim.Swarm.Count < 60)
+                {
+                    w.Hornets = Mathf.Max(0, w.Hornets - 1);
+                    w.Wasps = Mathf.Max(1, Mathf.CeilToInt(w.Wasps * 0.75f));
+                }
+                Launch(w, sim);
                 _next++;
+                _postponed = 0;
             }
         }
 

@@ -39,6 +39,11 @@ namespace Swarm.Game
         bool _newRecord;
         bool _resultSoundPlayed;
 
+        // удержание пальца: почти неподвижен дольше HoldTime → тепловой шар у врага
+        const float HoldTime = 0.3f, HoldTolerance = 7f;   // секунды; RT-пиксели
+        Vector2 _holdAnchor;
+        float _holdTimer;
+
         // автопилот витрины
         float _autoTimer;
         Vector2 _autoTarget;
@@ -68,6 +73,8 @@ namespace Swarm.Game
             _cfg = SimConfig.Default();
             _attract = new GameSim(_cfg, 4242u) { AttractMode = true };
             _bestWin = PlayerPrefs.GetFloat("swarm_best_win", 0f);
+            Haptics.Load();
+            FxSystem.ShakeEnabled = PlayerPrefs.GetInt("swarm_shake", 1) == 1;
             EnterMenu();
         }
 
@@ -129,7 +136,7 @@ namespace Swarm.Game
                 case State.Menu: act = _gameUi.DrawMenu(_time, _bestWin, _audio.Muted); break;
                 case State.Playing: act = _gameUi.DrawHud(_sim, _screen, _time, dt); break;
                 case State.Hive: act = _gameUi.DrawHive(_sim, _time); break;
-                case State.Paused: act = _gameUi.DrawPause(_audio.Muted); break;
+                case State.Paused: act = _gameUi.DrawPause(_audio.Muted, Haptics.Enabled, FxSystem.ShakeEnabled); break;
                 case State.Result: act = _gameUi.DrawResult(_sim, _time, _newRecord, _bestWin); break;
             }
             if (Input.GetKeyDown(KeyCode.Escape)) act = BackAction();
@@ -139,8 +146,9 @@ namespace Swarm.Game
             var sim = Active;
             if (_state == State.Playing || _state == State.Menu)
             {
-                SimInput inp = _state == State.Menu ? Autopilot(dt) : PlayerInput();
-                _acc += dt;
+                SimInput inp = _state == State.Menu ? Autopilot(dt) : PlayerInput(dt);
+                // hit-stop: симуляция на мгновение замирает (по реальному времени), ввод продолжает читаться
+                _acc += _fx.HitStop > 0f ? 0f : dt;
                 int steps = 0;
                 while (_acc >= Step && steps < MaxStepsPerFrame)
                 {
@@ -202,6 +210,12 @@ namespace Swarm.Game
                 case UiAction.OpenHive: if (_state == State.Playing) _state = State.Hive; break;
                 case UiAction.CloseHive: if (_state == State.Hive) { _state = State.Playing; _input.Reset(); } break;
                 case UiAction.ToggleSound: _audio.ToggleMute(); break;
+                case UiAction.ToggleHaptics: Haptics.Toggle(); break;
+                case UiAction.ToggleShake:
+                    FxSystem.ShakeEnabled = !FxSystem.ShakeEnabled;
+                    PlayerPrefs.SetInt("swarm_shake", FxSystem.ShakeEnabled ? 1 : 0);
+                    PlayerPrefs.Save();
+                    break;
             }
             if (_gameUi.TutorialStep >= 4 && PlayerPrefs.GetInt("swarm_tutorial_done", 0) == 0)
             {
@@ -227,14 +241,23 @@ namespace Swarm.Game
             }
         }
 
-        SimInput PlayerInput()
+        SimInput PlayerInput(float dt)
         {
             var inp = new SimInput();
+            Vector2 px = _screen.ScreenToPixel(_input.ScreenPos);
             if (_input.Held && !_ui.Captured)
             {
                 inp.Active = true;
-                inp.Target = _screen.PixelToWorld(_screen.ScreenToPixel(_input.ScreenPos));
+                inp.Target = _screen.PixelToWorld(px);
+                if (_input.Down || (px - _holdAnchor).sqrMagnitude > HoldTolerance * HoldTolerance)
+                {
+                    _holdAnchor = px;
+                    _holdTimer = 0f;
+                }
+                else _holdTimer += dt;
+                inp.Hold = _holdTimer >= HoldTime;
             }
+            else _holdTimer = 0f;
             return inp;
         }
 
@@ -246,8 +269,8 @@ namespace Swarm.Game
             if (_autoTimer <= 0f)
             {
                 _autoTimer = 5f + (float)_rnd.NextDouble() * 4f;
-                float cap = _cfg.CarryBase * s.Colony.CarryMul * Mathf.Max(1, s.Swarm.Count);
-                if (s.Swarm.TotalCarry > cap * 0.7f)
+                float cap = _cfg.CarryBase * s.Colony.CarryMul * Mathf.Max(1, s.Swarm.SwarmCount);
+                if (s.Swarm.FieldCarry > cap * 0.7f)
                     _autoTarget = s.World.HivePos + BeeSwarm.HiveEntranceOffset;
                 else
                 {
@@ -276,10 +299,7 @@ namespace Swarm.Game
             var w = sim.World;
             _cam.x = w.Width > _screen.Width ? Mathf.Clamp(_cam.x, hw - 8f, w.Width - hw + 8f) : w.Width * 0.5f;
             _cam.y = w.Height > _screen.Height ? Mathf.Clamp(_cam.y, hh - 24f, w.Height - hh + 24f) : w.Height * 0.5f;
-            Vector2 shake = Vector2.zero;
-            if (_fx.Shake > 0.05f)
-                shake = new Vector2(Mathf.Sin(_time * 71f), Mathf.Cos(_time * 53f)) * _fx.Shake;
-            _screen.PlaceWorldCamera(_cam + shake);
+            _screen.PlaceWorldCamera(_cam + _fx.ShakeOffset());
         }
     }
 }

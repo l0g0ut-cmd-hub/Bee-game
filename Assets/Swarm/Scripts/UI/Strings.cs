@@ -27,7 +27,20 @@ namespace Swarm.UI
         public const string WaveHornet = "ШЕРШЕНЬ!";
         public const string WaveInvasion = "НАШЕСТВИЕ!";
         public const string WaveSubRaid = "ОСЫ ГРАБЯТ УЛЕЙ, ЕСЛИ РОЙ ДАЛЕКО";
-        public const string WaveSubHornet = "БОЛЬШОЙ РОЙ СПРАВИТСЯ";
+        public const string WaveSubHornet = "ДЕРЖИ ПАЛЕЦ НА НЁМ - ТЕПЛОВОЙ ШАР";
+        public const string HintBall = "ДЕРЖИ ПАЛЕЦ НА ШЕРШНЕ - РОЙ СВАРИТ ЕГО ТЕПЛОВЫМ ШАРОМ";
+        public const string Balling = "ТЕПЛОВОЙ ШАР!";
+        public const string LateSummer = "ЛЕТО НА ИСХОДЕ";
+        public const string LateSummerSub = "КОПИ МЁД НА ЗИМУ";
+        public const string GuardName = "СТРАЖИ";
+        public const string GuardSub = "ОХРАНЯЮТ УЛЕЙ: ";
+        public const string GuardSubHint = "НАЗНАЧАЮТСЯ У УЛЬЯ";
+        public const string Wintered = "ЗИМОВКА";
+        public const string WinteredSub = "КОЛОНИЯ ПЕРЕЗИМУЕТ";
+        public const string HapticsOn = "ВИБРО: ВКЛ";
+        public const string HapticsOff = "ВИБРО: ВЫКЛ";
+        public const string ShakeOn = "ТРЯСКА: ВКЛ";
+        public const string ShakeOff = "ТРЯСКА: ВЫКЛ";
 
         public const string HiveTitle = "УЛЕЙ";
         public const string HatchName = "ВЫВЕСТИ ПЧЁЛ";
@@ -53,7 +66,7 @@ namespace Swarm.UI
         public const string LostSwarm = "РОЙ ПОГИБ";
         public const string LostSwarmSub = "ОСЫ И ШЕРШНИ ВЗЯЛИ ВЕРХ";
         public const string LostSummer = "ЛЕТО ПРОШЛО";
-        public const string LostSummerSub = "КОЛОНИЯ НЕ ГОТОВА К ЗИМЕ";
+        public const string LostSummerSub = "ЗАПАСОВ НЕ ХВАТИТ НА ЗИМУ";
         public const string StatTime = "ВРЕМЯ";
         public const string StatPeak = "ПИК РОЯ";
         public const string StatHoney = "МЁДА ПРИНЕСЕНО";

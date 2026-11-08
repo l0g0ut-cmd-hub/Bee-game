@@ -10,6 +10,7 @@ namespace Swarm.Simulation
         readonly SimConfig _cfg;
         public float Honey;
         public readonly int[] Level = new int[(int)UpgradeType.Count];
+        public int GuardIndex;
 
         public Colony(SimConfig cfg) { _cfg = cfg; }
 

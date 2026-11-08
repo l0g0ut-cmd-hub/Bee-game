@@ -12,6 +12,7 @@ namespace Swarm.Simulation
         FlowerBloomed,
         EnemySpawned,
         EnemyHit,
+        EnemyWindup,
         EnemyKilled,
         HoneyStolen,
         HoneyRecovered,

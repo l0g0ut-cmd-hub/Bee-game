@@ -50,5 +50,15 @@ namespace UnityEngine
         public static int FloorToInt(float f) => (int)Math.Floor(f);
         public static int RoundToInt(float f) => (int)Math.Round(f, MidpointRounding.ToEven);
         public static float Lerp(float a, float b, float t) => a + (b - a) * Clamp01(t);
+        public static float Round(float f) => (float)Math.Round(f, MidpointRounding.ToEven);
+        public static float Floor(float f) => (float)Math.Floor(f);
+        public static float Ceil(float f) => (float)Math.Ceiling(f);
+        public static float Repeat(float t, float length) => Clamp(t - Floor(t / length) * length, 0f, length);
+        public static float MoveTowards(float current, float target, float maxDelta) =>
+            Abs(target - current) <= maxDelta ? target : current + Math.Sign(target - current) * maxDelta;
+        public static float Pow(float f, float p) => (float)Math.Pow(f, p);
+        public static float Exp(float p) => (float)Math.Exp(p);
+        public static float Atan2(float y, float x) => (float)Math.Atan2(y, x);
+
     }
 }

@@ -270,11 +270,26 @@ namespace Swarm.Presentation
                 bool hornet = en.Type[i] == EnemyType.Hornet;
                 int fr = ((int)(time * 22f + en.Phase[i]) & 1);
                 int spr;
-                if (en.Flash[i] > 0.06f) spr = hornet ? (int)Spr.HornetFlash : (int)Spr.WaspFlash;
+                bool windup = en.Act[i] == EnemyAct.Windup;
+                bool dash = en.Act[i] == EnemyAct.Dash;
+                if (en.Flash[i] > 0.06f || (windup && ((int)(time * 16f) & 1) == 0)) spr = hornet ? (int)Spr.HornetFlash : (int)Spr.WaspFlash;
                 else spr = hornet ? (int)Spr.HornetA + fr : (int)Spr.WaspA + fr;
-                float bob = Mathf.Sin(time * 6f + en.Phase[i]) * 1.5f;
-                _shadow.Add(hornet ? Spr.ShadowL : Spr.ShadowM, p.x, p.y - (hornet ? 11f : 8f), A(70));
-                _fly.Add(spr, p.x, p.y + bob, White, en.Vel[i].x < 0f);
+                float bob = windup ? 0f : Mathf.Sin(time * 6f + en.Phase[i]) * 1.5f;
+                // замах: дрожь на пиксель, чтобы читалось «сейчас бросится»
+                float jx = windup ? (((int)(time * 40f) & 1) == 0 ? 1f : -1f) : 0f;
+                bool flipE = windup || dash ? en.DashDir[i].x < 0f : en.Vel[i].x < 0f;
+                float footY = p.y - (hornet ? 11f : 8f);
+                _shadow.Add(hornet ? Spr.ShadowL : Spr.ShadowM, p.x, footY, A(70));
+                // кольцо опасности под врагом — враги читаются даже в гуще роя
+                byte ra = (byte)(windup ? 230 : 110);
+                _shadow.Add(hornet ? Spr.KRing1 : Spr.KRing0, p.x, footY, new Color32(238, 70, 60, ra));
+                if (en.Heat[i] > 0.05f)
+                {
+                    float hp = 0.6f + 0.4f * Mathf.Sin(time * 14f);
+                    _glow.AddStretched((int)Spr.Glow, p.x - 18f, p.y - 12f, 36f, 26f, new Color32(255, 120, 40, (byte)(170 * en.Heat[i] * hp)));
+                }
+                if (dash) _fly.Add(spr, p.x - en.Vel[i].x * 0.05f, p.y - en.Vel[i].y * 0.05f + bob, new Color32(255, 200, 200, 90), flipE);
+                _fly.Add(spr, p.x + jx, p.y + bob, White, flipE);
                 if (en.Hp[i] < en.MaxHp[i])
                 {
                     float w = hornet ? 16f : 10f;

@@ -187,7 +187,7 @@ add('BeeLoadB', make_bee(BEE_WINGS_DOWN, True))
 
 # ------------------------------------------------------------------ осы и шершни (процедурно)
 def insect(w, h, parts, wings, stripe_cols=(), stripe_c=INK[1], stinger=None, eye=None, legs=(), flash=False,
-           antenna=()):
+           antenna=(), outline=INK[0]):
     cv = Canvas(w, h)
     # крылья под телом рисуем первыми (прозрачная часть сверху)
     for (cx, cy, rx, ry) in wings:
@@ -211,7 +211,7 @@ def insect(w, h, parts, wings, stripe_cols=(), stripe_c=INK[1], stinger=None, ey
         body.set(x, y, INK[0])
     if stinger:
         body.set(stinger[0], stinger[1], INK[2])
-    body.outline(INK[0])
+    body.outline(outline)
     if eye:
         body.set(eye[0], eye[1], INK[0])
         body.set(eye[0], eye[1] - 1, WHITE[3])
@@ -235,7 +235,7 @@ def wasp(frame, flash=False):
         (12.5, 7.5, 1.9, 1.9, [HONEY[3], HONEY[4], HONEY[5], WHITE[3]]),
     ]
     return insect(16, 12, parts, wings, stripe_cols=(2, 4, 6), stripe_c=INK[0], stinger=(0, 8), eye=(13, 7),
-                  legs=[(8, 10), (10, 10), (11, 10)], antenna=[(14, 5), (15, 4)], flash=flash)
+                  legs=[(8, 10), (10, 10), (11, 10)], antenna=[(14, 5), (15, 4)], flash=flash, outline=RED[1])
 
 
 def hornet(frame, flash=False):
@@ -247,7 +247,7 @@ def hornet(frame, flash=False):
     ]
     return insect(22, 16, parts, wings, stripe_cols=(3, 4, 7, 8), stripe_c=HORNET[0], stinger=(0, 11),
                   eye=(19, 10), legs=[(11, 14), (12, 15), (14, 15), (16, 14)], antenna=[(20, 7), (21, 6), (21, 5)],
-                  flash=flash)
+                  flash=flash, outline=RED[0])
 
 
 add('WaspA', wasp(0))
@@ -765,12 +765,55 @@ ICONS = {
     'IconSkull': ['.WWWWW..', 'WWWWWWW.', 'WkkWkkW.', 'WkkWkkW.', 'WWWkWWW.', '.WWWWW..', '.W.W.W..', '........'],
     'IconArrow': ['...k....', '...kk...', 'kkkkWk..', 'kWWWWWk.', 'kkkkWk..', '...kk...', '...k....', '........'],
     'IconHeart': ['.rr.rr..', 'rRRrRRr.', 'rRrrrrr.', 'rrrrrrr.', '.rrrrr..', '..rrr...', '...r....', '........'],
+    'IconStar': ['...y....', '...Y....', '..yYy...', 'yYYYYYy.', '.yYYYy..', '.yY.Yy..', 'yy...yy.', '........'],
+    'IconStarEmpty': ['...K....', '...K....', '..KKK...', 'KKKKKKK.', '.KKKKK..', '.KK.KK..', 'KK...KK.', '........'],
+    'IconGuard': ['.kkkkk..', 'kyYyYyk.', 'kYkkkYk.', 'kykYkyk.', 'kYkkkYk.', '.kyYyk..', '..kyk...', '...k....'],
     'IconWasp': ['..vv.vv.', '.vwwvwwv', '..kkkkk.', 'kokKokok', 'okKokKok', '.kkkkkk.', '..k..k..', '........'],
 }
 for name, rows in ICONS.items():
     cv = Canvas(8, 8)
     cv.pattern(rows, ICON_MAP)
     add(name, cv)
+
+
+# ------------------------------------------------------------------ частицы из Kenney Particle Pack (CC0)
+# Исходники 512 px пикселизируются под стиль игры: обрезка по содержимому, уменьшение,
+# альфа квантуется в 3 уровня упорядоченным дизерингом. Цвет даёт vertex color при отрисовке.
+VENDOR = os.path.join(os.path.dirname(__file__), 'vendor', 'kenney')
+
+
+def kenney(name, size):
+    from PIL import ImageChops
+    im = Image.open(os.path.join(VENDOR, name + '.png')).convert('RGBA')
+    r, g, b, a = im.split()
+    lum = Image.merge('RGB', (r, g, b)).convert('L')
+    dens = ImageChops.multiply(lum, a)
+    bbox = dens.point(lambda v: 255 if v > 20 else 0).getbbox()
+    if bbox:
+        dens = dens.crop(bbox)
+    w, h = dens.size
+    sc = size / max(w, h)
+    dens = dens.resize((max(1, round(w * sc)), max(1, round(h * sc))), Image.LANCZOS)
+    cv = Canvas(dens.width, dens.height)
+    for y in range(dens.height):
+        for x in range(dens.width):
+            v = dens.getpixel((x, y)) / 255.0
+            t = dith(x, y)
+            if v > 0.62:
+                cv.set(x, y, (255, 255, 255, 255))
+            elif v > 0.3:
+                cv.set(x, y, (255, 255, 255, 255 if v > 0.3 + t * 0.32 else 150))
+            elif v > 0.08 + t * 0.22:
+                cv.set(x, y, (255, 255, 255, 120))
+    return cv
+
+
+for nm, src, sz in (('KRing0', 'circle_02', 9), ('KRing1', 'circle_02', 13), ('KRing2', 'circle_02', 17),
+                    ('KSpark', 'star_06', 9), ('KCross', 'star_08', 9), ('KStar', 'star_04', 11),
+                    ('KSmokeA', 'smoke_07', 10), ('KSmokeB', 'smoke_08', 13), ('KSlash', 'slash_02', 15),
+                    ('KTwirl', 'twirl_02', 13), ('KFlame', 'flame_03', 8), ('KBurst', 'muzzle_01', 15),
+                    ('KTrace', 'trace_04', 11)):
+    add(nm, kenney(src, sz))
 
 
 # ------------------------------------------------------------------ логотип «РОЙ»

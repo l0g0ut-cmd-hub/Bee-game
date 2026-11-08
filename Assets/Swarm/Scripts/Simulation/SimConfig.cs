@@ -27,6 +27,9 @@ namespace Swarm.Simulation
         public float SeparationForce = 40f;   // скорость расталкивания при полном перекрытии
         public float WanderAmp = 26f;
         public float LeashDistance = 95f;    // дальше этого пчела бросает дела и летит к рою
+        public float CometTail = 1.0f;       // длина шлейфа «кометы» в радиусах роя на полной скорости
+        public float TurnWaveDelay = 0.45f;  // задержка следования края роя за лидером, сек
+        public float ScoutReachMul = 2.3f;   // насколько дальше обычного разведчицы ищут цветы
 
         // --- нектар и улей
         public float GatherReach = 18f;      // насколько цветок может быть дальше края роя
@@ -40,6 +43,30 @@ namespace Swarm.Simulation
         public float StingRange = 3f;
         public float AggroRadius = 36f;
         public int MaxStingersPerEnemy = 14;  // для осы; шершень вмещает вдвое больше
+
+        // --- тепловой шар: палец удерживается на месте рядом с врагом
+        public int BallMinBees = 10;
+        public float BallLockRange = 45f;     // насколько враг может быть дальше края роя
+        public float BallJoinRange = 150f;    // пчёлы ближе этого к цели сбиваются в шар
+        public float BallStingerMul = 2.5f;   // в шаре вокруг врага помещается больше пчёл
+        public float HeatDamageMul = 2.2f;    // прогрев: урон пчёл в шаре
+        public float HeatDeathRate = 0.03f;   // гибель от перегрева: на пчелу в шаре в секунду
+
+        // --- стражи улья
+        public int[] GuardSteps = { 0, 5, 10, 20 };
+        public float GuardRecruitRadius = 80f;
+        public float GuardDefendRadius = 85f;
+        public float GuardStingMul = 2f;      // дома стражи жалят сильнее
+        public float RaidBiteSlow = 1.7f;     // оса, занятая грабежом, кусается реже
+
+        // --- зимовка (если цель лета не выполнена к концу)
+        public int Winter2Bees = 85, Winter2Honey = 240;
+        public int Winter1Bees = 50, Winter1Honey = 140;
+
+        // --- директор волн
+        public float WaveLossThreshold = 0.22f; // доля роя, потерянная «недавно», при которой волна откладывается
+        public float WavePostpone = 18f;
+        public int WaveMaxPostpones = 2;
 
         // --- экономика
         public int HatchBatch = 5;

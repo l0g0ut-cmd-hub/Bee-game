@@ -4,16 +4,23 @@ using UnityEngine;
 namespace Swarm.Presentation
 {
     /// <summary>
-    /// Частицы и всплывающие числа на пулах-массивах. Реагирует на события симуляции:
-    /// гибель пчёл, сбор и сдачу нектара, удары и смерть врагов, вывод пчёл, кражу мёда.
+    /// Частицы, всплывающие числа и «сок» (game feel) на пулах-массивах.
+    ///
+    /// Правила (по скиллу game-feel): отклик многослойный и короткий; сила — по важности события
+    /// (Small/Medium/Large); тряска — через накопительную «травму» (амплитуда = травма², плавный синус,
+    /// затухание), только смещение камеры; hit-stop — лишь на крупных убийствах, по реальному времени,
+    /// ввод не блокируется; числа «выпрыгивают» с перелётом масштаба.
+    /// Частицы ударов/дыма/искр — пикселизированный Kenney Particle Pack (CC0).
     /// </summary>
     public sealed class FxSystem
     {
+        public enum Tier : byte { Small, Medium, Large }
+
         struct Particle
         {
             public Vector2 Pos, Vel;
             public float Life, MaxLife, Z, Vz, Drag;
-            public short Spr;
+            public short Spr, SprEnd;    // SprEnd >= 0 — покадровая анимация Spr..SprEnd за жизнь
             public Color32 Col;
             public bool Additive, Flip, Fade;
         }
@@ -24,7 +31,7 @@ namespace Swarm.Presentation
             public float Life;
             public int Value;
             public Color32 Col;
-            public byte Icon; // 0 нет, 1 мёд, 2 пчела
+            public byte Icon; // 0 нет, 1 мёд
         }
 
         const int MaxParticles = 900;
@@ -38,9 +45,13 @@ namespace Swarm.Presentation
         readonly System.Random _rnd = new System.Random(777);
         readonly TextBuf _buf = new TextBuf();
 
-        public float Shake;
+        // --- сок
+        public float Trauma;            // 0..1, накапливается от ударов
+        public float HitStop;           // сек реального времени, пока симуляция заморожена
+        public static bool ShakeEnabled = true;
+        float _shakeT;
         bool _sound;
-        float _depositAcc, _depositTimer, _stolenAcc, _stolenTimer;
+        float _depositAcc, _depositTimer, _stolenAcc, _stolenTimer, _trailTimer, _heatTimer;
         Vector2 _stolenPos;
 
         public FxSystem(Transform root)
@@ -50,19 +61,20 @@ namespace Swarm.Presentation
             _text = new QuadBatch("L10_FxText", 600, SpriteAtlas.Alpha, 10, PixelScreen.LayerWorld, root);
         }
 
-        public void Clear() { _pCount = 0; _tCount = 0; Shake = 0f; _depositAcc = 0f; _stolenAcc = 0f; }
+        public void Clear() { _pCount = 0; _tCount = 0; Trauma = 0f; HitStop = 0f; _depositAcc = 0f; _stolenAcc = 0f; }
 
         float R => (float)_rnd.NextDouble();
         float S => (float)_rnd.NextDouble() * 2f - 1f;
 
         void Emit(Spr spr, Vector2 pos, Vector2 vel, float life, Color32 col, bool additive = false,
-                  float z = 0f, float vz = 0f, float drag = 2f, bool fade = true, bool flip = false)
+                  float z = 0f, float vz = 0f, float drag = 2f, bool fade = true, bool flip = false, Spr sprEnd = Spr.Count)
         {
             if (_pCount >= MaxParticles) return;
             _p[_pCount++] = new Particle
             {
                 Pos = pos, Vel = vel, Life = life, MaxLife = life, Z = z, Vz = vz, Drag = drag,
-                Spr = (short)spr, Col = col, Additive = additive, Fade = fade, Flip = flip,
+                Spr = (short)spr, SprEnd = (short)(sprEnd == Spr.Count ? -1 : (int)sprEnd),
+                Col = col, Additive = additive, Fade = fade, Flip = flip,
             };
         }
 
@@ -72,11 +84,32 @@ namespace Swarm.Presentation
             _t[_tCount++] = new FloatText { Pos = pos, Life = 1.1f, Value = value, Col = col, Icon = icon };
         }
 
+        /// <summary>Единый «пакет отклика» по важности события.</summary>
+        public void Feedback(Tier tier)
+        {
+            switch (tier)
+            {
+                case Tier.Small: AddTrauma(0.12f); Haptics.Pulse(12, 70); break;
+                case Tier.Medium: AddTrauma(0.32f); Haptics.Pulse(22, 140); break;
+                default: AddTrauma(0.65f); HitStop = Mathf.Max(HitStop, 0.09f); Haptics.Pulse(45, 255, 0f); break;
+            }
+        }
+
+        void AddTrauma(float a) => Trauma = Mathf.Min(1f, Trauma + a);
+
+        /// <summary>Смещение камеры от тряски: амплитуда ~ травма², плавный синус, а не случайный шум.</summary>
+        public Vector2 ShakeOffset()
+        {
+            if (!ShakeEnabled || Trauma <= 0.001f) return Vector2.zero;
+            float k = Trauma * Trauma;
+            return new Vector2(Mathf.Sin(_shakeT * 1.7f) * 5f * k, Mathf.Sin(_shakeT * 2.3f + 1f) * 4f * k);
+        }
+
         static readonly Color32 Honey = new Color32(247, 207, 85, 255);
-        static readonly Color32 HoneyDeep = new Color32(235, 166, 52, 255);
         static readonly Color32 White = new Color32(255, 255, 255, 255);
         static readonly Color32 Red = new Color32(238, 106, 82, 255);
         static readonly Color32 Ink = new Color32(44, 34, 50, 255);
+        static readonly Color32 Heat = new Color32(255, 150, 60, 255);
 
         public void Consume(GameSim sim, WorldRenderer world, AudioDirector audio)
         {
@@ -89,18 +122,20 @@ namespace Swarm.Presentation
                 switch (e.Type)
                 {
                     case SimEventType.BeeDied:
-                        // пчела падает, кувыркаясь, + облачко
-                        Emit(Spr.BeeA, e.Pos, new Vector2(S * 20f, 0f), 0.9f, new Color32(200, 190, 170, 255), z: 2f, vz: 30f, drag: 1f, flip: R < 0.5f);
-                        for (int k = 0; k < 3; k++)
-                            Emit(Spr.Puff, e.Pos, new Vector2(S, S) * 18f, 0.35f + R * 0.2f, new Color32(255, 255, 255, 170), drag: 4f);
-                        Shake = Mathf.Max(Shake, 0.6f);
+                    {
+                        bool heat = e.Data == 99;
+                        // пчела падает, кувыркаясь, + облачко дыма (от перегрева — оранжевое)
+                        Emit(Spr.BeeA, e.Pos, new Vector2(S * 20f, 0f), 0.9f, heat ? new Color32(230, 140, 90, 255) : new Color32(200, 190, 170, 255), z: 2f, vz: 30f, drag: 1f, flip: R < 0.5f);
+                        Emit(R < 0.5f ? Spr.KSmokeA : Spr.KSmokeB, e.Pos, new Vector2(S * 6f, 10f), 0.5f, heat ? new Color32(255, 170, 90, 170) : new Color32(255, 255, 255, 140), drag: 3f);
+                        if (_sound) Feedback(Tier.Small);
                         audio?.Play(Sfx.BeeDie);
                         break;
+                    }
                     case SimEventType.BeeHatched:
-                        Emit(Spr.Sparkle, e.Pos + new Vector2(S * 6f, S * 4f), new Vector2(S * 10f, 15f + R * 10f), 0.6f, Honey, true);
+                        Emit(Spr.KSpark, e.Pos + new Vector2(S * 6f, S * 4f), new Vector2(S * 10f, 15f + R * 10f), 0.6f, Honey, true);
                         if (e.Data == 0)
                         {
-                            Emit(Spr.Ring2, e.Pos, Vector2.zero, 0.35f, Honey, true, drag: 0f);
+                            Emit(Spr.KRing0, e.Pos, Vector2.zero, 0.35f, Honey, true, drag: 0f, sprEnd: Spr.KRing2);
                             audio?.Play(Sfx.Hatch);
                         }
                         break;
@@ -116,31 +151,38 @@ namespace Swarm.Presentation
                         break;
                     case SimEventType.FlowerBloomed:
                         for (int k = 0; k < 4; k++)
-                            Emit(Spr.Sparkle, e.Pos + new Vector2(S * 5f, S * 5f), new Vector2(0f, 8f), 0.5f + R * 0.4f, White, true);
+                            Emit(Spr.KSpark, e.Pos + new Vector2(S * 5f, S * 5f), new Vector2(0f, 8f), 0.5f + R * 0.4f, White, true);
                         break;
                     case SimEventType.FlowerDepleted:
                         for (int k = 0; k < 5; k++)
                             Emit(Spr.Petal, e.Pos, new Vector2(S * 16f, S * 10f), 0.8f + R * 0.5f, new Color32(255, 240, 220, 230), z: 3f, vz: 12f, drag: 2.5f);
                         break;
-                    case SimEventType.EnemySpawned:
+                    case SimEventType.EnemyWindup:
+                        // телеграф: красный крест-искра над врагом и короткий сигнал
+                        Emit(Spr.KCross, e.Pos + new Vector2(0f, 12f), new Vector2(0f, 6f), 0.5f, Red, true, drag: 1f);
+                        audio?.Play(Sfx.Windup);
                         break;
                     case SimEventType.EnemyHit:
-                        Emit(Spr.Ring0, e.Pos + new Vector2(S * 4f, S * 4f), Vector2.zero, 0.15f, White, true, drag: 0f);
+                        Emit(Spr.KCross, e.Pos + new Vector2(S * 4f, S * 4f), Vector2.zero, 0.12f, White, true, drag: 0f);
                         audio?.Play(Sfx.Hit);
                         break;
                     case SimEventType.EnemyKilled:
                     {
                         bool hornet = e.Data == (int)EnemyType.Hornet;
-                        Emit(Spr.Ring2, e.Pos, Vector2.zero, 0.3f, White, true, drag: 0f);
-                        Emit(Spr.Ring1, e.Pos, Vector2.zero, 0.2f, Honey, true, drag: 0f);
+                        bool cooked = e.Value > 0.5f;
+                        Emit(Spr.KRing0, e.Pos, Vector2.zero, hornet ? 0.4f : 0.3f, White, true, drag: 0f, sprEnd: Spr.KRing2);
+                        Emit(Spr.KBurst, e.Pos, Vector2.zero, 0.18f, cooked ? Heat : Honey, true, drag: 0f);
+                        Emit(Spr.KSlash, e.Pos + new Vector2(0f, 2f), new Vector2(0f, 4f), 0.22f, White, true, drag: 0f, flip: R < 0.5f);
                         int n = hornet ? 16 : 9;
                         for (int k = 0; k < n; k++)
                         {
-                            Color32 c = k % 3 == 0 ? Ink : (k % 3 == 1 ? Honey : new Color32(210, 230, 255, 200));
+                            Color32 c = k % 3 == 0 ? Ink : (k % 3 == 1 ? (cooked ? Heat : Honey) : new Color32(210, 230, 255, 200));
                             Emit(k % 2 == 0 ? Spr.Pixel2 : Spr.Pixel, e.Pos, new Vector2(S, S) * (hornet ? 55f : 40f), 0.5f + R * 0.4f, c, z: 2f, vz: 25f + R * 20f, drag: 2.5f);
                         }
+                        for (int k = 0; k < (hornet ? 3 : 1); k++)
+                            Emit(Spr.KSmokeB, e.Pos + new Vector2(S * 5f, S * 3f), new Vector2(S * 8f, 12f), 0.6f, new Color32(255, 255, 255, 120), drag: 2f);
                         Emit(hornet ? Spr.HornetA : Spr.WaspA, e.Pos, new Vector2(S * 10f, 0f), 1.0f, new Color32(150, 140, 130, 255), z: 3f, vz: 35f, drag: 1f, flip: R < 0.5f);
-                        Shake = Mathf.Max(Shake, hornet ? 2.5f : 1.2f);
+                        Feedback(hornet ? Tier.Large : Tier.Medium);
                         audio?.Play(hornet ? Sfx.KillBig : Sfx.Kill);
                         break;
                     }
@@ -157,19 +199,60 @@ namespace Swarm.Presentation
                         break;
                     case SimEventType.WaveIncoming:
                         audio?.Play(Sfx.Alarm);
+                        if (_sound) Haptics.Pulse(60, 180, 0f);
                         break;
                     case SimEventType.Upgrade:
                         for (int k = 0; k < 14; k++)
-                            Emit(Spr.Sparkle, e.Pos + new Vector2(S * 16f, R * 30f), new Vector2(S * 12f, 18f + R * 16f), 0.8f + R * 0.4f, k % 2 == 0 ? Honey : White, true);
+                            Emit(k % 3 == 0 ? Spr.KStar : Spr.KSpark, e.Pos + new Vector2(S * 16f, R * 30f), new Vector2(S * 12f, 18f + R * 16f), 0.8f + R * 0.4f, k % 2 == 0 ? Honey : White, true);
                         audio?.Play(Sfx.Upgrade);
+                        if (_sound) Feedback(Tier.Small);
                         break;
                 }
             }
             ev.Clear();
         }
 
+        /// <summary>Непрерывные эффекты от состояния мира: шар, рывки, шлейф пыльцы.</summary>
+        void Ambient(GameSim sim, float dt)
+        {
+            var sw = sim.Swarm;
+            var en = sim.Enemies;
+            // тепловой шар: языки пламени и завихрения жара над целью
+            _heatTimer -= dt;
+            if (sw.Balling && sw.BallTarget >= 0 && sw.BallTarget < en.Count && _heatTimer <= 0f)
+            {
+                _heatTimer = 0.05f;
+                Vector2 c = en.Pos[sw.BallTarget];
+                float heat = en.Heat[sw.BallTarget];
+                Emit(Spr.KBurst, c + new Vector2(S * 8f, S * 4f), new Vector2(S * 4f, 22f + R * 10f), 0.35f, new Color32(255, (byte)(200 - 80 * heat), 70, (byte)(150 + 80 * heat)), true, drag: 1f);
+                if (R < 0.4f) Emit(Spr.KTwirl, c + new Vector2(S * 6f, 6f), new Vector2(0f, 14f), 0.4f, new Color32(255, 190, 110, 150), true, drag: 1f, flip: R < 0.5f);
+                if (_sound && R < 0.25f) AudioDirector.Instance?.Play(Sfx.Heat);
+            }
+            // рывок врага: штрихи скорости позади
+            for (int i = 0; i < en.Count; i++)
+                if (en.Act[i] == EnemyAct.Dash && R < dt * 30f)
+                    Emit(Spr.KTrace, en.Pos[i] - en.Vel[i] * 0.04f + new Vector2(S * 3f, S * 3f), Vector2.zero, 0.15f, new Color32(255, 255, 255, 170), true, drag: 0f);
+            // шлейф пыльцы за гружёным роем в полёте
+            _trailTimer -= dt;
+            if (sw.Count > 0 && sw.Speed01 > 0.4f && _trailTimer <= 0f)
+            {
+                _trailTimer = 0.06f;
+                int b = _rnd.Next(sw.Count);
+                if (sw.Carry[b] > 0.3f)
+                    Emit(Spr.Pollen, sw.Pos[b], -sw.Vel[b] * 0.2f + new Vector2(0f, -4f), 0.6f, new Color32(255, 240, 170, 220), drag: 2f);
+            }
+        }
+
         public void Update(GameSim sim, float dt)
         {
+            float rdt = Time.unscaledDeltaTime;
+            if (HitStop > 0f) HitStop -= Mathf.Min(rdt, 0.1f);
+            Trauma = Mathf.Max(0f, Trauma - 1.4f * dt);
+            _shakeT += dt * 30f;
+            if (dt <= 0f) return;
+
+            Ambient(sim, dt);
+
             // агрегируем «+мёд» над ульем, чтобы не спамить числами
             _depositTimer -= dt;
             if (_depositAcc >= 1f && _depositTimer <= 0f)
@@ -178,7 +261,7 @@ namespace Swarm.Presentation
                 Text(hive + new Vector2(0f, 26f), Mathf.RoundToInt(_depositAcc), Honey, 1);
                 _depositAcc -= Mathf.Round(_depositAcc);
                 _depositTimer = 0.45f;
-                if (_sound) AudioDirector.Instance?.Play(Sfx.Deposit);
+                if (_sound) { AudioDirector.Instance?.Play(Sfx.Deposit); Haptics.Pulse(8, 50); }
             }
             _stolenTimer -= dt;
             if (_stolenAcc >= 1f && _stolenTimer <= 0f)
@@ -187,8 +270,6 @@ namespace Swarm.Presentation
                 _stolenAcc -= Mathf.Round(_stolenAcc);
                 _stolenTimer = 0.6f;
             }
-
-            Shake = Mathf.MoveTowards(Shake, 0f, dt * 6f);
 
             int w = 0;
             for (int i = 0; i < _pCount; i++)
@@ -227,17 +308,13 @@ namespace Swarm.Presentation
             {
                 ref var p = ref _p[i];
                 if (!view.Contains(p.Pos)) continue;
+                float age = 1f - p.Life / p.MaxLife;
                 float k = p.Fade ? Mathf.Clamp01(p.Life / p.MaxLife * 1.6f) : 1f;
                 var c = p.Col;
                 c.a = (byte)(c.a * k);
                 var b = p.Additive ? _add : _alpha;
-                // кольца «растут»: кадр Ring0 -> Ring1 -> Ring2 по ходу жизни
                 int spr = p.Spr;
-                if (spr >= (int)Spr.Ring0 && spr <= (int)Spr.Ring2)
-                {
-                    float age = 1f - p.Life / p.MaxLife;
-                    spr = Mathf.Min((int)Spr.Ring2, spr + (int)(age * 2.5f));
-                }
+                if (p.SprEnd >= 0) spr = Mathf.Min(p.SprEnd, p.Spr + (int)(age * (p.SprEnd - p.Spr + 1)));
                 b.Add(spr, p.Pos.x, p.Pos.y + p.Z, c, p.Flip);
             }
             for (int i = 0; i < _tCount; i++)
@@ -245,13 +322,15 @@ namespace Swarm.Presentation
                 ref var t = ref _t[i];
                 var c = t.Col;
                 c.a = (byte)(255 * Mathf.Clamp01(t.Life * 2.5f));
+                // «поп»: первые доли секунды число вдвое крупнее, потом оседает
+                int scale = t.Life > 0.98f ? 2 : 1;
                 _buf.Clear();
                 if (t.Value >= 0) _buf.Append('+');
                 _buf.Append(t.Value);
-                int w = PixelFont.Measure(_buf);
+                int w = PixelFont.Measure(_buf, scale);
                 float x = t.Pos.x - (w + (t.Icon != 0 ? 9 : 0)) * 0.5f;
-                PixelFont.Draw(_text, _buf, x, t.Pos.y, c);
-                if (t.Icon == 1) _text.Add(Spr.IconHoney, x + w + 5f, t.Pos.y + 3f, new Color32(255, 255, 255, c.a));
+                PixelFont.Draw(_text, _buf, x, t.Pos.y, c, scale);
+                if (t.Icon == 1) _text.Add(Spr.IconHoney, x + w + 5f, t.Pos.y + 3f * scale, new Color32(255, 255, 255, c.a));
             }
             _alpha.End(); _add.End(); _text.End();
         }

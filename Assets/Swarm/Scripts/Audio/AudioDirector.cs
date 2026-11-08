@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Swarm.Presentation
 {
-    public enum Sfx : byte { Click, Collect, Deposit, Hit, Kill, KillBig, BeeDie, Hatch, Upgrade, Alarm, Win, Lose, Count }
+    public enum Sfx : byte { Click, Collect, Deposit, Hit, Kill, KillBig, BeeDie, Hatch, Upgrade, Alarm, Win, Lose, Windup, Heat, Count }
 
     /// <summary>
     /// Процедурный звук: все клипы синтезируются при старте (никаких аудиофайлов).
@@ -18,8 +18,8 @@ namespace Swarm.Presentation
         AudioSource _buzz, _buzzLow;
         int _nextVoice;
         readonly float[] _lastPlayed = new float[(int)Sfx.Count];
-        static readonly float[] MinInterval = { 0.03f, 0.07f, 0.12f, 0.06f, 0.05f, 0.05f, 0.08f, 0.1f, 0.1f, 0.5f, 0.5f, 0.5f };
-        static readonly float[] Volume = { 0.5f, 0.18f, 0.35f, 0.22f, 0.45f, 0.6f, 0.3f, 0.4f, 0.5f, 0.45f, 0.6f, 0.6f };
+        static readonly float[] MinInterval = { 0.03f, 0.07f, 0.12f, 0.06f, 0.05f, 0.05f, 0.08f, 0.1f, 0.1f, 0.5f, 0.5f, 0.5f, 0.15f, 0.12f };
+        static readonly float[] Volume = { 0.5f, 0.18f, 0.35f, 0.22f, 0.45f, 0.6f, 0.3f, 0.4f, 0.5f, 0.45f, 0.6f, 0.6f, 0.35f, 0.25f };
 
         public bool Muted { get; private set; }
 
@@ -41,6 +41,9 @@ namespace Swarm.Presentation
             _clips[(int)Sfx.Win] = Synth("win", 1.0f, (t, n) => Sin(t * Note(new[] { 0, 4, 7, 12, 12, 12 }[Mathf.Min(5, (int)(n * 6f))], 523f)) * Env(n, 0.01f, 1f) * 0.5f);
             _clips[(int)Sfx.Lose] = Synth("lose", 1.0f, (t, n) => Saw(t * Note(new[] { 7, 5, 3, 0, 0 }[Mathf.Min(4, (int)(n * 5f))], 262f)) * Env(n, 0.01f, 1f) * 0.3f);
 
+            // телеграф рывка: нарастающий «вжж»; перегрев: шипение
+            _clips[(int)Sfx.Windup] = Synth("windup", 0.35f, (t, n) => Saw(t * Lerp(180f, 520f, n * n)) * (0.3f + 0.7f * n) * (1f - Mathf.Max(0f, n - 0.85f) * 6f) * 0.4f);
+            _clips[(int)Sfx.Heat] = Synth("heat", 0.25f, (t, n) => Noise() * (0.5f + 0.5f * Sin(t * 13f)) * Env(n, 0.03f, 0.25f) * 0.45f, lowpass: 0.9f);
             _voices = new AudioSource[8];
             for (int i = 0; i < _voices.Length; i++)
             {

@@ -41,6 +41,22 @@ namespace Swarm.Simulation
             return false;
         }
 
+        /// <summary>Пересекает ли отрезок a→b какое-либо препятствие (с запасом pad).</summary>
+        public bool SegmentBlocked(Vector2 a, Vector2 b, float pad)
+        {
+            Vector2 ab = b - a;
+            float len2 = ab.sqrMagnitude;
+            for (int i = 0; i < Obstacles.Count; i++)
+            {
+                var o = Obstacles[i];
+                float t = len2 > 0.0001f ? Mathf.Clamp01(Vector2.Dot(o.Pos - a, ab) / len2) : 0f;
+                Vector2 c = a + ab * t;
+                float r = o.Radius + pad;
+                if ((o.Pos - c).sqrMagnitude < r * r) return true;
+            }
+            return false;
+        }
+
         /// <summary>Выталкивает точку из препятствий. Возвращает true, если было пересечение.</summary>
         public bool PushOut(ref Vector2 p, ref Vector2 v, float pad)
         {

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Swarm.UI
 {
-    public enum UiAction { None, Play, Pause, Resume, Restart, ToMenu, OpenHive, CloseHive, ToggleSound }
+    public enum UiAction { None, Play, Pause, Resume, Restart, ToMenu, OpenHive, CloseHive, ToggleSound, ToggleHaptics, ToggleShake }
 
     /// <summary>Экраны: меню, HUD, улей (улучшения), пауза, итоги. Только отрисовка и клики — логика в GameRoot.</summary>
     public sealed class GameUI
@@ -39,7 +39,18 @@ namespace Swarm.UI
             }
         }
 
-        public void ClearBanner() { _bannerTime = 0f; }
+        public void ClearBanner() { _bannerTime = 0f; _lateSummerShown = false; _ballHintTime = 0f; }
+
+        public void ShowBanner(string title, string sub, Color32 color)
+        {
+            _bannerTime = 3f;
+            _bannerTitle = title;
+            _bannerSub = sub;
+            _bannerColor = color;
+        }
+
+        bool _lateSummerShown;
+        float _ballHintTime;
 
         /// <summary>Для съёмки кадров в CI: плавные проявления сразу в конечном состоянии.</summary>
         public void SnapFades() { _hintAlpha = 1f; }
@@ -142,12 +153,19 @@ namespace Swarm.UI
 
             if (_ui.Button(10, new Rect(W - 21, top - 19, 18, 18), null, true, 1, Spr.IconPause)) a = UiAction.Pause;
 
+            // --- позднее лето: один раз баннер «копи мёд»
+            if (!_lateSummerShown && sim.TimeLeft < 120f && sim.TimeLeft > 0f)
+            {
+                _lateSummerShown = true;
+                ShowBanner(Strings.LateSummer, Strings.LateSummerSub, PixelUI.Honey);
+            }
             // --- цель
             float gy = top - 33;
             _ui.Fill(new Rect(4, gy - 3, W - 8, 13), PixelUI.InkSoft);
             float half = (W - 8) * 0.5f;
             DrawGoal(4 + 2, gy, half - 6, Spr.IconBee, sw.Count, cfg.GoalBees);
-            DrawGoal(4 + half + 2, gy, half - 6, Spr.IconHoney, Mathf.FloorToInt(col.Honey), cfg.GoalHoney);
+            bool honeyBlink = sim.TimeLeft < 120f && !sim.GoalHoneyMet && Mathf.Repeat(time * 2f, 1f) < 0.3f;
+            if (!honeyBlink) DrawGoal(4 + half + 2, gy, half - 6, Spr.IconHoney, Mathf.FloorToInt(col.Honey), cfg.GoalHoney);
 
             // --- баннер волны
             if (_bannerTime > 0f)
@@ -167,8 +185,8 @@ namespace Swarm.UI
             }
 
             // --- нектар в рое
-            float cap = cfg.CarryBase * col.CarryMul * Mathf.Max(1, sw.Count);
-            float frac = sw.TotalCarry / cap;
+            float cap = cfg.CarryBase * col.CarryMul * Mathf.Max(1, sw.SwarmCount);
+            float frac = sw.FieldCarry / cap;
             float bottom = _ui.SafeBottom + 6;
             var cr = new Rect(6, bottom, 74, 18);
             _ui.Fill(cr, PixelUI.InkSoft);
@@ -176,6 +194,10 @@ namespace Swarm.UI
             _ui.Bar(new Rect(cr.x + 14, cr.y + 7, 54, 4), frac, PixelUI.Honey, new Color32(70, 50, 40, 255));
             if (frac > 0.85f && !sim.SwarmAtHive && Mathf.Repeat(time * 2f, 1f) < 0.6f)
                 _ui.Text(Strings.CarryFull, cr.x, cr.yMax + 4, PixelUI.Honey);
+
+            // --- тепловой шар: статус
+            if (sw.Balling && Mathf.Repeat(time * 5f, 1f) < 0.75f)
+                _ui.Text(Strings.Balling, W * 0.5f, bottom + 34, new Color32(255, 150, 60, 255), 1, 1);
 
             // --- кнопка улья
             if (sim.SwarmAtHive)
@@ -209,6 +231,17 @@ namespace Swarm.UI
 
         string TutorialHint(GameSim sim)
         {
+            // контекстная подсказка: шершень рядом, а шар не включён (первые ~15 с за партию)
+            if (_ballHintTime < 15f && !sim.Swarm.Balling && sim.Swarm.SwarmCount >= sim.Cfg.BallMinBees)
+            {
+                var en = sim.Enemies;
+                for (int i = 0; i < en.Count; i++)
+                    if (en.Type[i] == EnemyType.Hornet && (en.Pos[i] - sim.Swarm.LeaderPos).sqrMagnitude < 150f * 150f)
+                    {
+                        _ballHintTime += 1f / 60f;
+                        return Strings.HintBall;
+                    }
+            }
             switch (TutorialStep)
             {
                 case 0:
@@ -273,7 +306,7 @@ namespace Swarm.UI
             var cfg = sim.Cfg;
             _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 140));
 
-            float pw = Mathf.Min(W - 10, 220), ph = 262;
+            float pw = Mathf.Min(W - 10, 220), ph = 298;
             var panel = new Rect(Mathf.Round((W - pw) * 0.5f), Mathf.Round((H - ph) * 0.5f), pw, ph);
             _ui.Blocker(new Rect(0, 0, W, H));
             _ui.Panel(panel);
@@ -309,6 +342,18 @@ namespace Swarm.UI
             y = UpgradeRow(sim, UpgradeType.Carry, 33, Spr.IconCap, Strings.CarryName, x0, x1, y, rowH, time);
             y = UpgradeRow(sim, UpgradeType.Sting, 34, Spr.IconSting, Strings.StingName, x0, x1, y, rowH, time);
             y = UpgradeRow(sim, UpgradeType.Speed, 35, Spr.IconSpeed, Strings.SpeedName, x0, x1, y, rowH, time);
+            // стражи: переключатель 0 → 5 → 10 → 20 (бесплатно)
+            {
+                y -= rowH;
+                RowFrame(x0, y, x1 - x0, rowH - 3);
+                _ui.Icon(Spr.IconGuard, x0 + 12, y + rowH * 0.5f, null, 2);
+                _ui.Text(Strings.GuardName, x0 + 24, y + 19, PixelUI.Ink, 1, 0, false);
+                _b.Clear().Append(Strings.GuardSub).Append(sim.Swarm.GuardCount).Append('/').Append(sim.GuardWanted);
+                _ui.Text(_b, x0 + 24, y + 8, SubText, 1, 0, false);
+                int next = sim.Cfg.GuardSteps[(sim.Colony.GuardIndex + 1) % sim.Cfg.GuardSteps.Length];
+                _b.Clear().Append(next);
+                if (_ui.ButtonBuf(36, new Rect(x1 - 50, y + 6, 46, 20), _b, true, Spr.IconGuard)) sim.CycleGuards();
+            }
 
             if (_ui.Button(39, new Rect(Mathf.Round(panel.center.x - 46), panel.y + 6, 92, 22), Strings.Fly)) a = UiAction.CloseHive;
             return a;
@@ -370,20 +415,22 @@ namespace Swarm.UI
         }
 
         // ================================================================ ПАУЗА
-        public UiAction DrawPause(bool muted)
+        public UiAction DrawPause(bool muted, bool haptics, bool shake)
         {
             var a = UiAction.None;
             int W = _ui.W, H = _ui.H;
             _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 170));
             _ui.Blocker(new Rect(0, 0, W, H));
-            var panel = new Rect(Mathf.Round(W * 0.5f - 70), Mathf.Round(H * 0.5f - 80), 140, 160);
+            var panel = new Rect(Mathf.Round(W * 0.5f - 70), Mathf.Round(H * 0.5f - 106), 140, 212);
             _ui.Panel(panel);
             _ui.Text(Strings.Pause, panel.center.x, panel.yMax - 24, PixelUI.Ink, 2, 1, false);
             float bx = panel.center.x - 55, by = panel.yMax - 54;
             if (_ui.Button(41, new Rect(bx, by, 110, 22), Strings.Resume)) a = UiAction.Resume;
             if (_ui.Button(42, new Rect(bx, by - 26, 110, 22), Strings.Restart)) a = UiAction.Restart;
             if (_ui.Button(43, new Rect(bx, by - 52, 110, 22), muted ? Strings.SoundOff : Strings.SoundOn)) a = UiAction.ToggleSound;
-            if (_ui.Button(44, new Rect(bx, by - 78, 110, 22), Strings.ToMenu)) a = UiAction.ToMenu;
+            if (_ui.Button(45, new Rect(bx, by - 78, 110, 22), haptics ? Strings.HapticsOn : Strings.HapticsOff)) a = UiAction.ToggleHaptics;
+            if (_ui.Button(46, new Rect(bx, by - 104, 110, 22), shake ? Strings.ShakeOn : Strings.ShakeOff)) a = UiAction.ToggleShake;
+            if (_ui.Button(44, new Rect(bx, by - 130, 110, 22), Strings.ToMenu)) a = UiAction.ToMenu;
             return a;
         }
 
@@ -394,7 +441,7 @@ namespace Swarm.UI
             int W = _ui.W, H = _ui.H;
             _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 175));
             _ui.Blocker(new Rect(0, 0, W, H));
-            var panel = new Rect(Mathf.Round(W * 0.5f - Mathf.Min(100, W * 0.5f - 6)), Mathf.Round(H * 0.5f - 112), Mathf.Min(200, W - 12), 224);
+            var panel = new Rect(Mathf.Round(W * 0.5f - Mathf.Min(100, W * 0.5f - 6)), Mathf.Round(H * 0.5f - 122), Mathf.Min(200, W - 12), 244);
             _ui.Panel(panel);
 
             string title, sub;
@@ -402,6 +449,7 @@ namespace Swarm.UI
             switch (sim.Result)
             {
                 case SimResult.Won: title = Strings.Won; sub = Strings.WonSub; tc = PixelUI.Green; break;
+                case SimResult.Wintered: title = Strings.Wintered; sub = Strings.WinteredSub; tc = PixelUI.Honey; break;
                 case SimResult.LostSwarm: title = Strings.LostSwarm; sub = Strings.LostSwarmSub; tc = PixelUI.Red; break;
                 default: title = Strings.LostSummer; sub = Strings.LostSummerSub; tc = PixelUI.Red; break;
             }
@@ -410,6 +458,14 @@ namespace Swarm.UI
             y -= 13;
             _ui.Text(sub, panel.center.x, y, SubText, 1, 1, true);
             y -= 8;
+            // звёзды: 3 — цель лета, 1–2 — зимовка
+            for (int si = 0; si < 3; si++)
+            {
+                bool on = si < sim.Stars;
+                float pop = on && Mathf.Repeat(time * 1.5f - si * 0.15f, 1f) < 0.08f ? 1f : 0f;
+                _ui.Icon(on ? Spr.IconStar : Spr.IconStarEmpty, panel.center.x + (si - 1) * 22, y - 8 + pop, null, 2);
+            }
+            y -= 18;
 
             var st = sim.Stats;
             y = StatRow(panel, y, Strings.StatTime, -1, sim.Time);

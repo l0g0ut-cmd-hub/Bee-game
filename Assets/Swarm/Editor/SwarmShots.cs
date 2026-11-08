@@ -85,42 +85,75 @@ namespace Swarm.EditorTools
             Play(sim, 1.2f, s => s.Swarm.LeaderPos);
             Shot("02_start", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
 
-            // 3. Сбор нектара: рой вырос до 70, летит на луг
+            // 3. Сбор: рой 70 пчёл остановился на лугу — «облако»
             Grow(sim, 70);
-            _gui.TutorialStep = 2;
+            _gui.TutorialStep = 4;
             Play(sim, 7f, s => NearestFlower(s));
-            Shot("03_gather", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            Shot("03_cloud_gather", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            _log.Append($"PROBE|cloud|R {sim.Swarm.Radius:F1} speed01 {sim.Swarm.Speed01:F2} gather {sim.Swarm.GatheringCount} scout {sim.Swarm.ScoutingCount}\n");
 
-            // 4-5. Бой: осы и шершень налетают на рой
+            // 4. Полёт: «комета» со шлейфом
+            Vector2 far = new Vector2(sim.World.Width - sim.Swarm.LeaderPos.x, sim.World.Height - sim.Swarm.LeaderPos.y);
+            Play(sim, 1.6f, s => far);
+            Shot("04_comet", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            _log.Append($"PROBE|comet|speed01 {sim.Swarm.Speed01:F2} heading {sim.Swarm.Heading}\n");
+
+            // 5. Телеграф: осы замирают и дрожат перед рывком
             Vector2 lp = sim.Swarm.LeaderPos;
-            sim.Enemies.Spawn(EnemyType.Wasp, lp + new Vector2(60f, 40f), sim.Rng);
-            sim.Enemies.Spawn(EnemyType.Wasp, lp + new Vector2(70f, 20f), sim.Rng);
-            sim.Enemies.Spawn(EnemyType.Wasp, lp + new Vector2(-65f, 30f), sim.Rng);
-            sim.Enemies.Spawn(EnemyType.Hornet, lp + new Vector2(10f, 80f), sim.Rng);
-            _gui.ShowWave(WaveMessage.Hornet);
-            Play(sim, 1.4f, s => s.Swarm.LeaderPos);
-            Shot("04_combat", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
-            Play(sim, 1.6f, s => s.Swarm.LeaderPos);
-            Shot("05_combat_late", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
-            _log.Append($"PROBE|combat|bees {sim.Swarm.Count} enemies {sim.Enemies.Count} lost {sim.Stats.BeesLost} " +
-                        $"wasps {sim.Stats.WaspsKilled} hornets {sim.Stats.HornetsKilled}\n");
+            sim.Enemies.Spawn(EnemyType.Wasp, lp + new Vector2(55f, 30f), sim.Rng);
+            sim.Enemies.Spawn(EnemyType.Wasp, lp + new Vector2(-50f, 35f), sim.Rng);
+            for (int e = 0; e < sim.Enemies.Count; e++) sim.Enemies.DashCd[e] = 0f;
+            _gui.ShowWave(WaveMessage.Wasps);
+            float waited = 0f;
+            bool windup = false;
+            while (waited < 3f && !windup)
+            {
+                Play(sim, 0.05f, s => s.Swarm.LeaderPos);
+                waited += 0.05f;
+                for (int e = 0; e < sim.Enemies.Count; e++) windup |= sim.Enemies.Act[e] == EnemyAct.Windup;
+            }
+            Play(sim, 0.15f, s => s.Swarm.LeaderPos);
+            Shot("05_windup", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            _log.Append($"PROBE|windup|seen {windup} after {waited:F2}s\n");
+            Play(sim, 3f, s => s.Swarm.LeaderPos);
 
-            // 6. Улей: рой у летка, мёд на покупки
+            // 6. Тепловой шар: палец удерживается на шершне
             sim.Enemies.Clear();
-            Play(sim, 5f, s => s.World.HivePos + BeeSwarm.HiveEntranceOffset);
-            sim.Colony.Honey = Mathf.Max(sim.Colony.Honey, 180f);
-            _log.Append($"PROBE|hive|atHive {sim.SwarmAtHive} honey {sim.Colony.Honey:F0}\n");
-            Shot("06_hud_at_hive", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
-            Shot("07_hive_menu", sim, () => _gui.DrawHive(sim, _t));
+            Grow(sim, 80);
+            lp = sim.Swarm.LeaderPos;
+            sim.Enemies.Spawn(EnemyType.Hornet, lp + new Vector2(40f, 50f), sim.Rng);
+            sim.Enemies.DashCd[0] = 99f;
+            _gui.ShowWave(WaveMessage.Hornet);
+            Play(sim, 0.9f, s => s.Enemies.Count > 0 ? s.Enemies.Pos[0] : s.Swarm.LeaderPos, hold: true);
+            Shot("06_heat_ball", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            _log.Append($"PROBE|ball|balling {sim.Swarm.Balling} inBall {sim.Swarm.BallCount} hornets {sim.Enemies.Count} " +
+                        $"heatLost {sim.Stats.LostToHeat} hornetHp {(sim.Enemies.Count > 0 ? sim.Enemies.Hp[0] : 0f):F1}\n");
+            Play(sim, 2.5f, s => s.Enemies.Count > 0 ? s.Enemies.Pos[0] : s.Swarm.LeaderPos, hold: true);
+            _log.Append($"PROBE|ball_end|hornets {sim.Enemies.Count} killed {sim.Stats.HornetsKilled} heatLost {sim.Stats.LostToHeat}\n");
 
-            // 8. Большой рой над лугом
+            // 7-8. Улей: стражи и меню
+            sim.Enemies.Clear();
+            sim.CycleGuards(); sim.CycleGuards();   // 10 стражей
+            Play(sim, 6f, s => s.World.HivePos + BeeSwarm.HiveEntranceOffset);
+            sim.Colony.Honey = Mathf.Max(sim.Colony.Honey, 180f);
+            Play(sim, 1f, s => s.World.HivePos + BeeSwarm.HiveEntranceOffset);
+            _log.Append($"PROBE|hive|atHive {sim.SwarmAtHive} guards {sim.Swarm.GuardCount}/{sim.Swarm.GuardWanted}\n");
+            Shot("07_hive_menu", sim, () => _gui.DrawHive(sim, _t));
+            Play(sim, 4f, s => NearestFlower(s));
+            Shot("08_guards_stay", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+
+            // 9. Большой рой над лугом
             Grow(sim, 170);
             Play(sim, 6f, s => NearestFlower(s));
-            Shot("08_big_swarm", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            Shot("09_big_swarm", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
 
-            // 9. Итоги
-            sim.Result = SimResult.Won;
-            Shot("09_result", sim, () => _gui.DrawResult(sim, _t, true, sim.Time));
+            // 10. Пауза с настройками
+            Shot("10_pause", sim, () => _gui.DrawPause(false, true, true));
+
+            // 11. Итоги: зимовка на две звезды
+            sim.Result = SimResult.Wintered;
+            sim.Stars = 2;
+            Shot("11_result", sim, () => _gui.DrawResult(sim, _t, false, 0f));
         }
 
         // ------------------------------------------------------------------ прогон
@@ -144,12 +177,12 @@ namespace Swarm.EditorTools
             return best >= 0 ? s.Flowers.Pos[best] : s.World.HivePos;
         }
 
-        static void Play(GameSim sim, float seconds, Func<GameSim, Vector2> target, bool menu = false)
+        static void Play(GameSim sim, float seconds, Func<GameSim, Vector2> target, bool menu = false, bool hold = false)
         {
-            int steps = Mathf.RoundToInt(seconds / Dt);
+            int steps = Mathf.Max(1, Mathf.RoundToInt(seconds / Dt));
             for (int i = 0; i < steps; i++)
             {
-                var inp = new SimInput { Active = true, Target = target(sim) };
+                var inp = new SimInput { Active = true, Target = target(sim), Hold = hold };
                 sim.Step(Dt, inp);
                 _t += Dt;
                 _fx.Consume(sim, _world, null);

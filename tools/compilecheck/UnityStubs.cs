@@ -16,18 +16,6 @@ namespace UnityEngine
         public override int GetHashCode() => x.GetHashCode() ^ y.GetHashCode();
     }
 
-    public static partial class Mathf
-    {
-        public static float Round(float f) => (float)Math.Round(f, MidpointRounding.ToEven);
-        public static float Floor(float f) => (float)Math.Floor(f);
-        public static float Ceil(float f) => (float)Math.Ceiling(f);
-        public static float Repeat(float t, float length) => Clamp(t - Floor(t / length) * length, 0f, length);
-        public static float MoveTowards(float current, float target, float maxDelta) =>
-            Abs(target - current) <= maxDelta ? target : current + Math.Sign(target - current) * maxDelta;
-        public static float Pow(float f, float p) => (float)Math.Pow(f, p);
-        public static float Exp(float p) => (float)Math.Exp(p);
-        public static float Atan2(float y, float x) => (float)Math.Atan2(y, x);
-    }
 
     public struct Vector3
     {
@@ -223,6 +211,19 @@ namespace UnityEngine
         public void Play() { }
         public void PlayOneShot(AudioClip clip, float volumeScale) { }
     }
+
+    public static class Handheld { public static void Vibrate() { } }
+
+    public class AndroidJavaObject : IDisposable
+    {
+        public AndroidJavaObject(string className, params object[] args) { }
+        public void Call(string methodName, params object[] args) { }
+        public ReturnType Call<ReturnType>(string methodName, params object[] args) => default;
+        public FieldType GetStatic<FieldType>(string fieldName) => default;
+        public ReturnType CallStatic<ReturnType>(string methodName, params object[] args) => default;
+        public void Dispose() { }
+    }
+    public class AndroidJavaClass : AndroidJavaObject { public AndroidJavaClass(string className) : base(className) { } }
 
     public static class Resources { public static T Load<T>(string path) where T : Object => null; }
 
