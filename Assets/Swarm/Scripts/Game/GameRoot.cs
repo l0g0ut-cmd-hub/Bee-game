@@ -25,6 +25,7 @@ namespace Swarm.Game
         PixelUI _ui;
         GameUI _gameUi;
         TouchInput _input;
+        readonly AutoPilot _auto = new AutoPilot();
         AudioDirector _audio;
 
         SimConfig _cfg;
@@ -82,6 +83,7 @@ namespace Swarm.Game
             var info = Resources.Load<TextAsset>("BuildInfo");
             _gameUi.VersionText = info != null ? info.text.Trim() : Application.version;
             Haptics.Load();
+            AutoPilot.Load();
             FxSystem.ShakeEnabled = PlayerPrefs.GetInt("swarm_shake", 1) == 1;
             EnterMenu();
         }
@@ -130,6 +132,7 @@ namespace Swarm.Game
             _newRecord = false;
             _resultSoundPlayed = false;
             _input.Reset();
+            _auto.Reset(_screen);
             _fade = 1f;
         }
 
@@ -141,7 +144,18 @@ namespace Swarm.Game
             _animTime += _state == State.Paused ? dt * 0.1f : (_state == State.Hive || _state == State.Perk ? dt * 0.35f : dt);
             _screen.Refresh();
             _input.Poll();
-            _ui.Begin(_screen, _input);
+            // автопилот жмёт «виртуальным пальцем»; живое касание всегда главнее
+            bool realTouch = _input.Held || _input.Down || _input.Up;
+            bool autoOn = AutoPilot.Enabled && (_state == State.Playing || _state == State.Hive || _state == State.Perk);
+            bool autoFinger = autoOn && !realTouch;
+            if (autoOn)
+            {
+                if (_input.Down) _auto.Interrupt();
+                else if (autoFinger)
+                    _auto.Tick(_sim, _state == State.Playing ? AutoContext.Playing : _state == State.Hive ? AutoContext.Hive : AutoContext.Perk, _ui, _screen, dt);
+            }
+            if (autoFinger) _ui.Begin(_screen, _auto.Cursor, _auto.Down, _auto.Held, _auto.Up);
+            else _ui.Begin(_screen, _input);
 
             // --- UI текущего состояния (рисуется до шага симуляции, чтобы знать, «съеден» ли тап)
             UiAction act = UiAction.None;
@@ -153,7 +167,7 @@ namespace Swarm.Game
                 case State.Perk: act = _gameUi.DrawPerk(_sim, _time); break;
                 case State.Playing: act = _gameUi.DrawHud(_sim, _screen, _time, dt); break;
                 case State.Hive: act = _gameUi.DrawHive(_sim, _time); break;
-                case State.Paused: act = _gameUi.DrawPause(_audio.Muted, Haptics.Enabled, FxSystem.ShakeEnabled); break;
+                case State.Paused: act = _gameUi.DrawPause(_audio.Muted, Haptics.Enabled, FxSystem.ShakeEnabled, AutoPilot.Enabled); break;
                 case State.Result: act = _gameUi.DrawResult(_sim, _time, _newRecord, _best, _fresh); break;
             }
             if (Input.GetKeyDown(KeyCode.Escape)) act = BackAction();
@@ -163,7 +177,7 @@ namespace Swarm.Game
             var sim = Active;
             if (_state == State.Playing || InMenus)
             {
-                SimInput inp = InMenus ? Autopilot(dt) : PlayerInput(dt);
+                SimInput inp = InMenus ? Autopilot(dt) : autoFinger ? AutoInput() : PlayerInput(dt);
                 // hit-stop: симуляция на мгновение замирает (по реальному времени), ввод продолжает читаться
                 _acc += _fx.HitStop > 0f ? 0f : dt;
                 int steps = 0;
@@ -200,6 +214,7 @@ namespace Swarm.Game
             _threat = Mathf.MoveTowards(_threat, InMenus ? 0f : Threat(sim), dt * 0.5f);
             _audio.SetMusic(_threat, sim.Sky.IsNight(sim.Time), sim.Sky.Current == Weather.Rain ? sim.Sky.WeatherBlend : 0f, InMenus);
 
+            if (autoFinger) _auto.DrawCursor(_ui, _time);
             _fade = Mathf.MoveTowards(_fade, 0f, dt * 2.5f);
             _gameUi.Fade(_fade);
             _ui.End();
@@ -243,6 +258,11 @@ namespace Swarm.Game
                     break;
                 case UiAction.ToggleSound: _audio.ToggleMute(); break;
                 case UiAction.ToggleHaptics: Haptics.Toggle(); break;
+                case UiAction.ToggleAuto:
+                    AutoPilot.Toggle();
+                    if (_sim != null) _auto.Reset(_screen);
+                    _input.Reset();
+                    break;
                 case UiAction.ToggleShake:
                     FxSystem.ShakeEnabled = !FxSystem.ShakeEnabled;
                     PlayerPrefs.SetInt("swarm_shake", FxSystem.ShakeEnabled ? 1 : 0);
@@ -270,6 +290,16 @@ namespace Swarm.Game
                 _audio.Play(_sim.Result == SimResult.Won || _sim.Result == SimResult.Wintered || (_mode == GameMode.Endless && _sim.Stars > 0) ? Sfx.Win : Sfx.Lose);
                 _resultSoundPlayed = true;
             }
+        }
+
+        SimInput AutoInput()
+        {
+            return new SimInput
+            {
+                Active = _auto.Steering && !_ui.Captured,
+                Target = _screen.PixelToWorld(_auto.Cursor),
+                Hold = _auto.WantHold && _auto.HoldStill >= AutoPilot.HoldTime
+            };
         }
 
         SimInput PlayerInput(float dt)

@@ -43,15 +43,36 @@ namespace Swarm.UI
             Batch.Go.transform.position = new Vector3(PixelScreen.UiOrigin.x, PixelScreen.UiOrigin.y, 0f);
         }
 
-        public void Begin(PixelScreen screen, TouchInput input)
+        public void Begin(PixelScreen screen, TouchInput input) =>
+            Begin(screen, screen.ScreenToPixel(input.ScreenPos), input.Down, input.Held, input.Up);
+
+        /// <summary>Кадр с произвольным указателем в пикселях RT (живой палец или «палец» автопилота).</summary>
+        public void Begin(PixelScreen screen, Vector2 pointer, bool down, bool held, bool up)
         {
             _screen = screen;
-            Pointer = screen.ScreenToPixel(input.ScreenPos);
-            Down = input.Down;
-            Held = input.Held;
-            Up = input.Up;
+            Pointer = pointer;
+            Down = down;
+            Held = held;
+            Up = up;
             _clickedThisFrame = false;
+            _frame++;
             Batch.Begin();
+        }
+
+        // --- реестр кнопок прошлого кадра: автопилот находит, куда «нажать»
+        const int MaxIds = 128;
+        readonly Rect[] _rects = new Rect[MaxIds];
+        readonly int[] _rectFrame = new int[MaxIds];
+        readonly bool[] _rectEnabled = new bool[MaxIds];
+        int _frame;
+
+        /// <summary>Кнопка id была нарисована в этом или прошлом кадре и доступна.</summary>
+        public bool TryGetButton(int id, out Rect r)
+        {
+            r = default;
+            if (id <= 0 || id >= MaxIds || _frame - _rectFrame[id] > 1 || !_rectEnabled[id]) return false;
+            r = _rects[id];
+            return true;
         }
 
         public void End()
@@ -70,6 +91,7 @@ namespace Swarm.UI
 
         public bool Button(int id, Rect r, string label, bool enabled = true, int scale = 1, Spr icon = Spr.Count, Color32? textColor = null)
         {
+            if (id > 0 && id < MaxIds) { _rects[id] = r; _rectFrame[id] = _frame; _rectEnabled[id] = enabled; }
             bool hover = Hit(r);
             if (Down && hover)
             {

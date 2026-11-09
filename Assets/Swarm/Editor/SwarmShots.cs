@@ -195,13 +195,16 @@ namespace Swarm.EditorTools
             Shot("16_night", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
 
             // 17. Пауза
-            Shot("17_pause", sim, () => _gui.DrawPause(false, true, true));
+            Shot("17_pause", sim, () => _gui.DrawPause(false, true, true, false));
 
             // 18. Итоги с новым достижением
             sim.Result = SimResult.Wintered;
             sim.Stars = 2;
             var fresh = new System.Collections.Generic.List<Game.Achievement> { Game.Achievement.BearRepeller };
             Shot("18_result", sim, () => _gui.DrawResult(sim, _t, false, 0f, fresh));
+
+            // 20-22. Автопилот: виртуальный палец сам играет через настоящий UI
+            RunAutopilot();
 
             // 19. Выживание: HUD с кругами
             var end = new GameSim(Levels.Make(GameMode.Endless, 0), 31u);
@@ -212,6 +215,59 @@ namespace Swarm.EditorTools
             end.Time = 700f;
             Play(end, 0.2f, s => NearestFlower(s));
             Shot("19_endless", end, () => _gui.DrawHud(end, _screen, _t, Dt));
+        }
+
+        static void RunAutopilot()
+        {
+            var sim = new GameSim(Levels.Make(GameMode.Campaign, 1), 2024u);
+            var auto = new Game.AutoPilot();
+            auto.Reset(_screen);
+            _fx.Clear();
+            _gui.ClearBanner();
+            _gui.TutorialStep = 4;
+            Snap(sim);
+            int state = 0;            // 0 поле, 1 улей, 2 дар
+            int hiveVisits = 0, posts = 0, perks = 0, presses = 0;
+            bool shotHive = false, shotPerk = false, shotPost = false;
+            int steps = Mathf.RoundToInt(240f / Dt);
+            for (int i = 0; i < steps && sim.Result == SimResult.Running; i++)
+            {
+                var ctx = state == 0 ? Game.AutoContext.Playing : state == 1 ? Game.AutoContext.Hive : Game.AutoContext.Perk;
+                auto.Tick(sim, ctx, _ui, _screen, Dt);
+                _ui.Begin(_screen, auto.Cursor, auto.Down, auto.Held, auto.Up);
+                UiAction act = state == 0 ? _gui.DrawHud(sim, _screen, _t, Dt) : state == 1 ? _gui.DrawHive(sim, _t) : _gui.DrawPerk(sim, _t);
+                bool wasSquad = sim.Swarm.SquadActive;
+                switch (act)
+                {
+                    case UiAction.OpenHive: state = 1; hiveVisits++; break;
+                    case UiAction.CloseHive: state = 0; break;
+                    case UiAction.ChoosePerk: sim.ChoosePerk(_gui.PerkChoice); state = 0; perks++; break;
+                    case UiAction.PostSquad: if (wasSquad) sim.RecallSquad(); else { sim.PostSquad(); posts++; } break;
+                }
+                if (auto.Up) presses++;
+                if (state == 0)
+                {
+                    var inp = new SimInput { Active = auto.Steering && !_ui.Captured, Target = _screen.PixelToWorld(auto.Cursor), Hold = auto.WantHold && auto.HoldStill >= Game.AutoPilot.HoldTime };
+                    sim.Step(Dt, inp);
+                    if (sim.PerkPending) state = 2;
+                }
+                if (state == 2) auto.DrawCursor(_ui, _t);
+                _ui.End();
+                _t += Dt;
+                _fx.Consume(sim, _world, null);
+                _fx.Update(sim, Dt);
+                sim.Events.Clear();
+                Follow(sim, false);
+                _world.Draw(sim, _screen, _t, Dt);
+                if (state == 1 && !shotHive && hiveVisits >= 2) { shotHive = true; Shot("20_auto_hive", sim, () => { _gui.DrawHive(sim, _t); auto.DrawCursor(_ui, _t); }); }
+                if (state == 2 && !shotPerk) { shotPerk = true; Shot("21_auto_perk", sim, () => { _gui.DrawPerk(sim, _t); auto.DrawCursor(_ui, _t); }); }
+                if (state == 0 && sim.Swarm.SquadActive && !shotPost && i % 60 == 0) { shotPost = true; Shot("22_auto_post", sim, () => { _gui.DrawHud(sim, _screen, _t, Dt); auto.DrawCursor(_ui, _t); }); }
+            }
+            Shot("23_auto_field", sim, () => { _gui.DrawHud(sim, _screen, _t, Dt); auto.DrawCursor(_ui, _t); });
+            var col = sim.Colony;
+            _log.Append($"PROBE|auto|t {sim.Time:F0} result {sim.Result} bees {sim.Swarm.SwarmCount}/{col.MaxBees} honey {col.Honey:F0} delivered {sim.Stats.HoneyDelivered:F0} " +
+                        $"hive {hiveVisits} presses {presses} posts {posts} perks {perks} brood {sim.BroodIndex} def {sim.Swarm.GuardCount} " +
+                        $"lv spd{col.Level[0]} car{col.Level[1]} sti{col.Level[2]} comb{col.Level[3]} cooked {sim.Stats.HornetsCooked}\n");
         }
 
         // ------------------------------------------------------------------ прогон

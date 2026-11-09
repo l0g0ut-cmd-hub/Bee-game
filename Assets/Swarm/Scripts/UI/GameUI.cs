@@ -10,7 +10,7 @@ namespace Swarm.UI
     {
         None, OpenCampaign, StartLevel, PlayEndless, PlayDaily, OpenAchievements, Back,
         Pause, Resume, Restart, ToMenu, OpenHive, CloseHive, ChoosePerk,
-        ToggleSound, ToggleHaptics, ToggleShake, PostSquad
+        ToggleSound, ToggleHaptics, ToggleShake, PostSquad, ToggleAuto
     }
 
     /// <summary>
@@ -258,7 +258,7 @@ namespace Swarm.UI
             _b.Clear().Append(Mathf.FloorToInt(col.Honey));
             _ui.Text(_b, hx + 6, ty, PixelUI.Honey);
 
-            float tx = Mathf.Round(W * 0.64f);
+            float tx = Mathf.Round(W * 0.58f);
             bool night = sim.Sky.IsNight(sim.Time);
             _ui.Icon(night ? Spr.IconMoon : WeatherIcon(sim.Sky), tx, ty + 3);
             _b.Clear();
@@ -272,6 +272,10 @@ namespace Swarm.UI
             _ui.Text(_b, tx + 6, ty, hurry ? PixelUI.Red : PixelUI.White);
 
             if (_ui.Button(10, new Rect(W - 21, top - 19, 18, 18), null, true, 1, Spr.IconPause)) a = UiAction.Pause;
+            bool auto = AutoPilot.Enabled;
+            if (_ui.Button(11, new Rect(W - 41, top - 19, 18, 18), "А", true, 1, Spr.Count, auto ? new Color32(40, 120, 30, 255) : (Color32?)null)) a = UiAction.ToggleAuto;
+            if (auto && Mathf.Repeat(time, 2f) < 1.6f)
+                _ui.Text(Strings.AutoOn, W * 0.5f, top - 59, new Color32(255, 240, 160, 255), 1, 1);
 
             // --- вторая строка: цель / выживание
             float gy = top - 33;
@@ -602,13 +606,13 @@ namespace Swarm.UI
         }
 
         // ================================================================ ПАУЗА
-        public UiAction DrawPause(bool muted, bool haptics, bool shake)
+        public UiAction DrawPause(bool muted, bool haptics, bool shake, bool auto)
         {
             var a = UiAction.None;
             int W = _ui.W, H = _ui.H;
             _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 170));
             _ui.Blocker(new Rect(0, 0, W, H));
-            var panel = new Rect(Mathf.Round(W * 0.5f - 70), Mathf.Round(H * 0.5f - 106), 140, 212);
+            var panel = new Rect(Mathf.Round(W * 0.5f - 70), Mathf.Round(H * 0.5f - 119), 140, 238);
             _ui.Panel(panel);
             _ui.Text(Strings.Pause, panel.center.x, panel.yMax - 24, PixelUI.Ink, 2, 1, false);
             float bx = panel.center.x - 55, by = panel.yMax - 54;
@@ -617,7 +621,8 @@ namespace Swarm.UI
             if (_ui.Button(43, new Rect(bx, by - 52, 110, 22), muted ? Strings.SoundOff : Strings.SoundOn)) a = UiAction.ToggleSound;
             if (_ui.Button(45, new Rect(bx, by - 78, 110, 22), haptics ? Strings.HapticsOn : Strings.HapticsOff)) a = UiAction.ToggleHaptics;
             if (_ui.Button(46, new Rect(bx, by - 104, 110, 22), shake ? Strings.ShakeOn : Strings.ShakeOff)) a = UiAction.ToggleShake;
-            if (_ui.Button(44, new Rect(bx, by - 130, 110, 22), Strings.ToMenu)) a = UiAction.ToMenu;
+            if (_ui.Button(47, new Rect(bx, by - 130, 110, 22), auto ? Strings.AutoBtnOn : Strings.AutoBtnOff, true, 1, auto ? Spr.IconCheck : Spr.Count)) a = UiAction.ToggleAuto;
+            if (_ui.Button(44, new Rect(bx, by - 156, 110, 22), Strings.ToMenu)) a = UiAction.ToMenu;
             return a;
         }
 
