@@ -107,6 +107,24 @@ namespace Swarm.UI
         }
 
         // ================================================================ МЕНЮ
+        /// <summary>Фон меню (арт): прижат к низу экрана; если экран выше картинки — сверху трава её же цветом.</summary>
+        public void MenuBackground()
+        {
+            int W = _ui.W, H = _ui.H;
+            _ui.Fill(new Rect(0, 0, W, H), new Color32(85, 143, 64, 255));
+            _ui.Icon(Spr.MenuBg, Mathf.Round(W * 0.5f), 0f);
+            // живые пчёлы кружат у улья на картинке
+            float t = UnityEngine.Time.unscaledTime;
+            for (int k = 0; k < 7; k++)
+            {
+                float a = t * (0.6f + k * 0.07f) + k * 0.9f;
+                float x = W * 0.5f + Mathf.Sin(a) * (40f + k * 6f);
+                float y = 150f + Mathf.Sin(a * 1.7f + k) * (22f + k * 3f) + k * 6f;
+                int fr = ((int)(t * 30f) + k) & 3;
+                _ui.Icon((Spr)((int)Spr.BeeA + fr), Mathf.Round(x), Mathf.Round(y), null, 1, Mathf.Cos(a) < 0f);
+            }
+        }
+
         public string ContinueLabel;   // «ЛЕТО 4:12» — есть сохранённая партия; null — нет
 
         public UiAction DrawMenu(float time, Profile profile, bool muted)
@@ -114,11 +132,12 @@ namespace Swarm.UI
             var a = UiAction.None;
             int W = _ui.W, H = _ui.H;
             float top = H - _ui.SafeTop;
-            for (int i = 0; i < 10; i++)
-                _ui.Fill(new Rect(0, top - 130 + i * 13, W, 13), new Color32(23, 18, 28, (byte)(20 + i * 14)));
+            MenuBackground();
+            for (int i = 0; i < 8; i++)
+                _ui.Fill(new Rect(0, top - 104 + i * 13, W, 13), new Color32(23, 18, 28, (byte)(8 + i * 8)));
 
             float bob = Mathf.Round(Mathf.Sin(time * 1.6f) * 2f);
-            _ui.Icon(Spr.Logo, W * 0.5f, top - 52 + bob);
+            _ui.Icon(Spr.Logo, W * 0.5f, top - 50 + bob);
             _ui.Text(Strings.Subtitle, W * 0.5f, top - 92, PixelUI.Honey, 1, 1);
 
             float ty = H * 0.47f;
@@ -163,6 +182,7 @@ namespace Swarm.UI
         {
             var a = UiAction.None;
             int W = _ui.W, H = _ui.H;
+            MenuBackground();
             _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 150));
             _ui.Blocker(new Rect(0, 0, W, H));
             float top = H - _ui.SafeTop;
@@ -215,6 +235,7 @@ namespace Swarm.UI
         {
             var a = UiAction.None;
             int W = _ui.W, H = _ui.H;
+            MenuBackground();
             _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 170));
             _ui.Blocker(new Rect(0, 0, W, H));
             float top = H - _ui.SafeTop;

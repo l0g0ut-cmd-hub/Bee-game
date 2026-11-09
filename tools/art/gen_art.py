@@ -504,7 +504,7 @@ def hive():
     return cv
 
 
-add('Hive', hive(), (22, 3))
+pass  # улей — из арта ChatGPT (ниже, раздел GPT)
 
 
 def hive_honey(level):
@@ -528,8 +528,7 @@ def hive_honey(level):
     return cv
 
 
-for lv in range(1, 5):
-    add('HiveHoney%d' % lv, hive_honey(lv), (22, 3))
+pass  # подтёки мёда теперь нарисованы в стадиях улья
 
 
 def comb_glow():
@@ -937,7 +936,7 @@ add('BirdB', bird(1))
 spider = Canvas(11, 9)
 spider.pattern(['k...k...k..', '.k.kkk.k...', '..kKKKk....', 'kkKrKKKkk..', '..kKKKk....', '.k.kkk.k...', 'k...k...k..'],
                {'k': INK[0], 'K': INK[2], 'r': RED[2]}, 0, 1)
-add('Spider', spider)
+pass  # паук — из арта ChatGPT
 
 
 def web():
@@ -986,9 +985,7 @@ def bear(frame, flash=False):
     return cv
 
 
-add('BearA', bear(0))
-add('BearB', bear(1))
-add('BearFlash', bear(0, True))
+pass  # медведь — из арта ChatGPT
 
 
 def nest():
@@ -1009,7 +1006,7 @@ def nest():
     return cv
 
 
-add('Nest', nest(), (12, 2))
+pass  # гнездо — из арта ChatGPT
 
 
 def rival_bee(wings):
@@ -1055,7 +1052,7 @@ def wild_hive():
     return cv
 
 
-add('WildHive', wild_hive(), (15, 2))
+pass  # дикий улей — из арта ChatGPT
 
 def ant(frame):
     """Муравей сбоку, мельче пчелы: брюшко | талия | грудь | голова, коленчатый усик, 3 пары ног с шагом."""
@@ -1230,7 +1227,7 @@ def logo(text='РОЙ', scale=5):
     return cv
 
 
-add('Logo', logo())
+pass  # логотип — из арта ChatGPT
 
 
 # ------------------------------------------------------------------ шрифт
@@ -1242,8 +1239,73 @@ for ch in font.CHARS:
     GLYPHS.append((ch, cv))
 
 
+# ------------------------------------------------------------------ арт из ChatGPT (tools/art/vendor/gpt)
+# Пиксельные «псевдо-пиксели» приводятся к сетке и палитре игры (см. gpt_import.py).
+import gpt_import as G  # noqa: E402
+
+
+def canvas_of(img):
+    cv = Canvas(img.size[0], img.size[1])
+    px = img.load()
+    for y in range(img.size[1]):
+        for x in range(img.size[0]):
+            if px[x, y][3]:
+                cv.set(x, y, px[x, y])
+    return cv
+
+
+def flash_of(cv):
+    """Кадр попадания: силуэт светлее (как у прочих врагов)."""
+    f = Canvas(cv.w, cv.h)
+    for y in range(cv.h):
+        for x in range(cv.w):
+            c = cv.get(x, y)
+            if c[3]:
+                f.set(x, y, (min(255, c[0] + 120), min(255, c[1] + 110), min(255, c[2] + 110), 255))
+    return f
+
+
+# улей: 3 стадии по уровню сот; леток на 18 px от низа → опора на 6 px (леток = опора + 12)
+_hs = G.frames(G.load('hive_stages_big.png'), 3)
+_sc = G.sheet_scale(_hs, 56)
+for _i, _f in enumerate(_hs):
+    _im = G.pixelize(_f, _sc)
+    add('Hive' if _i == 0 else 'HiveS%d' % (_i + 1), canvas_of(_im), (_im.size[0] // 2, 6))
+
+# медведь: 4 кадра ходьбы + ест мёд, удар лапой, больно, убегает
+_bw = G.frames(G.load('bear_walk_big.png', 'white'), 4)
+_sc = G.sheet_scale(_bw, 26)
+_walk = [G.pixelize(f, _sc) for f in _bw]
+for _i, _im in enumerate(_walk):
+    add('BearW%d' % _i, canvas_of(_im), (_im.size[0] // 2, _im.size[1] // 2))
+add('BearFlash', flash_of(canvas_of(_walk[0])), (_walk[0].size[0] // 2, _walk[0].size[1] // 2))
+_ba = G.frames(G.load('bear_actions_big.png'), 4)
+_sc = G.sheet_scale(_ba, 30)
+for _nm, _f in zip(('BearEat', 'BearSwipe', 'BearHurt', 'BearRun'), _ba):
+    _im = G.pixelize(_f, _sc)
+    add(_nm, canvas_of(_im), (_im.size[0] // 2, _im.size[1] // 2))
+
+# паук на нити: 4 кадра, опора — центр тела (8 px от низа)
+_sp = G.equal_frames(G.load('spider_640x240.png'), 4)
+_sc = G.sheet_scale(_sp, 24)
+for _i, _f in enumerate(_sp):
+    _im = G.pixelize(_f, _sc, outline=False)
+    add('Spider%s' % 'ABCD'[_i], canvas_of(_im), (_im.size[0] // 2, 8))
+
+# осиное гнездо (уже в натуральном размере), дикий улей, логотип, фон меню
+_n = G.quantize(G.load('nest_24x28.png'))
+add('Nest', canvas_of(_n), (_n.size[0] // 2, 2))
+_wl = G.load('wild_hive_big.png')
+_w = G.pixelize(_wl, _wl.size[1] / 34.0)
+add('WildHive', canvas_of(_w), (_w.size[0] // 2, 2))
+_lg = G.quantize(G.load('logo_160x64.png'))
+add('Logo', canvas_of(_lg))
+_bg = G.quantize(G.load('menu_bg_216x468.png'))
+add('MenuBg', canvas_of(_bg), (_bg.size[0] // 2, 0))
+
+
 # ------------------------------------------------------------------ упаковка атласа
-def pack(items, size=512, pad=1):
+def pack(items, size=1024, pad=1):
     order = sorted(range(len(items)), key=lambda i: (-items[i].h, -items[i].w))
     pos = [None] * len(items)
     x = y = 0
@@ -1267,7 +1329,7 @@ def main():
     if '--preview' in sys.argv:
         preview_dir = sys.argv[sys.argv.index('--preview') + 1]
     canv = [s[1] for s in SPRITES] + [g[1] for g in GLYPHS]
-    size = 512
+    size = 1024   # с артом из ChatGPT (фон меню 216x468) атлас 1024x1024
     pos = pack(canv, size)
     atlas = Image.new('RGBA', (size, size), (0, 0, 0, 0))
     for cv, (x, y) in zip(canv, pos):

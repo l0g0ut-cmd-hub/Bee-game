@@ -165,8 +165,8 @@ namespace Swarm.UI
         public void Text(TextBuf t, float x, float y, Color32 c, int scale = 1, int align = 0, bool shadow = true) =>
             PixelFont.Draw(Batch, t, x, y, c, scale, align, shadow);
 
-        public void Icon(Spr s, float cx, float cy, Color32? tint = null, int scale = 1) =>
-            Batch.Add(s, cx, cy, tint ?? new Color32(255, 255, 255, 255), false, scale);
+        public void Icon(Spr s, float cx, float cy, Color32? tint = null, int scale = 1, bool flip = false) =>
+            Batch.Add(s, cx, cy, tint ?? new Color32(255, 255, 255, 255), flip, scale);
 
         public void NineSlice(int spr, Rect r, int b)
         {

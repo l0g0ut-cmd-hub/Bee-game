@@ -248,12 +248,13 @@ namespace Swarm.Presentation
                         DrawFlower(it.Index, it.Pos, flowers, wind, swarm.LeaderPos, time);
                         break;
                     case StandKind.Hive:
-                        _stand.Add(Spr.Hive, it.Pos.x, it.Pos.y + (_hiveBounce > 0f ? 1f : 0f), White);
                         {
-                            // мёд виден на самом улье: подтёки и лужица растут к цели
+                            // улей растёт: стадия по мёду (к цели сезона) или по расширенным сотам
                             float goal = sim.Cfg.Endless ? 600f : sim.Cfg.GoalHoney;
-                            int lv = Mathf.Clamp(Mathf.FloorToInt(sim.Colony.Honey / goal * 4f + 0.5f), 0, 4);
-                            if (lv > 0) _stand.Add((int)Spr.HiveHoney1 + lv - 1, it.Pos.x, it.Pos.y + (_hiveBounce > 0f ? 1f : 0f), White);
+                            float hf = sim.Colony.Honey / goal;
+                            int comb = sim.Colony.Level[(int)UpgradeType.Comb];
+                            int stage = hf >= 0.66f || comb >= 4 ? 2 : hf >= 0.33f || comb >= 2 ? 1 : 0;
+                            _stand.Add(stage == 0 ? (int)Spr.Hive : (int)Spr.HiveS2 + stage - 1, it.Pos.x, it.Pos.y + (_hiveBounce > 0f ? 1f : 0f), White);
                         }
                         if (_hiveGlow > 0.01f)
                         {
@@ -439,9 +440,15 @@ namespace Swarm.Presentation
                 return;
             }
             // медведь
-            int bf = ((int)(time * 6f) & 1);
-            int bs = en.Flash[i] > 0.06f ? (int)Spr.BearFlash : (bf == 0 ? (int)Spr.BearA : (int)Spr.BearB);
+            // медведь: идёт (4 кадра), ест мёд у улья, бьёт лапой, морщится от жал, убегает
             bool flip = en.Vel[i].x < 0f;
+            int bs;
+            float spd = en.Vel[i].magnitude;
+            if (en.Mode[i] == EnemyMode.Flee) { bs = (int)Spr.BearRun; flip = en.Vel[i].x > 0f; }   // кадр бега смотрит влево
+            else if (en.BiteTimer[i] > EnemySystem.BiteCooldown(EnemyType.Bear) - 0.35f) bs = (int)Spr.BearSwipe;
+            else if (en.Flash[i] > 0.06f && en.Stingers[i] > 4) bs = (int)Spr.BearHurt;
+            else if (en.Mode[i] == EnemyMode.Raid && spd < 6f) bs = (int)Spr.BearEat;
+            else bs = (int)Spr.BearW0 + (((int)(time * 7f)) & 3);
             _shadow.Add(Spr.ShadowXL, p.x, p.y - 8f, A(110));
             _shadow.Add(Spr.KRing2, p.x, p.y - 8f, new Color32(238, 70, 60, 120));
             _fly.Add(bs, p.x, p.y, White, flip);
@@ -465,7 +472,7 @@ namespace Swarm.Presentation
                 float k = hz.WStrength[w] / 100f;
                 byte a = (byte)(110 + 120 * k);
                 _fly.Add(Spr.Web, hz.WPos[w].x, hz.WPos[w].y, new Color32(255, 255, 255, a));
-                _fly.Add(Spr.Spider, hz.SpiderPos[w].x, hz.SpiderPos[w].y + Mathf.Round(Mathf.Sin(time * 3f + w) * 0.6f), White);
+                _fly.Add((int)Spr.SpiderA + (((int)(time * 4f) + w) & 3), hz.SpiderPos[w].x, hz.SpiderPos[w].y + Mathf.Round(Mathf.Sin(time * 3f + w) * 0.6f), White);
             }
             for (int b = 0; b < HazardSystem.MaxBirds; b++)
             {
