@@ -58,6 +58,14 @@ jobs:
           print('ok')
           PY
 
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # быстрая проверка до Unity: снимок партии детерминирован, автопилот проходит все три сезона
+      - name: Gameplay gate (snapshot + autopilot)
+        run: dotnet run -c Release --project tools/simtest -- gate 2>&1 | tee gate.txt; exit ${PIPESTATUS[0]}
+
       - name: Free disk space
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost

@@ -256,12 +256,14 @@ namespace UnityEngine
         public static bool isPlaying => false;
         public static string dataPath => "";
         public static string version => "";
+        public static string persistentDataPath => "";
         public static void Quit() { }
     }
 
     public static class QualitySettings { public static int vSyncCount { get; set; } }
 
-    public static class SleepTimeout { public const int NeverSleep = -1; }
+    public static class SleepTimeout { public const int NeverSleep = -1;
+        public const int SystemSetting = -2; }
 
     public enum ScreenOrientation { Portrait = 1, PortraitUpsideDown = 2, LandscapeLeft = 3, LandscapeRight = 4, AutoRotation = 5 }
 
@@ -283,6 +285,7 @@ namespace UnityEngine
         public static string GetString(string key, string defaultValue) => defaultValue;
         public static void SetString(string key, string value) { }
         public static void Save() { }
+        public static void DeleteKey(string key) { }
     }
 
     public enum TouchPhase { Began, Moved, Stationary, Ended, Canceled }
@@ -379,9 +382,12 @@ namespace UnityEditor
         public SerializedProperty FindProperty(string propertyPath) => null;
         public bool ApplyModifiedProperties() => true;
     }
+    [System.Flags] public enum ImportAssetOptions { Default = 0, ForceUpdate = 1 }
     public static class AssetDatabase
     {
         public static Object[] LoadAllAssetsAtPath(string assetPath) => null;
+        public static T LoadAssetAtPath<T>(string assetPath) where T : Object => null;
+        public static void ImportAsset(string path, ImportAssetOptions options) { }
         public static void SaveAssets() { }
         public static void Refresh() { }
     }
@@ -409,6 +415,7 @@ namespace UnityEditor
     public enum BuildTargetGroup { Android = 7 }
     [Flags] public enum BuildOptions { None = 0 }
 
+    public enum IconKind { Any = -1, Application = 0, Settings = 1, Notification = 2, Spotlight = 3, Store = 4 }
     public static class PlayerSettings
     {
         public static string companyName { get; set; }
@@ -422,6 +429,8 @@ namespace UnityEditor
         public static bool allowedAutorotateToLandscapeRight { get; set; }
         public static bool runInBackground { get; set; }
         public static void SetApplicationIdentifier(Build.NamedBuildTarget buildTarget, string identifier) { }
+        public static void SetIcons(Build.NamedBuildTarget buildTarget, UnityEngine.Texture2D[] icons, IconKind kind) { }
+        public static int[] GetIconSizes(Build.NamedBuildTarget buildTarget, IconKind kind) => new int[0];
         public static void SetScriptingBackend(Build.NamedBuildTarget buildTarget, ScriptingImplementation backend) { }
         public static void SetManagedStrippingLevel(Build.NamedBuildTarget buildTarget, ManagedStrippingLevel level) { }
         public static class Android
@@ -451,7 +460,7 @@ namespace UnityEditor
 
 namespace UnityEditor.Build
 {
-    public struct NamedBuildTarget { public static NamedBuildTarget Android => default; }
+    public struct NamedBuildTarget { public static NamedBuildTarget Android => default; public static NamedBuildTarget Unknown => default; }
 }
 
 namespace UnityEditor.Build.Reporting

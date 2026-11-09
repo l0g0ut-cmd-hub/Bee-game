@@ -251,6 +251,18 @@ namespace Swarm.EditorTools
             end.Time = 700f;
             Play(end, 0.2f, s => NearestFlower(s));
             Shot("19_endless", end, () => _gui.DrawHud(end, _screen, _t, Dt));
+
+            // снимок партии в настоящем Unity: сохранить → загрузить → сравнить
+            {
+                byte[] snap = SimSnapshot.Save(end);
+                var cfgB = SimSnapshot.ReadConfig(snap);
+                var b = cfgB != null ? new GameSim(cfgB, 1u) : null;
+                bool ok = b != null && SimSnapshot.Load(snap, b);
+                byte[] snapB = ok ? SimSnapshot.Save(b) : new byte[0];
+                bool same = snap.Length == snapB.Length;
+                for (int k = 0; same && k < snap.Length; k++) same = snap[k] == snapB[k];
+                _log.Append($"PROBE|snapshot|bytes {snap.Length} load {ok} roundtrip {same} err {SimSnapshot.LastError}\n");
+            }
         }
 
         static void RunAutopilot()

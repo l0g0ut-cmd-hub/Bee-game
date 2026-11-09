@@ -10,7 +10,7 @@ namespace Swarm.UI
     {
         None, OpenCampaign, StartLevel, PlayEndless, PlayDaily, OpenAchievements, Back,
         Pause, Resume, Restart, ToMenu, OpenHive, CloseHive, ChoosePerk,
-        ToggleSound, ToggleHaptics, ToggleShake, PostSquad, ToggleAuto, CycleBreed
+        ToggleSound, ToggleHaptics, ToggleShake, PostSquad, ToggleAuto, ContinueRun, CycleBreed
     }
 
     /// <summary>
@@ -107,6 +107,8 @@ namespace Swarm.UI
         }
 
         // ================================================================ МЕНЮ
+        public string ContinueLabel;   // «ЛЕТО 4:12» — есть сохранённая партия; null — нет
+
         public UiAction DrawMenu(float time, Profile profile, bool muted)
         {
             var a = UiAction.None;
@@ -120,10 +122,21 @@ namespace Swarm.UI
             _ui.Text(Strings.Subtitle, W * 0.5f, top - 92, PixelUI.Honey, 1, 1);
 
             float ty = H * 0.47f;
-            _ui.Fill(new Rect(8, ty - 16, W - 16, 44), new Color32(23, 18, 28, 150));
-            _ui.Text(Strings.Tagline1, W * 0.5f, ty + 16, PixelUI.White, 1, 1);
-            _ui.Text(Strings.Tagline2, W * 0.5f, ty + 4, PixelUI.Muted, 1, 1);
-            _ui.Text(Strings.Tagline3, W * 0.5f, ty - 8, PixelUI.Muted, 1, 1);
+            if (ContinueLabel != null)
+            {
+                // прерванная партия: продолжить с того же места
+                var cr = new Rect(Mathf.Round(W * 0.5f - 66), ty - 10, 132, 30);
+                if (_ui.Button(6, cr, null)) a = UiAction.ContinueRun;
+                _ui.Text(Strings.Continue, cr.center.x, cr.y + 16, PixelUI.Ink, 1, 1, false);
+                _ui.Text(ContinueLabel, cr.center.x, cr.y + 5, Brown, 1, 1, false);
+            }
+            else
+            {
+                _ui.Fill(new Rect(8, ty - 16, W - 16, 44), new Color32(23, 18, 28, 150));
+                _ui.Text(Strings.Tagline1, W * 0.5f, ty + 16, PixelUI.White, 1, 1);
+                _ui.Text(Strings.Tagline2, W * 0.5f, ty + 4, PixelUI.Muted, 1, 1);
+                _ui.Text(Strings.Tagline3, W * 0.5f, ty - 8, PixelUI.Muted, 1, 1);
+            }
 
             float bw = 132, bx = Mathf.Round(W * 0.5f - bw * 0.5f), by = Mathf.Round(H * 0.32f);
             float pulse = Mathf.Sin(time * 4f) > 0.7f ? 1f : 0f;

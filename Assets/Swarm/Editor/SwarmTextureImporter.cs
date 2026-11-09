@@ -8,7 +8,17 @@ namespace Swarm.EditorTools
     {
         void OnPreprocessTexture()
         {
-            if (!assetPath.Replace('\\', '/').StartsWith("Assets/Swarm/Resources/")) return;
+            string p = assetPath.Replace('\\', '/');
+            if (p == "Assets/Swarm/Editor/AppIcon.png")
+            {
+                var ii = (TextureImporter)assetImporter;
+                ii.filterMode = FilterMode.Point;   // пиксель-арт значка без размытия при уменьшении
+                ii.mipmapEnabled = false;
+                ii.textureCompression = TextureImporterCompression.Uncompressed;
+                ii.alphaIsTransparency = true;
+                return;
+            }
+            if (!p.StartsWith("Assets/Swarm/Resources/")) return;
             var ti = (TextureImporter)assetImporter;
             ti.textureType = TextureImporterType.Default;
             ti.filterMode = FilterMode.Point;

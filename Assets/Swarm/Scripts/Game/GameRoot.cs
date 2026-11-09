@@ -106,6 +106,74 @@ namespace Swarm.Game
         void OnApplicationPause(bool paused)
         {
             if (paused && _state == State.Playing) _state = State.Paused;
+            if (paused) SaveRun();   // Android может выгрузить игру из памяти — партия не пропадёт
+        }
+
+        void OnApplicationQuit() => SaveRun();
+
+        // ------------------------------------------------------------ сохранение партии
+        static string RunPath => System.IO.Path.Combine(Application.persistentDataPath, "run.sav");
+        const string RunKey = "swarm_run";   // «режим|уровень» сохранённой партии
+        float _saveTimer;
+
+        bool InRun => _sim != null && _sim.Result == SimResult.Running &&
+                      (_state == State.Playing || _state == State.Hive || _state == State.Perk || _state == State.Paused);
+
+        void SaveRun()
+        {
+            if (!InRun) return;
+            try
+            {
+                System.IO.File.WriteAllBytes(RunPath, SimSnapshot.Save(_sim));
+                PlayerPrefs.SetString(RunKey, (int)_mode + "|" + _level);
+                PlayerPrefs.Save();
+            }
+            catch (System.Exception e) { Debug.LogWarning("[SWARM] не сохранил партию: " + e.Message); }
+        }
+
+        void ClearRun()
+        {
+            try { if (System.IO.File.Exists(RunPath)) System.IO.File.Delete(RunPath); } catch (System.Exception) { }
+            PlayerPrefs.DeleteKey(RunKey);
+            _gameUi.ContinueLabel = null;
+        }
+
+        /// <summary>Есть ли сохранённая партия, которую можно продолжить (и подпись для кнопки).</summary>
+        void ProbeRun()
+        {
+            _gameUi.ContinueLabel = null;
+            string meta = PlayerPrefs.GetString(RunKey, "");
+            if (string.IsNullOrEmpty(meta) || !System.IO.File.Exists(RunPath)) return;
+            try
+            {
+                var cfg = SimSnapshot.ReadConfig(System.IO.File.ReadAllBytes(RunPath));
+                if (cfg == null) { ClearRun(); return; }   // снимок от старой версии игры
+                var parts = meta.Split('|');
+                var mode = (GameMode)int.Parse(parts[0]);
+                int level = int.Parse(parts[1]);
+                string name = mode == GameMode.Endless ? Strings.ModeEndless : mode == GameMode.Daily ? Strings.ModeDaily : Levels.Campaign[Mathf.Clamp(level, 0, 2)].Name;
+                _gameUi.ContinueLabel = name;
+            }
+            catch (System.Exception) { ClearRun(); }
+        }
+
+        void ContinueRun()
+        {
+            try
+            {
+                var parts = PlayerPrefs.GetString(RunKey, "").Split('|');
+                byte[] data = System.IO.File.ReadAllBytes(RunPath);
+                var cfg = SimSnapshot.ReadConfig(data);
+                if (cfg == null) { ClearRun(); return; }
+                StartGame((GameMode)int.Parse(parts[0]), int.Parse(parts[1]));
+                _cfg = cfg;
+                _sim = new GameSim(cfg, 1u);
+                if (!SimSnapshot.Load(data, _sim)) { ClearRun(); EnterMenu(); return; }
+                _cam = _sim.Swarm.LeaderPos;
+                _state = State.Paused;   // даём осмотреться — «ПРОДОЛЖИТЬ» в паузе
+                _gameUi.TutorialStep = 4;
+            }
+            catch (System.Exception e) { Debug.LogWarning("[SWARM] не загрузил партию: " + e.Message); ClearRun(); EnterMenu(); }
         }
 
         bool InMenus => _state == State.Menu || _state == State.Levels || _state == State.Achievements;
@@ -122,10 +190,13 @@ namespace Swarm.Game
             _fx.Clear();
             _gameUi.ClearBanner();
             _fade = 1f;
+            ProbeRun();
         }
 
         void StartGame(GameMode mode, int level)
         {
+            ClearRun();   // новая партия заменяет сохранённую
+            _saveTimer = 0f;
             _mode = mode;
             _level = level;
             uint seed = mode == GameMode.Daily ? Levels.DailySeed(System.DateTime.UtcNow) : (uint)_rnd.Next(1, int.MaxValue);
@@ -157,6 +228,12 @@ namespace Swarm.Game
             _animTime += _state == State.Paused ? dt * 0.1f : (_state == State.Hive || _state == State.Perk ? dt * 0.35f : dt);
             _screen.Refresh();
             _input.Poll();
+            // экономия батареи: 60 кадров только в игре; в меню, паузе и улье — 30, экран может гаснуть
+            bool live = _state == State.Playing;
+            int fps = live ? 60 : 30;
+            if (Application.targetFrameRate != fps) Application.targetFrameRate = fps;
+            int sleep = live || _state == State.Perk ? SleepTimeout.NeverSleep : SleepTimeout.SystemSetting;
+            if (Screen.sleepTimeout != sleep) Screen.sleepTimeout = sleep;
             // автопилот жмёт «виртуальным пальцем»; живое касание всегда главнее
             bool realTouch = _input.Held || _input.Down || _input.Up;
             bool autoOn = AutoPilot.Enabled && (_state == State.Playing || _state == State.Hive || _state == State.Perk);
@@ -216,6 +293,7 @@ namespace Swarm.Game
             _fx.Update(sim, _state == State.Paused ? 0f : dt);
 
             if (_state == State.Playing && sim.Result != SimResult.Running) EnterResult();
+            else if (_state == State.Playing && (_saveTimer += dt) > 20f) { _saveTimer = 0f; SaveRun(); }   // автосохранение
             else if (_state == State.Playing && sim.PerkPending) _state = State.Perk;
 
             // --- камера
@@ -258,6 +336,7 @@ namespace Swarm.Game
             switch (a)
             {
                 case UiAction.OpenCampaign: _state = State.Levels; break;
+                case UiAction.ContinueRun: ContinueRun(); break;
                 case UiAction.OpenAchievements: _state = State.Achievements; break;
                 case UiAction.Back: if (_state == State.Levels || _state == State.Achievements) _state = State.Menu; break;
                 case UiAction.StartLevel: StartGame(GameMode.Campaign, _gameUi.SelectedLevel); break;
@@ -279,7 +358,7 @@ namespace Swarm.Game
                     }
                     break;
                 case UiAction.Restart: StartGame(_mode, _level); break;
-                case UiAction.ToMenu: EnterMenu(); break;
+                case UiAction.ToMenu: if (InRun) SaveRun(); EnterMenu(); break;
                 case UiAction.OpenHive: if (_state == State.Playing) _state = State.Hive; break;
                 case UiAction.CloseHive: if (_state == State.Hive) { _state = State.Playing; _input.Reset(); } break;
                 case UiAction.PostSquad:
@@ -309,6 +388,7 @@ namespace Swarm.Game
         void EnterResult()
         {
             _state = State.Result;
+            ClearRun();
             float prev = _mode == GameMode.Endless ? _profile.EndlessBest
                 : _mode == GameMode.Campaign ? _profile.LevelBestTime[_level] : 0f;
             _fresh = _profile.Record(_sim, _mode, _level);

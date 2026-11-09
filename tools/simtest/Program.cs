@@ -15,6 +15,20 @@ static class Program
     static int Main(string[] args)
     {
         if (args.Length > 0 && args[0] == "ballcheck") { BallCheck(); return 0; }
+        if (args.Length > 0 && args[0] == "snapshot") return SnapshotCheck();
+        if (args.Length > 0 && args[0] == "gate")
+        {
+            // проверка для CI: снимки детерминированы и автопилот проходит каждый сезон
+            int fails = SnapshotCheck();
+            for (int lvl = 0; lvl < 3; lvl++)
+            {
+                Environment.SetEnvironmentVariable("LEVEL", lvl.ToString());
+                Console.WriteLine($"== сезон {lvl}");
+                fails += Brain(2);
+            }
+            Console.WriteLine(fails == 0 ? "GATE OK" : $"GATE FAIL: {fails}");
+            return fails;
+        }
         if (args.Length > 0 && args[0] == "brain") { Brain(args.Length > 1 ? int.Parse(args[1]) : 6); return 0; }
         int seeds = args.Length > 0 ? int.Parse(args[0]) : 6;
         bool verbose = args.Length > 1;
@@ -38,8 +52,9 @@ static class Program
     }
 
     /// <summary>Прогон «мозга» автопилота (AutoBrain) с замером простоя роя.</summary>
-    static void Brain(int seeds)
+    static int Brain(int seeds)
     {
+        int fails = 0;
         int lvl = int.TryParse(Environment.GetEnvironmentVariable("LEVEL"), out var lv) ? lv : 1;
         for (int sd = 1; sd <= seeds; sd++)
         {
@@ -107,7 +122,59 @@ static class Program
             Console.WriteLine($" seed {sd}: {sim.Result,-10} ★{sim.Stars} t={sim.Time,4:F0} bees={sim.Swarm.SwarmCount,3} honey={sim.Colony.Honey,4:F0} delivered={sim.Stats.HoneyDelivered,5:F0} " +
                               $"idleDay={idleDay,4:F0}s ({100f * idleDay / Math.Max(1f, sim.Time - night):F0}%) idleNight={idleNight,3:F0}/{night,3:F0}s hive={hive} posts={posts} workers={sim.Swarm.WorkerCount} def={sim.Swarm.GuardCount} " +
                               $"lost={sim.Stats.BeesLost} heat/dash/bite/spider={sim.Stats.LostToHeat}/{sim.Stats.LostToDash}/{sim.Stats.LostToBite}/{sim.Stats.LostToSpider} stolen={sim.Stats.HoneyStolen:F0} nest={(sim.Enemies.NestAlive ? 1 : 0)} wild={(sim.Enemies.WildAlive ? 1 : 0)}/{sim.Stats.WildHivesDestroyed} cooked={sim.Stats.HornetsCooked} hatched={sim.Stats.BeesHatched} boss={sim.Stats.BossesKilled} at={bossT0:F0} fight={bossDur:F0}s bossLost={bossLost} focus={focuses}");
+            if (sim.Result != SimResult.Won) fails++;   // автопилот обязан проходить сезон
         }
+        return fails;
+    }
+
+    /// <summary>Снимок: сохранить посреди партии → загрузить в свежий GameSim → доиграть оба одинаково → сравнить побитно.</summary>
+    static int SnapshotCheck()
+    {
+        int fails = 0;
+        for (int lvl = 0; lvl < 3; lvl++)
+        {
+            var cfg = Levels.Make(GameMode.Campaign, lvl);
+            var a = new GameSim(cfg, 4242u + (uint)lvl);
+            var brain = new AutoBrain();
+            const float dt = 1f / 60f;
+            float think = 0f;
+            SimInput Inp(GameSim g) => new SimInput { Active = true, Target = g.World.HivePos + new Vector2(Mathf.Cos(g.Time * 0.3f), Mathf.Sin(g.Time * 0.21f)) * 160f, Hold = false };
+            while (a.Time < 230f && a.Result == SimResult.Running)
+            {
+                think -= dt; if (think <= 0f) { think = 0.25f; brain.Decide(a); }
+                if (a.PerkPending) a.ChoosePerk(0);
+                if (a.SwarmAtHive) { a.HireWorkers(); a.HireDefenders(); a.TryUpgrade(UpgradeType.Comb); }
+                if ((int)(a.Time * 60f) % 3000 == 1500) { if (a.Swarm.SquadActive) a.RecallSquad(); else a.PostSquad(); }
+                a.Step(dt, new SimInput { Active = true, Target = brain.WorldTarget, Hold = brain.WantHold });
+                a.Events.Clear();
+            }
+            var t0 = DateTime.Now;
+            byte[] snap = SimSnapshot.Save(a);
+            double ms = (DateTime.Now - t0).TotalMilliseconds;
+            var cfgB = SimSnapshot.ReadConfig(snap);
+            var b = new GameSim(cfgB, 1u);
+            bool ok = SimSnapshot.Load(snap, b);
+            byte[] snapB = SimSnapshot.Save(b);
+            bool same0 = Equal(snap, snapB);
+            for (int k = 0; k < 60 * 120 && a.Result == SimResult.Running; k++)
+            {
+                if (a.PerkPending) a.ChoosePerk(1);
+                if (b.PerkPending) b.ChoosePerk(1);
+                a.Step(dt, Inp(a)); a.Events.Clear();
+                b.Step(dt, Inp(b)); b.Events.Clear();
+            }
+            bool same1 = Equal(SimSnapshot.Save(a), SimSnapshot.Save(b));
+            Console.WriteLine($"L{lvl}: snapshot {snap.Length / 1024}KB save {ms:F0}ms load={ok} roundtrip={same0} after120s={same1} t={a.Time:F0}/{b.Time:F0} bees={a.Swarm.SwarmCount}/{b.Swarm.SwarmCount} honey={a.Colony.Honey:F1}/{b.Colony.Honey:F1} enemies={a.Enemies.Count}/{b.Enemies.Count}");
+            if (!(ok && same0 && same1)) fails++;
+        }
+        return fails;
+    }
+
+    static bool Equal(byte[] x, byte[] y)
+    {
+        if (x.Length != y.Length) return false;
+        for (int i = 0; i < x.Length; i++) if (x[i] != y[i]) return false;
+        return true;
     }
 
     static void BallCheck()

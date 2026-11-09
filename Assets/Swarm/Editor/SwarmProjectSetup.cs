@@ -77,6 +77,22 @@ namespace Swarm.EditorTools
             PlayerSettings.Android.useCustomKeystore = false;     // debug-ключ: APK ставится на телефон как есть
             EditorUserBuildSettings.androidBuildType = AndroidBuildType.Release;
             ForceLegacyInputManager();
+            ApplyIcon();
+        }
+
+        /// <summary>Значок приложения — пухлая пчёлка (tools/art/gen_icon.py → Assets/Swarm/Editor/AppIcon.png).</summary>
+        static void ApplyIcon()
+        {
+            const string path = "Assets/Swarm/Editor/AppIcon.png";
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            if (icon == null) { Debug.LogWarning("[SWARM] значок не найден: " + path); return; }
+            PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);   // значок по умолчанию
+            int[] sizes = PlayerSettings.GetIconSizes(NamedBuildTarget.Android, IconKind.Application);
+            var arr = new Texture2D[sizes.Length];
+            for (int i = 0; i < arr.Length; i++) arr[i] = icon;
+            PlayerSettings.SetIcons(NamedBuildTarget.Android, arr, IconKind.Application);
+            Debug.Log("[SWARM] значок приложения установлен (" + sizes.Length + " размеров)");
         }
 
         /// <summary>
