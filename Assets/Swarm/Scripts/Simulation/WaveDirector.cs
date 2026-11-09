@@ -83,7 +83,8 @@ namespace Swarm.Simulation
                 float mul = cfg.WaveMul * (1f + 0.8f * _cycle + 0.25f * _cycle * _cycle) * (sim.Enemies.NestAlive || !cfg.NestEnabled ? 1f : 0.6f);
                 w.Wasps = Mathf.RoundToInt(w.Wasps * mul);
                 w.Hornets = Mathf.RoundToInt(w.Hornets * Mathf.Max(1f, mul * 0.9f));
-                w.Ants = Mathf.RoundToInt(w.Ants * cfg.WaveMul);
+                w.Ants = cfg.AntsEnabled ? Mathf.RoundToInt(w.Ants * cfg.WaveMul) : 0;
+                if (!cfg.BearEnabled) w.Bears = 0;
                 if (sim.Swarm.Count < 60)
                 {
                     w.Hornets = Mathf.Max(0, w.Hornets - 1);
@@ -130,7 +131,7 @@ namespace Swarm.Simulation
                     sim.Events.Push(SimEventType.EnemySpawned, p, 0f, (int)EnemyType.Ant);
             }
             total += w.Ants;
-            sim.Events.Push(SimEventType.WaveIncoming, best, total, (int)w.Message);
+            if (total > 0) sim.Events.Push(SimEventType.WaveIncoming, best, total, (int)w.Message);   // выключенные в сезоне волны — молча
         }
 
         static Vector2 RandomEdge(Rng rng, WorldMap w)

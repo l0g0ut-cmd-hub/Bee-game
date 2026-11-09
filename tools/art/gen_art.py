@@ -1011,6 +1011,52 @@ def nest():
 
 add('Nest', nest(), (12, 2))
 
+
+def rival_bee(wings):
+    """Дикая пчела-конкурент: тёмная, тускло-рыжие полосы — сразу видно, что не наша."""
+    m = dict(BEE_MAP)
+    m.update({'y': ORANGE[1], 'Y': ORANGE[2], 'h': ORANGE[3], 'd': ORANGE[0], 'K': INK[0]})
+    cv = Canvas(11, 9)
+    cv.pattern(BEE_BODY, m, 0, 3)
+    cv.pattern(wings, m, 0, 0)
+    cv.pattern(['...k.k.k...'], m, 0, 8)
+    return cv
+
+
+for i, wg in enumerate([BEE_WINGS_UP, BEE_WINGS_MID, BEE_WINGS_DOWN, BEE_WINGS_MID]):
+    add('Rival%s' % 'ABCD'[i], rival_bee(wg))
+
+
+def wild_hive():
+    """Дикий улей: три языка открытых сот свисают с ветки."""
+    cv = Canvas(30, 28)
+    for x in range(1, 29):                       # ветка
+        cv.set(x, 1 + (1 if 8 < x < 20 else 0), WOOD[1])
+        cv.set(x, 2 + (1 if 8 < x < 20 else 0), WOOD[0])
+    comb = [HONEY[1], HONEY[2], HONEY[3], HONEY[4], HONEY[5]]
+    for cx, top, h, w in [(6, 3, 17, 3.8), (15, 4, 23, 5.0), (24, 3, 15, 3.6)]:
+        for y in range(top, top + h):
+            t = (y - top) / h
+            half = w * math.sin(min(1.0, 0.25 + t * 0.95) * math.pi / 1.1) ** 0.7
+            for x in range(int(cx - half), int(cx + half) + 1):
+                u = (x + 0.5 - cx) / max(1.0, half)
+                sh = 0.75 - 0.45 * u - 0.2 * t
+                cv.set(x, y, ramp_pick(comb, sh, x, y))
+                # ячейки сот: тёмные точки в шахматном порядке со сдвигом рядов
+                if (y % 3 == 1) and ((x + (y // 3) % 2 * 2) % 4 == 0) and abs(u) < 0.85:
+                    cv.set(x, y, WOOD[0])
+                elif (y % 3 == 2) and ((x + (y // 3) % 2 * 2) % 4 == 0) and abs(u) < 0.85:
+                    cv.set(x, y, HONEY[1])
+                if abs(u) > 0.78:
+                    cv.set(x, y, HONEY[1])
+    cv.outline(INK[0], where=lambda x, y: y > 2)
+    for x, y in [(12, 12), (19, 9), (7, 15), (16, 19)]:   # ползающие пчёлы
+        cv.set(x, y, INK[0]); cv.set(x + 1, y, ORANGE[2])
+    return cv
+
+
+add('WildHive', wild_hive(), (15, 2))
+
 def ant(frame):
     """Муравей сбоку, мельче пчелы: брюшко | талия | грудь | голова, коленчатый усик, 3 пары ног с шагом."""
     body = [

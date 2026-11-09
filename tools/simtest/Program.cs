@@ -106,7 +106,7 @@ static class Program
             }
             Console.WriteLine($" seed {sd}: {sim.Result,-10} ★{sim.Stars} t={sim.Time,4:F0} bees={sim.Swarm.SwarmCount,3} honey={sim.Colony.Honey,4:F0} delivered={sim.Stats.HoneyDelivered,5:F0} " +
                               $"idleDay={idleDay,4:F0}s ({100f * idleDay / Math.Max(1f, sim.Time - night):F0}%) idleNight={idleNight,3:F0}/{night,3:F0}s hive={hive} posts={posts} workers={sim.Swarm.WorkerCount} def={sim.Swarm.GuardCount} " +
-                              $"lost={sim.Stats.BeesLost} heat/dash/bite/spider={sim.Stats.LostToHeat}/{sim.Stats.LostToDash}/{sim.Stats.LostToBite}/{sim.Stats.LostToSpider} stolen={sim.Stats.HoneyStolen:F0} nest={(sim.Enemies.NestAlive ? 1 : 0)} cooked={sim.Stats.HornetsCooked} hatched={sim.Stats.BeesHatched} boss={sim.Stats.BossesKilled} at={bossT0:F0} fight={bossDur:F0}s bossLost={bossLost} focus={focuses}");
+                              $"lost={sim.Stats.BeesLost} heat/dash/bite/spider={sim.Stats.LostToHeat}/{sim.Stats.LostToDash}/{sim.Stats.LostToBite}/{sim.Stats.LostToSpider} stolen={sim.Stats.HoneyStolen:F0} nest={(sim.Enemies.NestAlive ? 1 : 0)} wild={(sim.Enemies.WildAlive ? 1 : 0)}/{sim.Stats.WildHivesDestroyed} cooked={sim.Stats.HornetsCooked} hatched={sim.Stats.BeesHatched} boss={sim.Stats.BossesKilled} at={bossT0:F0} fight={bossDur:F0}s bossLost={bossLost} focus={focuses}");
         }
     }
 
@@ -271,7 +271,7 @@ static class Program
         var st = sim.Stats;
         Console.WriteLine($" seed {seed,6}: {sim.Result,-10} ★{sim.Stars} post={sim.Waves.Postponements} t={sim.Time,5:F0}s bees={sim.Swarm.SwarmCount,3} honey={sim.Colony.Honey,4:F0} " +
                           $"delivered={st.HoneyDelivered,5:F0} hatched={st.BeesHatched,3} lost={st.BeesLost,3} kills w{st.WaspsKilled}/h{st.HornetsKilled} " +
-                          $"stolen={st.HoneyStolen,4:F0} night={sim.Sky.Day(sim.Time)}d nest={(sim.Enemies.NestAlive ? 1 : 0)} ants={st.AntsKilled} cooked={st.HornetsCooked} heat/dash/bite/bird/spider={st.LostToHeat}/{st.LostToDash}/{st.LostToBite}/{st.LostToBird}/{st.LostToSpider} guards={st.LostGuards} workers={sim.Swarm.WorkerCount}/{st.WorkersHired} bears={st.BearsRepelled} sprouts={st.FlowersSprouted} spread avg={spreadAcc / Math.Max(1, spreadN):F1} max={maxSpread:F0} inObstacle={stuck}");
+                          $"stolen={st.HoneyStolen,4:F0} night={sim.Sky.Day(sim.Time)}d nest={(sim.Enemies.NestAlive ? 1 : 0)} wild={(sim.Enemies.WildAlive ? 1 : 0)}/{sim.Stats.WildHivesDestroyed} ants={st.AntsKilled} cooked={st.HornetsCooked} heat/dash/bite/bird/spider={st.LostToHeat}/{st.LostToDash}/{st.LostToBite}/{st.LostToBird}/{st.LostToSpider} guards={st.LostGuards} workers={sim.Swarm.WorkerCount}/{st.WorkersHired} bears={st.BearsRepelled} sprouts={st.FlowersSprouted} spread avg={spreadAcc / Math.Max(1, spreadN):F1} max={maxSpread:F0} inObstacle={stuck}");
         return (sim.Result, sim.Time);
     }
 }

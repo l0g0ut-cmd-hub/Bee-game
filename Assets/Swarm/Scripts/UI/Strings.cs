@@ -84,6 +84,12 @@ namespace Swarm.UI
         public const string HintThirst = "ЖАЖДА! ЛЕТИ К ПРУДУ";
         public const string HintSquad = "КНОПКА \"ОТРЯД\" ОСТАВИТ ЧАСТЬ ПЧЁЛ СТЕРЕЧЬ ЭТО МЕСТО И СОБИРАТЬ НЕКТАР";
         public const string PostName = "ОТРЯД";
+        public const string IntroFirst = "КАК ИГРАТЬ";
+        public const string IntroNew = "НОВОЕ В ЭТОМ СЕЗОНЕ";
+        public const string IntroGo = "ВПЕРЁД!";
+        public const string WildDown = "ДИКИЙ УЛЕЙ РАЗОРЁН!";
+        public const string WildDownSub = "ИХ ЗАПАСЫ - ТЕПЕРЬ НАШИ";
+        public const string HintRivals = "ТЁМНЫЕ ПЧЁЛЫ - ДИКИЙ РОЙ. ОНИ ВЫНОСЯТ НАШ НЕКТАР. РАЗОРИ ИХ УЛЕЙ (СТРЕЛКА С СОТАМИ)";
         public const string BossTitle = "КОРОЛЕВА ШЕРШНЕЙ!";
         public const string BossFinal = "ФИНАЛ СЕЗОНА: ПОБЕДИ КОРОЛЕВУ";
         public const string BossSub = "ДВОЙНОЙ ТАП - МЕТКА, ДЕРЖИ ПАЛЕЦ - ШАР";

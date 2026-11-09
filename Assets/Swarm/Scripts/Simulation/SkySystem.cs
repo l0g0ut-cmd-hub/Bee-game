@@ -69,7 +69,8 @@ namespace Swarm.Simulation
             if (!Enabled) return;
             var rng = sim.Rng;
             WeatherTimer -= dt;
-            if (WeatherTimer <= 0f)
+            if (!sim.Cfg.WeatherEnabled) { Current = Weather.Clear; WeatherTimer = 30f; }
+            else if (WeatherTimer <= 0f)
             {
                 if (Current == Weather.Clear)
                 {

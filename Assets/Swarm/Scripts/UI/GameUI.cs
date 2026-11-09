@@ -33,6 +33,7 @@ namespace Swarm.UI
         public string VersionText = "";
         float _hintAlpha;
         bool _lateSummerShown;
+        float _rivalHintTime;
         float _ballHintTime, _birdHintTime, _thirstHintTime, _squadHintTime, _webHintTime, _focusHintTime, _buffHintTime;
 
         static readonly Color32 SubText = new Color32(255, 230, 180, 255);
@@ -66,6 +67,7 @@ namespace Swarm.UI
         {
             _bannerTime = 0f;
             _lateSummerShown = false;
+            _rivalHintTime = 0f;
             _ballHintTime = _birdHintTime = _thirstHintTime = _squadHintTime = _webHintTime = _focusHintTime = _buffHintTime = 0f;
         }
 
@@ -217,6 +219,48 @@ namespace Swarm.UI
                 if (rowH >= 22f) _ui.Text(Achievements_.Desc(ach), 32, y + 3, has ? SubText : new Color32(140, 135, 125, 255), 1, 0, false);
             }
             if (_ui.Button(39, new Rect(Mathf.Round(W * 0.5f - 46), _ui.SafeBottom + 10, 92, 22), Strings.Back)) a = UiAction.Back;
+            return a;
+        }
+
+        // ================================================================ ЧТО НОВОГО В СЕЗОНЕ
+        static readonly string[][] IntroLines =
+        {
+            new[] { "ВЕДИ РОЙ ПАЛЬЦЕМ К ЦВЕТАМ", "ПОЛНЫЙ РОЙ НЕСИ В УЛЕЙ", "МАТКА ПРЕВРАЩАЕТ МЁД В ПЧЁЛ", "ДЕРЖИ ПАЛЕЦ НА ШЕРШНЕ - ТЕПЛОВОЙ ШАР", "В КОНЦЕ ВЕСНЫ - КОРОЛЕВА ШЕРШНЕЙ" },
+            new[] { "ЗАЩИТНИКИ И СБОРЩИЦЫ В УЛЬЕ", "КНОПКА ОТРЯД - ПОСТ НА ПОЛЯНЕ", "МЕДВЕДЬ И МУРАВЬИ ГРАБЯТ УЛЕЙ", "ПАУТИНА МЕЖДУ ДЕРЕВЬЯМИ", "ПОГОДА: ДОЖДЬ, ВЕТЕР, ЖАРА" },
+            new[] { "ОСИНОЕ ГНЕЗДО - СНЕСИ ЕГО", "ДИКИЙ РОЙ ВЫНОСИТ НЕКТАР", "РАЗОРИ ДИКИЙ УЛЕЙ - ЗАБЕРЁШЬ ЗАПАСЫ", "БОЛОТО: ВЕТЕР СИЛЬНЕЕ, ЦВЕТОВ МЕНЬШЕ" },
+        };
+        static readonly Spr[][] IntroIcons =
+        {
+            new[] { Spr.IconBee, Spr.IconNectar, Spr.IconQueen, Spr.IconHeat, Spr.IconSkull },
+            new[] { Spr.IconGuard, Spr.IconSquad, Spr.IconHoney, Spr.IconWasp, Spr.IconRain },
+            new[] { Spr.IconWasp, Spr.IconScout, Spr.IconComb, Spr.IconWind },
+        };
+
+        public UiAction DrawIntro(int level, float time)
+        {
+            var a = UiAction.None;
+            int W = _ui.W, H = _ui.H;
+            level = Mathf.Clamp(level, 0, 2);
+            _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 170));
+            _ui.Blocker(new Rect(0, 0, W, H));
+            var lines = IntroLines[level];
+            float ph = 80 + lines.Length * 24;
+            var panel = new Rect(8, Mathf.Round(H * 0.5f - ph * 0.5f), W - 16, ph);
+            _ui.Panel(panel);
+            float y = panel.yMax - 22;
+            _ui.Text(Levels.Campaign[level].Name, panel.center.x, y, PixelUI.Ink, 2, 1, false);
+            y -= 13;
+            _ui.Text(level == 0 ? Strings.IntroFirst : Strings.IntroNew, panel.center.x, y, Brown, 1, 1, false);
+            y -= 8;
+            for (int k = 0; k < lines.Length; k++)
+            {
+                y -= 24;
+                _ui.Fill(new Rect(panel.x + 6, y, panel.width - 12, 21), new Color32(119, 70, 29, 70));
+                _ui.Icon(IntroIcons[level][k], panel.x + 16, y + 10, null, 2);
+                TextWrapped(lines[k], panel.x + 28 + (panel.width - 40) * 0.5f, y + 21 - 4, (int)panel.width - 44, PixelUI.Ink, false);
+            }
+            float p = Mathf.Sin(time * 4f) > 0.6f ? 1f : 0f;
+            if (_ui.Button(70, new Rect(Mathf.Round(panel.center.x - 46), panel.y + 8 + p, 92, 22), Strings.IntroGo)) a = UiAction.Resume;
             return a;
         }
 
@@ -408,7 +452,8 @@ namespace Swarm.UI
 
             if (sw.Balling && Mathf.Repeat(time * 5f, 1f) < 0.75f)
                 _ui.Text(Strings.Balling, W * 0.5f, bottom + 34, new Color32(255, 150, 60, 255), 1, 1);
-            // кнопка поста: оставить отряд стеречь место / вернуть его в рой
+            // кнопка поста: оставить отряд стеречь место / вернуть его в рой (с лета)
+            if (sim.Cfg.PostEnabled)
             {
                 var pr = new Rect(Mathf.Round(W * 0.5f - 29), bottom - 2, 58, 22);
                 if (sw.SquadActive)
@@ -465,6 +510,13 @@ namespace Swarm.UI
         {
             var sw = sim.Swarm;
             // птица: тень рядом с роем
+            if (_rivalHintTime < 8f)
+            {
+                var er = sim.Enemies;
+                for (int i = 0; i < er.Count; i++)
+                    if (er.Type[i] == EnemyType.Rival && (er.Pos[i] - sw.LeaderPos).sqrMagnitude < 120f * 120f)
+                    { _rivalHintTime += dt; return Strings.HintRivals; }
+            }
             if (_birdHintTime < 8f)
             {
                 var hz = sim.Hazards;
@@ -523,7 +575,8 @@ namespace Swarm.UI
             {
                 var t = en.Type[i];
                 if (t == EnemyType.Nest && !sim.Fog.IsRevealed(en.Pos[i])) continue;
-                if (t == EnemyType.Ant) continue;
+                if (t == EnemyType.Ant || t == EnemyType.Rival) continue;
+                if (t == EnemyType.WildHive) { EdgeArrow(screen, en.Pos[i], W, minY, maxY, new Color32(230, 150, 70, 255), Spr.IconComb, time, i * 0.7f); continue; }
                 Spr icon = t == EnemyType.Hornet || t == EnemyType.Bear ? Spr.IconSkull : Spr.IconWasp;
                 EdgeArrow(screen, en.Pos[i], W, minY, maxY, PixelUI.Red, icon, time, i * 0.7f);
             }
@@ -568,7 +621,7 @@ namespace Swarm.UI
             var col = sim.Colony;
             _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 140));
 
-            float pw = Mathf.Min(W - 10, 220), ph = 360;
+            float pw = Mathf.Min(W - 10, 220), ph = 360 - (sim.Cfg.DefendersEnabled ? 0 : 34) - (sim.Cfg.WorkersEnabled ? 0 : 34);
             var panel = new Rect(Mathf.Round((W - pw) * 0.5f), Mathf.Round((H - ph) * 0.5f), pw, ph);
             _ui.Blocker(new Rect(0, 0, W, H));
             _ui.Panel(panel);
@@ -603,7 +656,8 @@ namespace Swarm.UI
                 }
                 if (_ui.Button(31, new Rect(x1 - 50, y + 6, 46, 20), Strings.BroodNames[sim.BroodIndex])) sim.CycleBrood();
             }
-            // 2. защитники
+            // 2. защитники (с лета)
+            if (sim.Cfg.DefendersEnabled)
             {
                 y -= rowH;
                 RowFrame(x0, y, x1 - x0, rowH - 3);
@@ -618,7 +672,8 @@ namespace Swarm.UI
                     if (_ui.ButtonBuf(32, new Rect(x1 - 50, y + 6, 46, 20), _b, sim.CanHireDefenders, Spr.IconHoney)) sim.HireDefenders();
                 }
             }
-            // 3. сборщицы
+            // 3. сборщицы (с лета)
+            if (sim.Cfg.WorkersEnabled)
             {
                 y -= rowH;
                 RowFrame(x0, y, x1 - x0, rowH - 3);

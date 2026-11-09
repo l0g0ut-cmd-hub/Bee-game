@@ -24,6 +24,7 @@ namespace Swarm.Simulation
         public readonly List<Vector2> Ponds = new List<Vector2>(4);
         public const float PondRadius = 22f;
         public Vector2 NestPos;
+        public Vector2 WildHivePos;
         public readonly Biome Biome;
         public readonly uint Seed;
 
@@ -169,6 +170,16 @@ namespace Swarm.Simulation
                 var p = new Vector2(rng.Range(30f, Width - 30f), rng.Range(40f, Height - 30f));
                 if ((p - HivePos).magnitude < 300f || InsideObstacle(p, 16f) || NearPond(p, 10f)) continue;
                 NestPos = p;
+                break;
+            }
+
+            // --- дикий улей конкурентов: далеко от нашего улья и от гнезда
+            WildHivePos = new Vector2(Width * 0.85f, Height * 0.85f);
+            for (int a = 0; a < 300; a++)
+            {
+                var p = new Vector2(rng.Range(40f, Width - 40f), rng.Range(50f, Height - 40f));
+                if ((p - HivePos).magnitude < 260f || (p - NestPos).magnitude < 200f || InsideObstacle(p, 16f) || NearPond(p, 12f)) continue;
+                WildHivePos = p;
                 break;
             }
         }

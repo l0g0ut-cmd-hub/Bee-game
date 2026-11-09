@@ -284,6 +284,15 @@ namespace Swarm.Presentation
                         Feedback(Tier.Large);
                         audio?.Play(Sfx.Upgrade, 0.8f);
                         break;
+                    case SimEventType.WildHiveDestroyed:
+                        Emit(Spr.KBurst, e.Pos, Vector2.zero, 0.3f, Honey, true, drag: 0f);
+                        Emit(Spr.KRing0, e.Pos, Vector2.zero, 0.5f, Honey, true, drag: 0f, sprEnd: Spr.KRing2);
+                        for (int k = 0; k < 18; k++)
+                            Emit(k % 2 == 0 ? Spr.HoneyDrop : Spr.Pixel2, e.Pos, new Vector2(S, S) * 55f, 0.9f, Honey, z: 3f, vz: 30f, drag: 2f);
+                        Text(e.Pos + new Vector2(0f, 20f), Mathf.RoundToInt(e.Value), Honey, 1);
+                        Feedback(Tier.Large);
+                        audio?.Play(Sfx.Upgrade);
+                        break;
                     case SimEventType.NestDestroyed:
                         Emit(Spr.KBurst, e.Pos, Vector2.zero, 0.3f, Honey, true, drag: 0f);
                         Emit(Spr.KRing0, e.Pos, Vector2.zero, 0.5f, White, true, drag: 0f, sprEnd: Spr.KRing2);

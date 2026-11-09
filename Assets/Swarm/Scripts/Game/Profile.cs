@@ -18,6 +18,7 @@ namespace Swarm.Game
         public int DailyDate;          // yyyymmdd последнего задания дня
         public int DailyStars;
         public int Achievements;       // битовая маска
+        public int SeenIntro;          // какие сезоны уже показали карточку «что нового»
         public int TotalCooked, TotalNests, TotalBears, TotalRare, TotalBosses;
         public int BreedIndex;         // выбранная порода (Swarm.Simulation.Breed)
 
@@ -120,7 +121,7 @@ namespace Swarm.Game
     public enum Achievement
     {
         FirstHoney, Cook10, NestBuster, BearRepeller, GoldFind, GreatSwarm, ThreeStars, Campaign,
-        Survivor, FullGuard, Flawless, Daily, QueenSlayer, Count
+        Survivor, FullGuard, Flawless, Daily, QueenSlayer, WildRaider, Count
     }
 
     public static class Achievements_
@@ -141,6 +142,7 @@ namespace Swarm.Game
                 case Achievement.FullGuard: return "ГВАРДИЯ";
                 case Achievement.Flawless: return "БЕЗ ПОТЕРЬ";
                 case Achievement.QueenSlayer: return "ЦАРЕУБИЙЦА";
+                case Achievement.WildRaider: return "РАЗОРИТЕЛЬ";
                 default: return "ЗАДАНИЕ ДНЯ";
             }
         }
@@ -161,6 +163,7 @@ namespace Swarm.Game
                 case Achievement.FullGuard: return "НАЙМИ 24 ЗАЩИТНИКА";
                 case Achievement.Flawless: return "ПОБЕДА, ПОТЕРЯВ < 25 ПЧЁЛ";
                 case Achievement.QueenSlayer: return "ПОБЕДИ КОРОЛЕВУ ШЕРШНЕЙ";
+                case Achievement.WildRaider: return "РАЗОРИ ДИКИЙ УЛЕЙ";
                 default: return "ЗВЕЗДА В ЗАДАНИИ ДНЯ";
             }
         }
@@ -182,6 +185,7 @@ namespace Swarm.Game
                 case Achievement.FullGuard: return st.DefendersHired >= 24;
                 case Achievement.Flawless: return sim.Result == SimResult.Won && st.BeesLost < 25;
                 case Achievement.QueenSlayer: return p.TotalBosses > 0;
+                case Achievement.WildRaider: return st.WildHivesDestroyed > 0;
                 default: return mode == GameMode.Daily && sim.Stars > 0;
             }
         }

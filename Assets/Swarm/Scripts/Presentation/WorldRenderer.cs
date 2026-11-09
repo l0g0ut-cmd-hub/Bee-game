@@ -315,7 +315,19 @@ namespace Swarm.Presentation
                 Vector2 p = en.Pos[i];
                 if (!view.Contains(p)) continue;
                 var et = en.Type[i];
-                if (et == EnemyType.Nest || et == EnemyType.Ant || et == EnemyType.Bear) { DrawGroundEnemy(en, i, p, time); continue; }
+                if (et == EnemyType.Nest || et == EnemyType.Ant || et == EnemyType.Bear || et == EnemyType.WildHive) { DrawGroundEnemy(en, i, p, time); continue; }
+                if (et == EnemyType.Rival)
+                {
+                    // дикая пчела: как наша, но тёмная; несёт пыльцу — видно комочек
+                    int rf = (int)(time * 30f + en.Phase[i]) & 3;
+                    Color32 rc = en.Flash[i] > 0.06f ? new Color32(255, 200, 200, 255) : White;
+                    float rb = Mathf.Round(Mathf.Sin(time * 7f + en.Phase[i]));
+                    _shadow.Add(Spr.ShadowS, p.x, p.y - 7f, A(60));
+                    _fly.Add((int)Spr.RivalA + rf, p.x, p.y + rb, rc, en.Vel[i].x < 0f);
+                    if (en.Stolen[i] > 0.5f) _fly.Add(Spr.Pollen, p.x, p.y + rb - 4f, White);
+                    if (en.Mode[i] == EnemyMode.Hunt) _overlay.Add(Spr.Pixel2, p.x, p.y + rb + 5f, new Color32(238, 70, 60, 255));
+                    continue;
+                }
                 bool queen = et == EnemyType.Queen;
                 bool hornet = et == EnemyType.Hornet || queen;   // крупный — для теней/полос
                 int fr = (int)(time * 30f + en.Phase[i]) & 3;
@@ -408,6 +420,14 @@ namespace Swarm.Presentation
                 _shadow.Add(Spr.ShadowS, p.x, p.y - 1f, A(70));
                 _shadow.Add(fr == 0 ? Spr.AntA : Spr.AntB, p.x, p.y, en.Flash[i] > 0f ? new Color32(255, 200, 190, 255) : White, en.Vel[i].x < 0f);
                 if (en.Stolen[i] > 0.3f) _shadow.Add(Spr.Pollen, p.x, p.y + 2f, White);
+                return;
+            }
+            if (et == EnemyType.WildHive)
+            {
+                float sw2 = Mathf.Round(Mathf.Sin(time * 1.1f) * 0.6f);
+                _shadow.Add(Spr.ShadowL, p.x, p.y - 4f, A(80));
+                _stand.Add(Spr.WildHive, p.x + sw2, p.y - 4f, en.Flash[i] > 0.06f ? new Color32(255, 210, 200, 255) : White);
+                HpBar(p.x, p.y + 26f, 24f, en.Hp[i] / en.MaxHp[i]);
                 return;
             }
             if (et == EnemyType.Nest)

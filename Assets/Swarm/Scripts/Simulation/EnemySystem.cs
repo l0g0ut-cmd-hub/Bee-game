@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Swarm.Simulation
 {
-    public enum EnemyType : byte { Wasp, Hornet, Bear, Nest, Ant, Queen }
+    public enum EnemyType : byte { Wasp, Hornet, Bear, Nest, Ant, Queen, WildHive, Rival }
     public enum EnemyMode : byte { Hunt, Raid, Flee }
     public enum EnemyAct : byte { Move, Windup, Dash }
 
@@ -32,7 +32,15 @@ namespace Swarm.Simulation
         public readonly float[] Heat = new float[Capacity];
         public readonly int[] Stingers = new int[Capacity];
         public readonly byte[] Stage = new byte[Capacity];
-        public readonly int[] Uid = new int[Capacity];      // постоянный id (индексы меняются при удалении)
+        public readonly int[] Uid = new int[Capacity];
+        public readonly int[] Aux = new int[Capacity];      // дикая пчела: цветок, с которого носит
+
+        // --- дикий рой (конкурент): свой улей, свои сборщицы
+        public bool WildAlive;
+        public float WildHoney;
+        public int RivalCount;
+        bool _wildAttacked;
+        float _wildTimer;      // постоянный id (индексы меняются при удалении)
         int _nextUid = 1;
 
         public int IndexOfUid(int uid)
@@ -45,23 +53,23 @@ namespace Swarm.Simulation
 
         public static float RadiusOf(EnemyType t)
         {
-            switch (t) { case EnemyType.Wasp: return 5f; case EnemyType.Hornet: return 8f; case EnemyType.Bear: return 15f; case EnemyType.Nest: return 11f; case EnemyType.Queen: return 12f; default: return 3f; }
+            switch (t) { case EnemyType.Wasp: return 5f; case EnemyType.Hornet: return 8f; case EnemyType.Bear: return 15f; case EnemyType.Nest: return 11f; case EnemyType.Queen: return 12f; case EnemyType.WildHive: return 12f; default: return 3f; }
         }
         public static float SpeedOf(EnemyType t)
         {
-            switch (t) { case EnemyType.Wasp: return 50f; case EnemyType.Hornet: return 40f; case EnemyType.Bear: return 20f; case EnemyType.Nest: return 0f; case EnemyType.Queen: return 34f; default: return 13f; }
+            switch (t) { case EnemyType.Wasp: return 50f; case EnemyType.Hornet: return 40f; case EnemyType.Bear: return 20f; case EnemyType.Nest: return 0f; case EnemyType.Queen: return 34f; case EnemyType.WildHive: return 0f; case EnemyType.Rival: return 46f; default: return 13f; }
         }
         public static float HpOf(EnemyType t)
         {
-            switch (t) { case EnemyType.Wasp: return 10f; case EnemyType.Hornet: return 45f; case EnemyType.Bear: return 300f; case EnemyType.Nest: return 220f; case EnemyType.Queen: return 1000f; default: return 3f; }
+            switch (t) { case EnemyType.Wasp: return 10f; case EnemyType.Hornet: return 45f; case EnemyType.Bear: return 300f; case EnemyType.Nest: return 220f; case EnemyType.Queen: return 1000f; case EnemyType.WildHive: return 260f; case EnemyType.Rival: return 4f; default: return 3f; }
         }
         public static float BiteCooldown(EnemyType t)
         {
-            switch (t) { case EnemyType.Wasp: return 1.1f; case EnemyType.Hornet: return 0.85f; case EnemyType.Bear: return 1.4f; case EnemyType.Nest: return 9999f; case EnemyType.Queen: return 0.75f; default: return 2.4f; }
+            switch (t) { case EnemyType.Wasp: return 1.1f; case EnemyType.Hornet: return 0.85f; case EnemyType.Bear: return 1.4f; case EnemyType.Nest: return 9999f; case EnemyType.Queen: return 0.75f; case EnemyType.WildHive: return 9999f; case EnemyType.Rival: return 1.8f; default: return 2.4f; }
         }
-        static int BiteKills(EnemyType t) => t == EnemyType.Bear || t == EnemyType.Queen ? 3 : (t == EnemyType.Nest ? 0 : 1);   // медведь бьёт лапой по площади
-        public static bool Flies(EnemyType t) => t == EnemyType.Wasp || t == EnemyType.Hornet || t == EnemyType.Queen;
-        public static bool IsStatic(EnemyType t) => t == EnemyType.Nest;
+        static int BiteKills(EnemyType t) => t == EnemyType.Bear || t == EnemyType.Queen ? 3 : (t == EnemyType.Nest || t == EnemyType.WildHive ? 0 : 1);   // медведь бьёт лапой по площади
+        public static bool Flies(EnemyType t) => t == EnemyType.Wasp || t == EnemyType.Hornet || t == EnemyType.Queen || t == EnemyType.Rival;
+        public static bool IsStatic(EnemyType t) => t == EnemyType.Nest || t == EnemyType.WildHive;
         public static bool IsBoss(EnemyType t) => t == EnemyType.Queen;
         static float WindupTime(EnemyType t) => t == EnemyType.Wasp ? 0.45f : t == EnemyType.Queen ? 0.8f : 0.65f;
         static float DashTime(EnemyType t) => t == EnemyType.Wasp ? 0.3f : t == EnemyType.Queen ? 0.5f : 0.45f;
@@ -77,6 +85,7 @@ namespace Swarm.Simulation
                 case EnemyType.Wasp: return cfg.MaxStingersPerEnemy;
                 case EnemyType.Hornet: return cfg.MaxStingersPerEnemy * 2;
                 case EnemyType.Ant: return 5;
+                case EnemyType.Rival: return 3;
                 case EnemyType.Queen: return cfg.MaxStingersPerEnemy * 3;
                 default: return cfg.MaxStingersPerEnemy * 4;
             }
@@ -94,7 +103,7 @@ namespace Swarm.Simulation
 
         readonly int[] _dashKills = new int[Capacity];
 
-        public void Clear() { Count = 0; NestAlive = false; HpMul = 1f; BiteMul = 1f; }
+        public void Clear() { Count = 0; NestAlive = false; WildAlive = false; WildHoney = 0f; RivalCount = 0; HpMul = 1f; BiteMul = 1f; }
 
         public bool Spawn(EnemyType t, Vector2 p, Rng rng)
         {
@@ -106,6 +115,7 @@ namespace Swarm.Simulation
             Uid[i] = _nextUid++;
             if (!Flies(t)) DashCd[i] = 9999f;
             if (t == EnemyType.Nest) { NestAlive = true; NestBrood = 0; _nestSpawnTimer = 0f; }
+            if (t == EnemyType.WildHive) { WildAlive = true; WildHoney = 0f; _wildTimer = 2f; }
             Act[i] = EnemyAct.Move;
             Pos[i] = p;
             Vel[i] = Vector2.zero;
@@ -120,6 +130,8 @@ namespace Swarm.Simulation
             Heat[i] = 0f;
             Stingers[i] = 0;
             _dashKills[i] = 0;
+            Aux[i] = -1;
+            if (t == EnemyType.Rival) DashCd[i] = 9999f;   // дикие пчёлы не делают рывков
             return true;
         }
 
@@ -131,7 +143,7 @@ namespace Swarm.Simulation
                 Type[i] = Type[last]; Mode[i] = Mode[last]; Act[i] = Act[last]; Pos[i] = Pos[last]; Vel[i] = Vel[last];
                 DashDir[i] = DashDir[last]; Hp[i] = Hp[last]; MaxHp[i] = MaxHp[last]; BiteTimer[i] = BiteTimer[last];
                 ActTimer[i] = ActTimer[last]; DashCd[i] = DashCd[last]; Flash[i] = Flash[last]; Stolen[i] = Stolen[last];
-                Phase[i] = Phase[last]; Heat[i] = Heat[last]; Stingers[i] = Stingers[last]; _dashKills[i] = _dashKills[last]; Stage[i] = Stage[last]; Uid[i] = Uid[last];
+                Phase[i] = Phase[last]; Heat[i] = Heat[last]; Stingers[i] = Stingers[last]; _dashKills[i] = _dashKills[last]; Stage[i] = Stage[last]; Uid[i] = Uid[last]; Aux[i] = Aux[last];
             }
             Count--;
         }
@@ -153,6 +165,18 @@ namespace Swarm.Simulation
             bool grounded = sim.Sky.EnemiesGrounded(sim.Time);
             Vector2 wind = sim.Sky.Wind;
             _nestSpawnTimer -= dt;
+            _wildTimer -= dt;
+            int rivals = 0;
+            bool wildAttacked = false;
+            for (int k = 0; k < Count; k++)
+            {
+                if (Type[k] == EnemyType.Rival) rivals++;
+                else if (Type[k] == EnemyType.WildHive && Stingers[k] > 0) wildAttacked = true;
+            }
+            RivalCount = rivals;
+            _wildAttacked = wildAttacked;
+            Vector2 wildHome = world.WildHivePos;
+            bool wildDefend = WildAlive && (_wildAttacked || (swarm.Count > 0 && (swarm.LeaderPos - wildHome).sqrMagnitude < 70f * 70f));
 
             int i = 0;
             while (i < Count)
@@ -175,7 +199,7 @@ namespace Swarm.Simulation
                 }
 
                 // ночью и в ливень осы и шершни улетают в укрытие (королева — нет)
-                if (grounded && Flies(t) && !IsBoss(t) && Mode[i] != EnemyMode.Flee) Mode[i] = EnemyMode.Flee;
+                if (grounded && Flies(t) && !IsBoss(t) && t != EnemyType.Rival && Mode[i] != EnemyMode.Flee) Mode[i] = EnemyMode.Flee;
 
                 // королева: на 60% и 30% здоровья зовёт свиту и злеет
                 if (t == EnemyType.Queen)
@@ -201,7 +225,17 @@ namespace Swarm.Simulation
                 }
 
                 // гнездо: стоит на месте; когда его жалят — выпускает ос на защиту
-                if (IsStatic(t))
+                if (t == EnemyType.WildHive)
+                {
+                    // дикий улей выпускает своих сборщиц; когда его жалят — чаще и больше
+                    int cap = _wildAttacked ? 14 : 9;
+                    if (_wildTimer <= 0f && rivals < cap)
+                    {
+                        _wildTimer = _wildAttacked ? 2.5f : 6f;
+                        if (Spawn(EnemyType.Rival, p + new Vector2(sim.Rng.Signed * 6f, -4f), sim.Rng)) rivals++;
+                    }
+                }
+                else if (IsStatic(t))
                 {
                     if (Stingers[i] > 0 && _nestSpawnTimer <= 0f && NestBrood < 6)
                     {
@@ -221,6 +255,13 @@ namespace Swarm.Simulation
                     }
                 }
 
+                if (t == EnemyType.Rival)
+                {
+                    // дикая пчела: защищает свой улей, иначе мирно собирает; без улья — улетает
+                    if (!WildAlive) Mode[i] = EnemyMode.Flee;
+                    else Mode[i] = wildDefend && swarm.Count > 0 ? EnemyMode.Hunt : EnemyMode.Raid;
+                }
+
                 if (t == EnemyType.Bear && Mode[i] != EnemyMode.Flee && Hp[i] < MaxHp[i] * 0.35f)
                 {
                     Mode[i] = EnemyMode.Flee;   // искусанный медведь отступает
@@ -237,6 +278,10 @@ namespace Swarm.Simulation
                 {
                     target = NearestBee(p, 40f, swarm, out _);
                     if (target.x < 0f) target = swarm.LeaderPos;
+                }
+                else if (t == EnemyType.Rival)
+                {
+                    target = RivalForage(i, p, dt, sim, wildHome);
                 }
                 else
                 {
@@ -389,7 +434,7 @@ namespace Swarm.Simulation
                             }
                         }
                     }
-                    else if (BiteTimer[i] <= 0f && Act[i] == EnemyAct.Move)
+                    else if (BiteTimer[i] <= 0f && Act[i] == EnemyAct.Move && (t != EnemyType.Rival || Mode[i] == EnemyMode.Hunt))
                     {
                         int hits = 0;
                         for (int k = 0; k < BiteKills(t); k++)
@@ -420,6 +465,16 @@ namespace Swarm.Simulation
                     if (t == EnemyType.Nest) { NestAlive = false; sim.Stats.NestsDestroyed++; ev.Push(SimEventType.NestDestroyed, p, 0f, 0); }
                     if (balled && t == EnemyType.Hornet) sim.Stats.HornetsCooked++;
                     if (t == EnemyType.Ant) sim.Stats.AntsKilled++;
+                    if (t == EnemyType.WildHive)
+                    {
+                        // разорили дикий улей: забираем его запасы
+                        WildAlive = false;
+                        float loot = sim.Cfg.WildHiveLoot + WildHoney * 0.6f;
+                        colony.Honey += loot;
+                        sim.Stats.HoneyDelivered += loot;
+                        sim.Stats.WildHivesDestroyed++;
+                        ev.Push(SimEventType.WildHiveDestroyed, p, loot, 0);
+                    }
                     if (t == EnemyType.Queen)
                     {
                         sim.Stats.BossesKilled++;
@@ -447,6 +502,35 @@ namespace Swarm.Simulation
                 }
                 i++;
             }
+        }
+
+        /// <summary>Цель дикой сборщицы: цветок рядом с её ульем → нектар → домой.</summary>
+        Vector2 RivalForage(int i, Vector2 p, float dt, GameSim sim, Vector2 home)
+        {
+            var fl = sim.Flowers;
+            bool closed = fl.CollectMul < 0.05f;
+            if (Stolen[i] >= 3f || closed)
+            {
+                if ((p - home).sqrMagnitude < 9f * 9f) { WildHoney += Stolen[i]; Stolen[i] = 0f; }
+                return home + new Vector2(Mathf.Sin(Phase[i]) * 6f, Mathf.Cos(Phase[i]) * 3f);
+            }
+            int f = Aux[i];
+            if (f < 0 || f >= fl.Count || !fl.IsBlooming(f) || fl.Nectar[f] < 0.5f)
+            {
+                f = -1;
+                float best = float.MaxValue;
+                for (int k = 0; k < fl.Count; k++)
+                {
+                    if (!fl.IsBlooming(k) || fl.Nectar[k] < 1f) continue;
+                    float d = (fl.Pos[k] - home).sqrMagnitude * (1f + 0.3f * Mathf.Abs(Mathf.Sin(k * 7.13f + Phase[i])));
+                    if (d < best) { best = d; f = k; }
+                }
+                Aux[i] = f;
+            }
+            if (f < 0) return home;
+            if ((p - fl.Pos[f]).sqrMagnitude < 6f * 6f)
+                Stolen[i] += fl.Take(f, sim.Cfg.RivalCollectRate * fl.CollectMul * dt, sim.Cfg.FlowerRegrowTime, sim.Events);
+            return fl.Pos[f];
         }
 
         /// <summary>Ближайшая живая пчела в радиусе; если нет — (-1,-1) и index = -1.</summary>

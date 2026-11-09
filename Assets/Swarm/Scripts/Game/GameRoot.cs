@@ -12,7 +12,8 @@ namespace Swarm.Game
     /// </summary>
     public sealed class GameRoot : MonoBehaviour
     {
-        enum State { Menu, Levels, Achievements, Playing, Hive, Perk, Paused, Result }
+        enum State { Menu, Levels, Achievements, Playing, Hive, Perk, Paused, Result, Intro }
+        float _introTime;
 
         public static GameRoot Instance { get; private set; }
 
@@ -134,6 +135,8 @@ namespace Swarm.Game
             _fresh = null;
             _best = 0f;
             _state = State.Playing;
+            // первый заход в сезон — карточка «что нового» (обучение по сезонам)
+            if (mode == GameMode.Campaign && (_profile.SeenIntro & (1 << level)) == 0) { _state = State.Intro; _introTime = 0f; }
             _acc = 0f;
             _cam = _sim.Swarm.LeaderPos;
             _fx.Clear();
@@ -175,6 +178,11 @@ namespace Swarm.Game
                 case State.Levels: act = _gameUi.DrawLevels(_profile, _time); break;
                 case State.Achievements: act = _gameUi.DrawAchievements(_profile); break;
                 case State.Perk: act = _gameUi.DrawPerk(_sim, _time); break;
+                case State.Intro:
+                    _introTime += dt;
+                    act = _gameUi.DrawIntro(_level, _time);
+                    if (AutoPilot.Enabled && _introTime > 3.5f) act = UiAction.Resume;   // автопилот даёт прочитать и идёт дальше
+                    break;
                 case State.Playing: act = _gameUi.DrawHud(_sim, _screen, _time, dt); break;
                 case State.Hive: act = _gameUi.DrawHive(_sim, _time); break;
                 case State.Paused: act = _gameUi.DrawPause(_audio.Muted, Haptics.Enabled, FxSystem.ShakeEnabled, AutoPilot.Enabled); break;
@@ -240,6 +248,7 @@ namespace Swarm.Game
                 case State.Result: return UiAction.ToMenu;
                 case State.Levels: case State.Achievements: return UiAction.Back;
                 case State.Perk: return UiAction.None;
+                case State.Intro: return UiAction.Resume;
                 default: Application.Quit(); return UiAction.None;
             }
         }
@@ -258,7 +267,17 @@ namespace Swarm.Game
                     if (_state == State.Perk) { _sim.ChoosePerk(_gameUi.PerkChoice); _state = State.Playing; _input.Reset(); _audio.Play(Sfx.Upgrade); }
                     break;
                 case UiAction.Pause: if (_state == State.Playing) _state = State.Paused; break;
-                case UiAction.Resume: if (_state == State.Paused) { _state = State.Playing; _input.Reset(); } break;
+                case UiAction.Resume:
+                    if (_state == State.Paused) { _state = State.Playing; _input.Reset(); }
+                    else if (_state == State.Intro)
+                    {
+                        _profile.SeenIntro |= 1 << _level;
+                        _profile.Save();
+                        _state = State.Playing;
+                        _input.Reset();
+                        _audio.Play(Sfx.Click);
+                    }
+                    break;
                 case UiAction.Restart: StartGame(_mode, _level); break;
                 case UiAction.ToMenu: EnterMenu(); break;
                 case UiAction.OpenHive: if (_state == State.Playing) _state = State.Hive; break;
@@ -389,6 +408,7 @@ namespace Swarm.Game
                     break;
                 case SimEventType.BearRepelled: _gameUi.ShowBanner(Strings.BearGone, null, PixelUI.Green); break;
                 case SimEventType.NestDestroyed: _gameUi.ShowBanner(Strings.NestDown, Strings.NestDownSub, PixelUI.Green); break;
+                case SimEventType.WildHiveDestroyed: _gameUi.ShowBanner(Strings.WildDown, Strings.WildDownSub, PixelUI.Green); break;
                 case SimEventType.LindenBloom: _gameUi.ShowBanner(Strings.LindenTitle, Strings.LindenSub, PixelUI.Honey); break;
                 case SimEventType.NightFall: _gameUi.ShowBanner(Strings.NightTitle, Strings.NightSub, new Color32(170, 190, 255, 255)); break;
                 case SimEventType.ScoutDance: _gameUi.ShowBanner(Strings.ScoutTitle, Strings.ScoutSub, PixelUI.Honey); break;
@@ -413,7 +433,7 @@ namespace Swarm.Game
             float t = 0f;
             for (int i = 0; i < en.Count; i++)
             {
-                if (en.Type[i] == EnemyType.Nest) continue;
+                if (en.Type[i] == EnemyType.Nest || en.Type[i] == EnemyType.WildHive || en.Type[i] == EnemyType.Rival) continue;
                 float d = Mathf.Min((en.Pos[i] - sim.Swarm.LeaderPos).magnitude, (en.Pos[i] - sim.World.HivePos).magnitude);
                 float w = en.Type[i] == EnemyType.Wasp ? 0.15f : en.Type[i] == EnemyType.Ant ? 0.06f : 0.5f;
                 t += w * Mathf.Clamp01(1.4f - d / 160f);

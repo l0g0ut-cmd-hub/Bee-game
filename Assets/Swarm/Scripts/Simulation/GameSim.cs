@@ -19,14 +19,14 @@ namespace Swarm.Simulation
         public float NectarCollected, HoneyDelivered, HoneyStolen;
         public int BeesHatched, BeesLost, WaspsKilled, HornetsKilled, BearsRepelled, PeakBees;
         public int LostToHeat, LostToDash, LostToBite, LostGuards, LostToBird, LostToSpider;
-        public int FlowersSprouted, RareFound, DefendersHired, WorkersHired, BossesKilled, AntsKilled, NestsDestroyed, HornetsCooked;
+        public int WildHivesDestroyed, FlowersSprouted, RareFound, DefendersHired, WorkersHired, BossesKilled, AntsKilled, NestsDestroyed, HornetsCooked;
 
         public void Reset()
         {
             NectarCollected = HoneyDelivered = HoneyStolen = 0f;
             BeesHatched = BeesLost = WaspsKilled = HornetsKilled = BearsRepelled = PeakBees = 0;
             LostToHeat = LostToDash = LostToBite = LostGuards = LostToBird = LostToSpider = 0;
-            FlowersSprouted = RareFound = DefendersHired = WorkersHired = BossesKilled = AntsKilled = NestsDestroyed = HornetsCooked = 0;
+            WildHivesDestroyed = FlowersSprouted = RareFound = DefendersHired = WorkersHired = BossesKilled = AntsKilled = NestsDestroyed = HornetsCooked = 0;
         }
     }
 
@@ -85,6 +85,7 @@ namespace Swarm.Simulation
             World.Generate(Rng, Flowers);
             Flowers.BaseCount = Flowers.Count;
             Hazards.Generate(World, Rng);
+            if (!Cfg.WebsEnabled) Hazards.WebCount = 0;
             Reset();
         }
 
@@ -134,6 +135,7 @@ namespace Swarm.Simulation
             _nextLinden = 0;
             _wasNight = false;
             if (Cfg.NestEnabled && !AttractMode) Enemies.Spawn(EnemyType.Nest, World.NestPos, Rng);
+            if (Cfg.RivalsEnabled && !AttractMode) Enemies.Spawn(EnemyType.WildHive, World.WildHivePos, Rng);
         }
 
         public float TimeLeft => Mathf.Max(0f, Cfg.SessionTime - Time);
@@ -153,7 +155,7 @@ namespace Swarm.Simulation
 
         // ------------------------------------------------------------ матка
         public float BroodShare => BroodSteps[BroodIndex];
-        public bool CanPost => !Swarm.SquadActive && Swarm.SwarmCount >= Cfg.PostMinSwarm;
+        public bool CanPost => Cfg.PostEnabled && !Swarm.SquadActive && Swarm.SwarmCount >= Cfg.PostMinSwarm;
         public bool PostSquad() => Swarm.PostSquad(Cfg);
         public void RecallSquad() => Swarm.RecallSquad();
         public float BroodPerMinute => Cfg.BroodRate * BroodShare * Mods.Brood * 60f;
@@ -183,7 +185,7 @@ namespace Swarm.Simulation
         // ------------------------------------------------------------ сборщицы
         public int WorkerCost => Cfg.WorkerCostBase + Cfg.WorkerCostPer * Swarm.WorkerCount;
         public int WorkerRoom => Mathf.Clamp(Cfg.WorkerMax - Swarm.WorkerCount, 0, Cfg.WorkerBatch);
-        public bool CanHireWorkers => SwarmAtHive && WorkerRoom > 0 && Colony.Honey >= WorkerCost;
+        public bool CanHireWorkers => Cfg.WorkersEnabled && SwarmAtHive && WorkerRoom > 0 && Colony.Honey >= WorkerCost;
 
         public bool HireWorkers()
         {
@@ -200,7 +202,7 @@ namespace Swarm.Simulation
         // ------------------------------------------------------------ защитники
         public int DefenderCost => Cfg.DefenderCostBase + Cfg.DefenderCostPer * Swarm.GuardCount;
         public int DefenderRoom => Mathf.Clamp(Cfg.DefenderMax - Swarm.GuardCount, 0, Cfg.DefenderBatch);
-        public bool CanHireDefenders => SwarmAtHive && DefenderRoom > 0 && Colony.Honey >= DefenderCost;
+        public bool CanHireDefenders => Cfg.DefendersEnabled && SwarmAtHive && DefenderRoom > 0 && Colony.Honey >= DefenderCost;
 
         public bool HireDefenders()
         {
@@ -339,7 +341,7 @@ namespace Swarm.Simulation
             }
             if (!Enemies.Spawn(EnemyType.Queen, best, Rng)) return;
             int qi = Enemies.Count - 1;
-            float qm = Cfg.WaveMul * (1f + 0.5f * Waves.Cycle);
+            float qm = Cfg.WaveMul * Cfg.BossHpMul * (1f + 0.5f * Waves.Cycle);
             Enemies.Hp[qi] = Enemies.MaxHp[qi] = Enemies.MaxHp[qi] * qm;
             Events.Push(SimEventType.BossIncoming, best, 0f, qi);
         }

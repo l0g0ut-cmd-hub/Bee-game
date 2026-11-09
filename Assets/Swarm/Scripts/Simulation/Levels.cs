@@ -22,7 +22,7 @@ namespace Swarm.Simulation
         {
             new LevelDef { Name = "ВЕСНА", Sub = "ЦВЕТУЩИЙ ЛУГ", Biome = Biome.Meadow, GoalBees = 100, GoalHoney = 450, WaveMul = 0.8f, UnlockStars = 0 },
             new LevelDef { Name = "ЛЕТО", Sub = "СТАРЫЙ САД", Biome = Biome.Garden, GoalBees = 120, GoalHoney = 650, WaveMul = 1.15f, UnlockStars = 2 },
-            new LevelDef { Name = "ОСЕНЬ", Sub = "ТУМАННОЕ БОЛОТО", Biome = Biome.Swamp, GoalBees = 130, GoalHoney = 700, WaveMul = 1.25f, UnlockStars = 4 },
+            new LevelDef { Name = "ОСЕНЬ", Sub = "ТУМАННОЕ БОЛОТО", Biome = Biome.Swamp, GoalBees = 130, GoalHoney = 700, WaveMul = 1.15f, UnlockStars = 4 },
         };
 
         public static SimConfig Make(GameMode mode, int level)
@@ -45,6 +45,14 @@ namespace Swarm.Simulation
                     c.WindStrength = 20f;
                     break;
             }
+            // обучение по сезонам: весна — основы, лето — защита и опасности, осень — всё + дикий рой
+            int season = mode == GameMode.Campaign ? UnityEngine.Mathf.Clamp(level, 0, 2) : (mode == GameMode.Daily ? 1 : 2);
+            bool summer = season >= 1, autumn = season >= 2;
+            c.AntsEnabled = c.BearEnabled = c.WebsEnabled = c.WeatherEnabled = summer;
+            c.DefendersEnabled = c.WorkersEnabled = c.PostEnabled = summer;
+            c.NestEnabled = autumn;
+            c.RivalsEnabled = autumn;
+            if (season == 0) c.BossHpMul = 0.55f;
             if (mode == GameMode.Endless)
             {
                 c.Endless = true;

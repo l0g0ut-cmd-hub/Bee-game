@@ -49,6 +49,11 @@ namespace Swarm.Presentation
             _clips[(int)Sfx.Swipe] = Synth("swipe", 0.3f, (t, n) => (Noise() * (1f - n) * 0.6f + Sin(t * Lerp(140f, 60f, n)) * 0.6f) * Env(n, 0.005f, 0.3f));
             _clips[(int)Sfx.Sprout] = Synth("sprout", 0.35f, (t, n) => (Sin(t * Note((int)(n * 3f) * 5, 880f)) * 0.6f + Sin(t * 1760f) * 0.15f) * Env(n, 0.01f, 0.35f) * 0.5f);
             _clips[(int)Sfx.Night] = Synth("night", 1.4f, (t, n) => (Sin(t * 196f) * 0.6f + Sin(t * 294f) * 0.3f + Sin(t * 392f) * 0.15f) * Env(n, 0.02f, 1.4f) * 0.5f);
+            // звуки интерфейса Kenney Interface Sounds (CC0); если файлов нет — остаётся синтез
+            var uiClick = Resources.Load<AudioClip>("Audio/ui_click");
+            if (uiClick != null) _clips[(int)Sfx.Click] = uiClick;
+            var uiBuy = Resources.Load<AudioClip>("Audio/ui_buy");
+            if (uiBuy != null) _clips[(int)Sfx.Upgrade] = uiBuy;
             _voices = new AudioSource[8];
             for (int i = 0; i < _voices.Length; i++)
             {

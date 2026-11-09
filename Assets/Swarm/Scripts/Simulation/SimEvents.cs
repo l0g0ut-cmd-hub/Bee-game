@@ -25,6 +25,7 @@ namespace Swarm.Simulation
         WeatherChanged,
         LindenBloom,
         NestDestroyed,
+        WildHiveDestroyed,
         NightFall,
         Dawn,
         EnemySpawned,

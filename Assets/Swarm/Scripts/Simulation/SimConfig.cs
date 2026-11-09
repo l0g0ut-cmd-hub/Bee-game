@@ -117,6 +117,13 @@ namespace Swarm.Simulation
         public float PostShare = 0.25f;
         public int PostMax = 30, PostMinSwarm = 16;
         public float PostRadius = 40f;
+        // --- дикий рой-конкурент
+        public bool RivalsEnabled = false;
+        public float BossHpMul = 1f;          // весной королева слабее — это первый босс
+        public float WildHiveLoot = 120f, RivalCollectRate = 1.4f;
+        // --- обучение по сезонам: что включено (весна — только основы)
+        public bool AntsEnabled = true, BearEnabled = true, WebsEnabled = true, WeatherEnabled = true;
+        public bool DefendersEnabled = true, WorkersEnabled = true, PostEnabled = true;
         public bool BirdsEnabled = false;     // птицы-охотники (выключены по отзыву)
         public bool FogEnabled = false;       // туман войны (выключен по отзыву; метки разведчиц работают)
         public bool SkyEnabled = true;        // день/ночь и погода

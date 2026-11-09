@@ -51,12 +51,14 @@ namespace Swarm.Simulation
             Vector2 hive = sim.World.HivePos + BeeSwarm.HiveEntranceOffset;
             float cap = cfg.CarryBase * col.CarryMul * sim.Mods.Carry * Mathf.Max(1, sw.SwarmCount - sw.SquadCount);
             var en = sim.Enemies;
-            int nest = -1, queen = -1;
+            int nest = -1, queen = -1, wild = -1, danger = 0;
             int threat = -1, raider = -1;
             float threatD = 140f * 140f;
             for (int e = 0; e < en.Count; e++)
             {
                 if (en.Type[e] == EnemyType.Nest) { nest = e; continue; }
+                if (en.Type[e] == EnemyType.WildHive) { wild = e; continue; }
+                if (en.Type[e] != EnemyType.Rival && en.Type[e] != EnemyType.Ant) danger++;
                 if (en.Type[e] == EnemyType.Queen) queen = e;
                 if (en.Type[e] == EnemyType.Bear && sw.SwarmCount < 60) continue;
                 if (en.Mode[e] == EnemyMode.Flee) continue;   // спит/убегает — не гоняемся
@@ -97,7 +99,9 @@ namespace Swarm.Simulation
             }
             else if (raider >= 0) WorldTarget = en.Pos[raider];
             else if (StuckWeb(sim, out Vector2 web)) WorldTarget = web;   // пчёлы в паутине — пролетаем роем, рвём сеть
-            else if (nest >= 0 && sw.SwarmCount >= 100 && col.Level[(int)UpgradeType.Sting] >= 2 && en.Count <= 2 && sw.FieldCarry < cap * 0.3f)
+            else if (wild >= 0 && sw.SwarmCount >= 90 && col.Level[(int)UpgradeType.Sting] >= 2 && danger == 0 && sw.FieldCarry < cap * 0.3f)
+                WorldTarget = en.Pos[wild];                                  // разоряем дикий улей: конкуренты пропадут, запасы — нам
+            else if (nest >= 0 && sw.SwarmCount >= 100 && col.Level[(int)UpgradeType.Sting] >= 2 && danger <= 2 && sw.FieldCarry < cap * 0.3f)
                 WorldTarget = en.Pos[nest];                                  // сильным роем сносим гнездо и днём
             else if (sim.Sky.Thirst > 0.6f && sim.World.Ponds.Count > 0)
             {

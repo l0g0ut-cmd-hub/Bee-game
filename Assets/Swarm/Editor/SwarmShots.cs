@@ -85,6 +85,7 @@ namespace Swarm.EditorTools
             profile.BreedIndex = 1;
             Shot("02b_levels_breed", attract, () => _gui.DrawLevels(profile, _t), menu: true);
             Shot("03_achievements", attract, () => _gui.DrawAchievements(profile), menu: true);
+            Shot("03b_intro_summer", attract, () => _gui.DrawIntro(1, _t), menu: true);
 
             // 4. Старт партии (лето, сад): подсказка обучения, 
             var sim = new GameSim(Levels.Make(GameMode.Campaign, 1), 777u);
@@ -227,6 +228,19 @@ namespace Swarm.EditorTools
 
             // 20-22. Автопилот: виртуальный палец сам играет через настоящий UI
             RunAutopilot();
+
+            // 19b. Осень: дикий улей и его сборщицы
+            {
+                var au = new GameSim(Levels.Make(GameMode.Campaign, 2), 99u);
+                _fx.Clear();
+                _gui.ClearBanner();
+                Snap(au);
+                Grow(au, 60);
+                Vector2 wh = au.World.WildHivePos + new Vector2(0f, -50f);
+                Play(au, 9f, s => wh);
+                _log.Append($"PROBE|wild|alive {au.Enemies.WildAlive} rivals {au.Enemies.RivalCount} wildHoney {au.Enemies.WildHoney:F1}\n");
+                Shot("19b_wild_hive", au, () => _gui.DrawHud(au, _screen, _t, Dt));
+            }
 
             // 19. Выживание: HUD с кругами
             var end = new GameSim(Levels.Make(GameMode.Endless, 0), 31u);
