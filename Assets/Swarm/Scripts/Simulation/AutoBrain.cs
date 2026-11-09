@@ -74,6 +74,9 @@ namespace Swarm.Simulation
             }
             else if (threat >= 0 && threatD < 90f * 90f) WorldTarget = en.Pos[threat];
             else if (raider >= 0) WorldTarget = en.Pos[raider];
+            else if (StuckWeb(sim, out Vector2 web)) WorldTarget = web;   // пчёлы в паутине — пролетаем роем, рвём сеть
+            else if (nest >= 0 && sw.SwarmCount >= 100 && col.Level[(int)UpgradeType.Sting] >= 2 && en.Count <= 2 && sw.FieldCarry < cap * 0.3f)
+                WorldTarget = en.Pos[nest];                                  // сильным роем сносим гнездо и днём
             else if (sim.Sky.Thirst > 0.6f && sim.World.Ponds.Count > 0)
             {
                 Vector2 best = sim.World.Ponds[0];
@@ -81,7 +84,7 @@ namespace Swarm.Simulation
                     if ((sim.World.Ponds[i] - sw.LeaderPos).sqrMagnitude < (best - sw.LeaderPos).sqrMagnitude) best = sim.World.Ponds[i];
                 WorldTarget = best;
             }
-            else if (sw.FieldCarry >= cap * 0.85f || (_delivering && sw.FieldCarry > 0.5f))
+            else if (sw.FieldCarry >= cap * 0.85f || (_delivering && sw.FieldCarry > UnloadedCarry(sim)))
             {
                 _delivering = true;
                 WorldTarget = hive;
@@ -141,6 +144,20 @@ namespace Swarm.Simulation
             }
         }
 
+        /// <summary>Есть ли застрявшие в паутине (3+) — и где.</summary>
+        static bool StuckWeb(GameSim sim, out Vector2 at)
+        {
+            var sw = sim.Swarm;
+            at = default;
+            int n = 0;
+            Vector2 acc = Vector2.zero;
+            for (int i = 0; i < sw.Count; i++)
+                if (sw.Stuck[i] > 0.5f && sw.Role[i] == BeeRole.Swarm) { n++; acc += sw.Pos[i]; }
+            if (n < 3) return false;
+            at = acc / n;
+            return true;
+        }
+
         public static int BloomingNear(GameSim sim, Vector2 c, float r)
         {
             var fl = sim.Flowers;
@@ -151,35 +168,71 @@ namespace Swarm.Simulation
         }
 
         // ------------------------------------------------------------------ улей
+        /// <summary>Пора копить мёд (матку на СТОП)? Решает по тому, чего не хватает до цели.</summary>
         public static bool Saving(GameSim sim)
         {
             var sw = sim.Swarm;
             var cfg = sim.Cfg;
             if (cfg.Endless) return false;
-            return sw.SwarmCount >= cfg.GoalBees
-                   || (sim.TimeLeft < 120f && sw.SwarmCount >= cfg.Winter2Bees)
-                   || (sim.Time > 420f && sw.SwarmCount >= cfg.GoalBees - 15 && sim.Colony.Honey < cfg.GoalHoney);
+            float bees = sw.SwarmCount / (float)cfg.GoalBees, honey = sim.Colony.Honey / cfg.GoalHoney;
+            if (bees >= 1f) return true;                 // пчёл хватает — весь мёд в запас
+            // мёда хватит и на недостающих пчёл, и на цель — растим рой
+            float need = (cfg.GoalBees - sw.SwarmCount) * sim.BroodCostPerBee;
+            if (sim.Colony.Honey - need >= cfg.GoalHoney) return false;
+            if (sim.TimeLeft < 150f) return honey < bees; // под конец лета добираем то, чего меньше
+            return sim.Time > 420f && bees >= 0.88f;
         }
 
         public static int WantBrood(GameSim sim) => Saving(sim) ? 0 : 4;
 
-        public static int WantDefenders(GameSim sim) => sim.Time > 250f ? 12 : (sim.Time > 90f ? 6 : 0);
+        public static int WantDefenders(GameSim sim)
+        {
+            int w = sim.Time > 400f ? 18 : sim.Time > 250f ? 12 : sim.Time > 90f ? 6 : 0;
+            if (sim.Cfg.Endless) w = Mathf.Min(sim.Cfg.DefenderMax, w + 3 * sim.Waves.Cycle);
+            return w;
+        }
 
         /// <summary>Следующая кнопка в меню улья; 39 — «В ПОЛЁТ!», когда делать больше нечего.</summary>
+        /// <summary>
+        /// Следующая кнопка в меню улья; 39 — «В ПОЛЁТ!», когда делать больше нечего.
+        /// Траты дисциплинированы: к концу лета покупаем только из излишка сверх цели по мёду.
+        /// </summary>
         public static int NextHiveButton(GameSim sim)
         {
             var sw = sim.Swarm;
             var col = sim.Colony;
+            var cfg = sim.Cfg;
             bool saving = Saving(sim);
             if (sim.BroodIndex != WantBrood(sim)) return 31;
-            if (sw.SwarmCount + 3 >= col.MaxBees && sim.CanUpgrade(UpgradeType.Comb)) return 33;
-            if (!saving && col.Level[(int)UpgradeType.Carry] < 2 && sim.CanUpgrade(UpgradeType.Carry)) return 34;
-            if (!saving && col.Level[(int)UpgradeType.Sting] < 2 && sim.Time > 150f && sim.CanUpgrade(UpgradeType.Sting)) return 35;
-            if (!saving && col.Level[(int)UpgradeType.Speed] < 1 && sim.CanUpgrade(UpgradeType.Speed)) return 36;
-            if (sw.GuardCount < WantDefenders(sim) && sim.CanHireDefenders && col.Honey > sim.DefenderCost + 40) return 32;
-            if (!saving && sim.Time > 40f && sim.CanHireWorkers && col.Honey > sim.WorkerCost + 30) return 37;
+
+            // «пол» мёда, ниже которого не тратим: рано — 0, со временем растёт к цели (в выживании — небольшой запас)
+            float late = cfg.Endless ? 0f : Mathf.Clamp01((sim.Time - 240f) / 240f);
+            float floor = cfg.Endless ? 30f : cfg.GoalHoney * late;
+            bool endgame = !cfg.Endless && sim.TimeLeft < 75f;
+            float free = col.Honey - floor;
+
+            bool needBees = sw.SwarmCount < cfg.GoalBees || cfg.Endless;
+            if (needBees && sw.SwarmCount + 3 >= col.MaxBees && sim.CanUpgrade(UpgradeType.Comb) && (free >= col.CostOf(UpgradeType.Comb) || !endgame && sim.Time < 300f)) return 33;
+            if (endgame) return 39;
+            // базовые улучшения — сразу, пока лето молодое
+            if (!saving && sim.Time < 300f)
+            {
+                if (col.Level[(int)UpgradeType.Carry] < 2 && sim.CanUpgrade(UpgradeType.Carry)) return 34;
+                if (col.Level[(int)UpgradeType.Sting] < 2 && sim.Time > 150f && sim.CanUpgrade(UpgradeType.Sting)) return 35;
+                if (col.Level[(int)UpgradeType.Speed] < 1 && sim.CanUpgrade(UpgradeType.Speed)) return 36;
+            }
+            if (sw.GuardCount < WantDefenders(sim) && sim.CanHireDefenders && free >= sim.DefenderCost + 20) return 32;
+            if (!saving && sim.Time > 40f && sim.CanHireWorkers && free >= sim.WorkerCost + 20 && (cfg.Endless || sim.TimeLeft > 150f)) return 37;
+            // дальше — только из излишка
+            if (sim.CanUpgrade(UpgradeType.Carry) && free >= col.CostOf(UpgradeType.Carry) + 40) return 34;
+            if (sim.CanUpgrade(UpgradeType.Sting) && free >= col.CostOf(UpgradeType.Sting) + 40) return 35;
+            if (sim.CanUpgrade(UpgradeType.Speed) && free >= col.CostOf(UpgradeType.Speed) + 40) return 36;
             return 39;
         }
+
+        /// <summary>Ноша, которую считаем «разгрузились» (пара отставших/застрявших пчёл не держит рой у улья).</summary>
+        public static float UnloadedCarry(GameSim sim) =>
+            0.5f + 0.06f * sim.Cfg.CarryBase * sim.Colony.CarryMul * sim.Mods.Carry * Mathf.Max(1, sim.Swarm.SwarmCount - sim.Swarm.SquadCount);
 
         public static bool HiveWanted(GameSim sim) => NextHiveButton(sim) != 39;
 

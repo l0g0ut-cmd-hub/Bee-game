@@ -57,7 +57,7 @@ static class Program
                 postAge = sw.SquadActive ? postAge + dt : 0f;
                 if (think <= 0f) { think = 0.25f; brain.Decide(sim); }
                 if (sim.PerkPending) sim.ChoosePerk(AutoBrain.PickPerk(sim));
-                if (sim.SwarmAtHive && sw.FieldCarry < 0.5f && hiveCd <= 0f && AutoBrain.HiveWanted(sim))
+                if (sim.SwarmAtHive && sw.FieldCarry < AutoBrain.UnloadedCarry(sim) && hiveCd <= 0f && AutoBrain.HiveWanted(sim))
                 {
                     hiveCd = 20f; hive++;
                     for (int k = 0; k < 30; k++)
@@ -79,6 +79,8 @@ static class Program
                 if (AutoBrain.ShouldRecall(sim, postAge)) { sim.RecallSquad(); postCd = 25f; }
                 else if (postCd <= 0f && brain.ShouldPost(sim)) { sim.PostSquad(); postCd = 45f; posts++; }
                 sim.Step(dt, new SimInput { Active = true, Target = brain.WorldTarget, Hold = brain.WantHold });
+                if (Environment.GetEnvironmentVariable("TRACE") == sd.ToString() && ((int)(sim.Time * 60f)) % 1800 == 0)
+                    Console.WriteLine($"   t={sim.Time,4:F0} bees={sw.SwarmCount}/{sim.Colony.MaxBees} honey={sim.Colony.Honey:F0} brood={sim.BroodIndex} save={AutoBrain.Saving(sim)} def={sw.GuardCount} wk={sw.WorkerCount} lv={sim.Colony.Level[0]}{sim.Colony.Level[1]}{sim.Colony.Level[2]}{sim.Colony.Level[3]} carry={sw.FieldCarry:F0} en={sim.Enemies.Count} tgt={brain.WorldTarget} lead={sw.LeaderPos}");
                 sim.Events.Clear();
                 bool isNight = sim.Sky.IsNight(sim.Time);
                 if (isNight) night += dt;
@@ -87,7 +89,8 @@ static class Program
                 if (idle) { if (isNight) idleNight += dt; else idleDay += dt; }
             }
             Console.WriteLine($" seed {sd}: {sim.Result,-10} ★{sim.Stars} t={sim.Time,4:F0} bees={sim.Swarm.SwarmCount,3} honey={sim.Colony.Honey,4:F0} delivered={sim.Stats.HoneyDelivered,5:F0} " +
-                              $"idleDay={idleDay,4:F0}s ({100f * idleDay / Math.Max(1f, sim.Time - night):F0}%) idleNight={idleNight,3:F0}/{night,3:F0}s hive={hive} posts={posts} workers={sim.Swarm.WorkerCount} def={sim.Swarm.GuardCount}");
+                              $"idleDay={idleDay,4:F0}s ({100f * idleDay / Math.Max(1f, sim.Time - night):F0}%) idleNight={idleNight,3:F0}/{night,3:F0}s hive={hive} posts={posts} workers={sim.Swarm.WorkerCount} def={sim.Swarm.GuardCount} " +
+                              $"lost={sim.Stats.BeesLost} heat/dash/bite/spider={sim.Stats.LostToHeat}/{sim.Stats.LostToDash}/{sim.Stats.LostToBite}/{sim.Stats.LostToSpider} stolen={sim.Stats.HoneyStolen:F0} nest={(sim.Enemies.NestAlive ? 1 : 0)} cooked={sim.Stats.HornetsCooked} hatched={sim.Stats.BeesHatched}");
         }
     }
 

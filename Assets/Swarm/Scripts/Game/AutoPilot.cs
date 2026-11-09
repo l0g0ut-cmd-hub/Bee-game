@@ -145,7 +145,7 @@ namespace Swarm.Game
         {
             var sw = sim.Swarm;
             // 1. Улей: зайти, если есть что купить или поменять кладку
-            if (sim.SwarmAtHive && sw.FieldCarry < 0.5f && _hiveCooldown <= 0f && AutoBrain.HiveWanted(sim) && ui.TryGetButton(20, out _))
+            if (sim.SwarmAtHive && sw.FieldCarry < AutoBrain.UnloadedCarry(sim) && _hiveCooldown <= 0f && AutoBrain.HiveWanted(sim) && ui.TryGetButton(20, out _))
             {
                 _hiveCooldown = 20f;
                 StartTap(20);
