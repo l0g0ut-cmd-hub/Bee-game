@@ -903,10 +903,23 @@ def nest():
 
 add('Nest', nest(), (12, 2))
 
+def ant(frame):
+    """Муравей сбоку, мельче пчелы: брюшко | талия | грудь | голова, коленчатый усик, 3 пары ног с шагом."""
+    body = [
+        '.........k..',
+        '.kk.....k.k.',
+        'kmhk.kk.kmhk',
+        'kmmmkmhkmmmkk',
+        '.kdmkkdkkdk.',
+    ]
+    legs = ['..k.k..k.k..', '.k..k..k..k.'] if frame == 0 else ['..k..k.k.k..', '...kk.k..kk.']
+    cv = Canvas(13, 7)
+    cv.pattern(body + legs, {'k': INK[0], 'm': HORNET[1], 'h': HORNET[3], 'd': RED[0]})
+    return cv
+
+
 for fr in range(2):
-    a = Canvas(6, 4)
-    a.pattern(['.k..k.', 'kKkKKk', '.k..k.', 'k....k'] if fr == 0 else ['k....k', 'kKkKKk', '.k..k.', '.k..k.'], {'k': INK[0], 'K': RED[0]})
-    add('Ant%s' % 'AB'[fr], a)
+    add('Ant%s' % 'AB'[fr], ant(fr), (6, 6))
 
 
 def linden(frame, dry=False):

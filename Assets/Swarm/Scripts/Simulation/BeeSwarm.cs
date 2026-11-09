@@ -33,7 +33,7 @@ namespace Swarm.Simulation
         public float Speed01;
         public float Radius;
         public float TotalCarry;
-        /// <summary>Нектар в полевом рое (без стражей) — для шкалы «неси в улей».</summary>
+        /// <summary>Нектар в основном рое (без стражей, отряда и сборщиц) — для шкалы «неси в улей».</summary>
         public float FieldCarry;
         public int GatheringCount, AttackingCount, ScoutingCount;
 
@@ -366,7 +366,7 @@ namespace Swarm.Simulation
                         Task[i] = BeeTask.Follow;
                         TotalCarry += Carry[i];
                         if (Role[i] == BeeRole.Swarm) { FieldCarry += Carry[i]; swarmIdx++; }
-                        else if (Role[i] == BeeRole.Squad) { FieldCarry += Carry[i]; squadIdx++; }
+                        else if (Role[i] == BeeRole.Squad) squadIdx++;
                         else if (Role[i] == BeeRole.Guard) guardIdx++;
                         continue;
                     }
@@ -409,15 +409,16 @@ namespace Swarm.Simulation
                 else if (Role[i] == BeeRole.Worker)
                 {
                     // --- сборщица: цветок → улей → цветок; не воюет
-                    if (Carry[i] >= cap * cfg.WorkerCarryMul - 0.01f || (Carry[i] > 0f && !ForageValid(i, flowers)))
+                    bool closed = flowers.CollectMul < 0.05f;   // ночь: цветы закрыты
+                    if (Carry[i] >= cap * cfg.WorkerCarryMul - 0.01f || (Carry[i] > 0f && (closed || !ForageValid(i, flowers))))
                     {
                         task = BeeTask.Deliver;
                         target = entrance + new Vector2(Mathf.Sin(ph) * 3f, 0f);
                     }
                     else
                     {
-                        if (!ForageValid(i, flowers)) Forage[i] = PickForage(i, flowers, entrance, sim);
-                        if (Forage[i] >= 0)
+                        if (!closed && !ForageValid(i, flowers)) Forage[i] = PickForage(i, flowers, entrance, sim);
+                        if (!closed && Forage[i] >= 0)
                         {
                             task = BeeTask.Gather;
                             targetIdx = Forage[i];
@@ -623,7 +624,7 @@ namespace Swarm.Simulation
                 Vel[i] = v;
                 Task[i] = task;
                 TotalCarry += Carry[i];
-                if (Role[i] == BeeRole.Swarm || Role[i] == BeeRole.Squad) FieldCarry += Carry[i];
+                if (Role[i] == BeeRole.Swarm) FieldCarry += Carry[i];   // отряд и сборщицы носят сами
             }
         }
 

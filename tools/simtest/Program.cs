@@ -15,6 +15,7 @@ static class Program
     static int Main(string[] args)
     {
         if (args.Length > 0 && args[0] == "ballcheck") { BallCheck(); return 0; }
+        if (args.Length > 0 && args[0] == "brain") { Brain(args.Length > 1 ? int.Parse(args[1]) : 6); return 0; }
         int seeds = args.Length > 0 ? int.Parse(args[0]) : 6;
         bool verbose = args.Length > 1;
         int wins = 0;
@@ -34,6 +35,60 @@ static class Program
         Console.WriteLine($"\nsim steps: {steps}, {steps / el:F0} steps/s ({el:F1}s wall)");
         Console.WriteLine($"skill 1.0 wins: {wins}/{seeds}");
         return 0;
+    }
+
+    /// <summary>Прогон «мозга» автопилота (AutoBrain) с замером простоя роя.</summary>
+    static void Brain(int seeds)
+    {
+        int lvl = int.TryParse(Environment.GetEnvironmentVariable("LEVEL"), out var lv) ? lv : 1;
+        for (int sd = 1; sd <= seeds; sd++)
+        {
+            var cfg = Levels.Make(GameMode.Campaign, lvl);
+            var sim = new GameSim(cfg, (uint)(sd * 7919));
+            var brain = new AutoBrain();
+            const float dt = 1f / 60f;
+            float think = 0f, hiveCd = 0f, postCd = 30f, postAge = 0f;
+            float idleDay = 0f, idleNight = 0f, night = 0f;
+            int hive = 0, posts = 0;
+            while (sim.Result == SimResult.Running)
+            {
+                var sw = sim.Swarm;
+                think -= dt; hiveCd -= dt; postCd -= dt;
+                postAge = sw.SquadActive ? postAge + dt : 0f;
+                if (think <= 0f) { think = 0.25f; brain.Decide(sim); }
+                if (sim.PerkPending) sim.ChoosePerk(AutoBrain.PickPerk(sim));
+                if (sim.SwarmAtHive && sw.FieldCarry < 0.5f && hiveCd <= 0f && AutoBrain.HiveWanted(sim))
+                {
+                    hiveCd = 20f; hive++;
+                    for (int k = 0; k < 30; k++)
+                    {
+                        int id = AutoBrain.NextHiveButton(sim);
+                        if (id == 39) break;
+                        switch (id)
+                        {
+                            case 31: sim.CycleBrood(); break;
+                            case 32: sim.HireDefenders(); break;
+                            case 33: sim.TryUpgrade(UpgradeType.Comb); break;
+                            case 34: sim.TryUpgrade(UpgradeType.Carry); break;
+                            case 35: sim.TryUpgrade(UpgradeType.Sting); break;
+                            case 36: sim.TryUpgrade(UpgradeType.Speed); break;
+                            case 37: sim.HireWorkers(); break;
+                        }
+                    }
+                }
+                if (AutoBrain.ShouldRecall(sim, postAge)) { sim.RecallSquad(); postCd = 25f; }
+                else if (postCd <= 0f && brain.ShouldPost(sim)) { sim.PostSquad(); postCd = 45f; posts++; }
+                sim.Step(dt, new SimInput { Active = true, Target = brain.WorldTarget, Hold = brain.WantHold });
+                sim.Events.Clear();
+                bool isNight = sim.Sky.IsNight(sim.Time);
+                if (isNight) night += dt;
+                bool idle = sw.LeaderVel.magnitude < 8f && sw.GatheringCount < 3 && sw.AttackingCount == 0
+                            && !(sim.SwarmAtHive && sw.FieldCarry > 0.3f);
+                if (idle) { if (isNight) idleNight += dt; else idleDay += dt; }
+            }
+            Console.WriteLine($" seed {sd}: {sim.Result,-10} ★{sim.Stars} t={sim.Time,4:F0} bees={sim.Swarm.SwarmCount,3} honey={sim.Colony.Honey,4:F0} delivered={sim.Stats.HoneyDelivered,5:F0} " +
+                              $"idleDay={idleDay,4:F0}s ({100f * idleDay / Math.Max(1f, sim.Time - night):F0}%) idleNight={idleNight,3:F0}/{night,3:F0}s hive={hive} posts={posts} workers={sim.Swarm.WorkerCount} def={sim.Swarm.GuardCount}");
+        }
     }
 
     static void BallCheck()

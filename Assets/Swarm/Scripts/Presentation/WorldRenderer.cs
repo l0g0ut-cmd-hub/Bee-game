@@ -375,7 +375,8 @@ namespace Swarm.Presentation
             if (et == EnemyType.Ant)
             {
                 int fr = ((int)(time * 10f + en.Phase[i]) & 1);
-                _shadow.Add(fr == 0 ? Spr.AntA : Spr.AntB, p.x, p.y, White, en.Vel[i].x < 0f);
+                _shadow.Add(Spr.ShadowS, p.x, p.y - 1f, A(70));
+                _shadow.Add(fr == 0 ? Spr.AntA : Spr.AntB, p.x, p.y, en.Flash[i] > 0f ? new Color32(255, 200, 190, 255) : White, en.Vel[i].x < 0f);
                 if (en.Stolen[i] > 0.3f) _shadow.Add(Spr.Pollen, p.x, p.y + 2f, White);
                 return;
             }

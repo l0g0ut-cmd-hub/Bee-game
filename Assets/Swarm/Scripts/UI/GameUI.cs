@@ -333,7 +333,9 @@ namespace Swarm.UI
                 bool blink = _bannerTime > 2.2f && Mathf.Repeat(time * 6f, 1f) < 0.35f;
                 float by = Mathf.Round(H * 0.66f);
                 float k = Mathf.Clamp01(_bannerTime * 2f);
-                _ui.Fill(new Rect(0, by - 14, W, 34), new Color32(23, 18, 28, (byte)(150 * k)));
+                int subLines = _bannerSub != null ? Wrap(_bannerSub, W - 8).Length : 0;
+                float extra = Mathf.Max(0, subLines - 1) * 10f;
+                _ui.Fill(new Rect(0, by - 14 - extra, W, 34 + extra), new Color32(23, 18, 28, (byte)(150 * k)));
                 if (!blink)
                 {
                     var c = _bannerColor; c.a = (byte)(255 * k);
@@ -341,11 +343,15 @@ namespace Swarm.UI
                     _ui.Text(_bannerTitle, W * 0.5f, by + (scale == 2 ? 2 : 5), c, scale, 1);
                 }
                 if (_bannerSub != null)
-                    _ui.Text(_bannerSub, W * 0.5f, by - 10, new Color32(255, 250, 240, (byte)(220 * k)), 1, 1);
+                {
+                    var lines = Wrap(_bannerSub, W - 8);   // длинные подписи переносятся, а не уходят за край
+                    for (int li = 0; li < lines.Length; li++)
+                        _ui.Text(lines[li], W * 0.5f, by - 10 - li * 10, new Color32(255, 250, 240, (byte)(220 * k)), 1, 1);
+                }
             }
 
             // --- нектар в рое
-            float cap = cfg.CarryBase * col.CarryMul * sim.Mods.Carry * Mathf.Max(1, sw.SwarmCount);
+            float cap = cfg.CarryBase * col.CarryMul * sim.Mods.Carry * Mathf.Max(1, sw.SwarmCount - sw.SquadCount);
             float frac = sw.FieldCarry / cap;
             float bottom = _ui.SafeBottom + 6;
             var cr = new Rect(6, bottom, 74, 18);

@@ -330,7 +330,7 @@ namespace Swarm.Game
             if (_autoTimer <= 0f)
             {
                 _autoTimer = 5f + (float)_rnd.NextDouble() * 4f;
-                float cap = _cfg.CarryBase * s.Colony.CarryMul * Mathf.Max(1, s.Swarm.SwarmCount);
+                float cap = _cfg.CarryBase * s.Colony.CarryMul * Mathf.Max(1, s.Swarm.SwarmCount - s.Swarm.SquadCount);
                 if (s.Swarm.FieldCarry > cap * 0.7f)
                     _autoTarget = s.World.HivePos + BeeSwarm.HiveEntranceOffset;
                 else

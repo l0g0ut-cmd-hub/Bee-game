@@ -38,11 +38,9 @@ namespace Swarm.Game
         float _tapTimer;
         float _wait;
 
-        // решения полёта
+        // решения — в AutoBrain (та же логика гоняется в стенде)
+        public readonly AutoBrain Brain = new AutoBrain();
         float _think;
-        int _flower = -1;
-        bool _delivering;
-        Vector2 _worldTarget;
         float _hiveCooldown, _postCooldown, _perkDelay = -1f;
         float _postAge;
 
@@ -54,8 +52,7 @@ namespace Swarm.Game
             Cursor = new Vector2(screen.Width * 0.5f, screen.Height * 0.4f);
             _tap = Tap.None;
             _wait = 0.8f;
-            _flower = -1;
-            _delivering = false;
+            Brain.Reset();
             _hiveCooldown = 0f;
             _postCooldown = 30f;
             _perkDelay = -1f;
@@ -71,7 +68,7 @@ namespace Swarm.Game
             Held = Steering = false;
         }
 
-        public Vector2 WorldTarget => _worldTarget;
+        public Vector2 WorldTarget => Brain.WorldTarget;
 
         public void Tick(GameSim sim, AutoContext ctx, PixelUI ui, PixelScreen screen, float dt)
         {
@@ -89,10 +86,10 @@ namespace Swarm.Game
                 case AutoContext.Perk:
                     if (_perkDelay < 0f) _perkDelay = 1.6f;           // даём прочитать карточки
                     _perkDelay -= dt;
-                    if (_perkDelay <= 0f) { _perkDelay = -1f; StartTap(60 + PickPerk(sim)); }
+                    if (_perkDelay <= 0f) { _perkDelay = -1f; StartTap(60 + AutoBrain.PickPerk(sim)); }
                     break;
                 case AutoContext.Hive:
-                    StartTap(NextHiveButton(sim));
+                    StartTap(AutoBrain.NextHiveButton(sim));
                     break;
                 case AutoContext.Playing:
                     PlayField(sim, ui, screen, dt);
@@ -148,7 +145,7 @@ namespace Swarm.Game
         {
             var sw = sim.Swarm;
             // 1. Улей: зайти, если есть что купить или поменять кладку
-            if (sim.SwarmAtHive && sw.FieldCarry < 0.5f && _hiveCooldown <= 0f && HiveWanted(sim) && ui.TryGetButton(20, out _))
+            if (sim.SwarmAtHive && sw.FieldCarry < 0.5f && _hiveCooldown <= 0f && AutoBrain.HiveWanted(sim) && ui.TryGetButton(20, out _))
             {
                 _hiveCooldown = 20f;
                 StartTap(20);
@@ -157,16 +154,14 @@ namespace Swarm.Game
             // 2. Отряд: оставить на богатой поляне / вернуть, когда поляна пуста или отряд мал
             if (sw.SquadActive)
             {
-                if (_postAge > 8f && (BloomingNear(sim, sw.SquadTarget, sim.Cfg.PostRadius) == 0 || sw.SquadCount < 5) && ui.TryGetButton(21, out _))
+                if (AutoBrain.ShouldRecall(sim, _postAge) && ui.TryGetButton(21, out _))
                 {
                     _postCooldown = 25f;
                     StartTap(21);
                     return;
                 }
             }
-            else if (_postCooldown <= 0f && sim.CanPost && sw.SwarmCount >= 50 && sim.Time > 120f && !_delivering && _flower >= 0
-                     && (sim.Flowers.Pos[_flower] - sw.LeaderPos).sqrMagnitude < 30f * 30f
-                     && BloomingNear(sim, sw.LeaderPos, sim.Cfg.PostRadius) >= 3 && ui.TryGetButton(21, out _))
+            else if (_postCooldown <= 0f && Brain.ShouldPost(sim) && ui.TryGetButton(21, out _))
             {
                 _postCooldown = 45f;
                 StartTap(21);
@@ -175,8 +170,8 @@ namespace Swarm.Game
 
             // 3. Полёт
             _think -= dt;
-            if (_think <= 0f) { _think = 0.25f; Decide(sim); }
-            Vector2 want = screen.WorldToPixel(_worldTarget);
+            if (_think <= 0f) { _think = 0.25f; Brain.Decide(sim); WantHold = Brain.WantHold; }
+            Vector2 want = screen.WorldToPixel(Brain.WorldTarget);
             float top = screen.Height - screen.SafeTop - 46f, bottom = screen.SafeBottom + 34f;
             want.x = Mathf.Clamp(want.x, 8f, screen.Width - 8f);
             want.y = Mathf.Clamp(want.y, bottom, top);
@@ -185,126 +180,6 @@ namespace Swarm.Game
             Held = true;
             Steering = true;
             if (WantHold && (Cursor - before).sqrMagnitude < 0.25f) HoldStill += dt; else HoldStill = 0f;
-        }
-
-        void Decide(GameSim sim)
-        {
-            var sw = sim.Swarm;
-            var col = sim.Colony;
-            var cfg = sim.Cfg;
-            Vector2 hive = sim.World.HivePos + BeeSwarm.HiveEntranceOffset;
-            float cap = cfg.CarryBase * col.CarryMul * sim.Mods.Carry * Mathf.Max(1, sw.SwarmCount);
-            var en = sim.Enemies;
-            int threat = -1, raider = -1;
-            float threatD = 140f * 140f;
-            for (int e = 0; e < en.Count; e++)
-            {
-                if (en.Type[e] == EnemyType.Nest || en.Type[e] == EnemyType.Bear && sw.SwarmCount < 60) continue;
-                float d = (en.Pos[e] - sw.LeaderPos).sqrMagnitude;
-                if (d < threatD) { threatD = d; threat = e; }
-                if (en.Mode[e] == EnemyMode.Raid && (en.Pos[e] - hive).sqrMagnitude < 90f * 90f) raider = e;
-            }
-            WantHold = false;
-            if (threat >= 0 && en.Type[threat] == EnemyType.Hornet && sw.SwarmCount >= 40)
-            {
-                _worldTarget = en.Pos[threat];
-                WantHold = true;
-            }
-            else if (threat >= 0 && en.Type[threat] == EnemyType.Hornet && sw.SwarmCount < 70)
-            {
-                Vector2 away = sw.LeaderPos - en.Pos[threat];
-                _worldTarget = sw.LeaderPos + away.normalized * 80f;
-            }
-            else if (threat >= 0 && threatD < 90f * 90f) _worldTarget = en.Pos[threat];
-            else if (raider >= 0) _worldTarget = en.Pos[raider];
-            else if (sim.Sky.Thirst > 0.6f && sim.World.Ponds.Count > 0)
-            {
-                Vector2 best = sim.World.Ponds[0];
-                for (int i = 1; i < sim.World.Ponds.Count; i++)
-                    if ((sim.World.Ponds[i] - sw.LeaderPos).sqrMagnitude < (best - sw.LeaderPos).sqrMagnitude) best = sim.World.Ponds[i];
-                _worldTarget = best;
-            }
-            else if (sw.FieldCarry >= cap * 0.85f || (_delivering && sw.FieldCarry > 0.5f))
-            {
-                _delivering = true;
-                _worldTarget = hive;
-            }
-            else
-            {
-                _delivering = false;
-                var fl = sim.Flowers;
-                if (_flower < 0 || _flower >= fl.Count || !fl.IsBlooming(_flower))
-                {
-                    _flower = -1;
-                    float best = float.MaxValue;
-                    for (int f = 0; f < fl.Count; f++)
-                    {
-                        if (!fl.IsBlooming(f)) continue;
-                        if (sw.SquadActive && (fl.Pos[f] - sw.SquadTarget).sqrMagnitude < cfg.PostRadius * cfg.PostRadius) continue; // там работает отряд
-                        float d = (fl.Pos[f] - sw.LeaderPos).magnitude + (fl.Pos[f] - hive).magnitude * 0.5f;
-                        float score = d / (2f + fl.Nectar[f]);
-                        if (score < best) { best = score; _flower = f; }
-                    }
-                }
-                _worldTarget = _flower >= 0 ? fl.Pos[_flower] : hive;
-            }
-        }
-
-        static int BloomingNear(GameSim sim, Vector2 c, float r)
-        {
-            var fl = sim.Flowers;
-            int n = 0;
-            for (int f = 0; f < fl.Count; f++)
-                if (fl.IsBlooming(f) && fl.Nectar[f] > 2f && (fl.Pos[f] - c).sqrMagnitude < r * r) n++;
-            return n;
-        }
-
-        // ------------------------------------------------------------------ улей
-        static bool Saving(GameSim sim)
-        {
-            var sw = sim.Swarm;
-            var cfg = sim.Cfg;
-            if (cfg.Endless) return false;
-            return sw.SwarmCount >= cfg.GoalBees
-                   || (sim.TimeLeft < 120f && sw.SwarmCount >= cfg.Winter2Bees)
-                   || (sim.Time > 420f && sw.SwarmCount >= cfg.GoalBees - 15 && sim.Colony.Honey < cfg.GoalHoney);
-        }
-
-        static int WantBrood(GameSim sim) => Saving(sim) ? 0 : 4;
-
-        static int WantDefenders(GameSim sim) => sim.Time > 250f ? 12 : (sim.Time > 90f ? 6 : 0);
-
-        /// <summary>Следующая кнопка в меню улья; 39 — «В ПОЛЁТ!», когда делать больше нечего.</summary>
-        static int NextHiveButton(GameSim sim)
-        {
-            var sw = sim.Swarm;
-            var col = sim.Colony;
-            bool saving = Saving(sim);
-            if (sim.BroodIndex != WantBrood(sim)) return 31;
-            if (sw.SwarmCount + 3 >= col.MaxBees && sim.CanUpgrade(UpgradeType.Comb)) return 33;
-            if (!saving && col.Level[(int)UpgradeType.Carry] < 2 && sim.CanUpgrade(UpgradeType.Carry)) return 34;
-            if (!saving && col.Level[(int)UpgradeType.Sting] < 2 && sim.Time > 150f && sim.CanUpgrade(UpgradeType.Sting)) return 35;
-            if (!saving && col.Level[(int)UpgradeType.Speed] < 1 && sim.CanUpgrade(UpgradeType.Speed)) return 36;
-            if (sw.GuardCount < WantDefenders(sim) && sim.CanHireDefenders && col.Honey > sim.DefenderCost + 40) return 32;
-            if (!saving && sim.Time > 40f && sim.CanHireWorkers && col.Honey > sim.WorkerCost + 30) return 37;
-            return 39;
-        }
-
-        static bool HiveWanted(GameSim sim) => NextHiveButton(sim) != 39;
-
-        static readonly PerkId[] Pref =
-        {
-            PerkId.SweetNectar, PerkId.ThickStings, PerkId.BigCrop, PerkId.FertileQueen, PerkId.Evasion,
-            PerkId.HeatProof, PerkId.SwiftWings, PerkId.IronGuards, PerkId.Scouting
-        };
-
-        static int PickPerk(GameSim sim)
-        {
-            int pick = 0, best = 99;
-            for (int k = 0; k < 3; k++)
-                for (int r = 0; r < Pref.Length; r++)
-                    if (Pref[r] == sim.PerkOffer[k] && r < best) { best = r; pick = k; }
-            return pick;
         }
 
         // ------------------------------------------------------------------ курсор
