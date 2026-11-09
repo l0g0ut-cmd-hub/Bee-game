@@ -131,8 +131,8 @@ namespace Swarm.Simulation
         {
             if (Count >= Capacity) return false;
             int i = Count++;
-            Pos[i] = p + new Vector2(rng.Signed, rng.Signed) * 3f;
-            Vel[i] = new Vector2(rng.Signed, rng.Signed) * 40f;
+            Pos[i] = p + new Vector2(rng.Signed * 2f, rng.Value * 2f);
+            Vel[i] = new Vector2(rng.Signed * 30f, 35f + rng.Value * 30f);   // вылет из летка вверх-вбок
             Carry[i] = 0f;
             Phase[i] = rng.Value * 100f;
             SpeedMul[i] = 0.88f + rng.Value * 0.24f;

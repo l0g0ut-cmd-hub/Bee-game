@@ -42,7 +42,7 @@ namespace Swarm.Presentation
         int _fogVersion = -1;
         Color32 _tint = new Color32(255, 255, 255, 255);
         readonly QuadBatch _fog, _night, _nightGlow, _weather;
-        struct Drop { public Vector2 Pos; public float Life; }
+        struct Drop { public Vector2 Pos; public float Life; public Vector2 SplashPos; public float Splash; }
         readonly Drop[] _rain = new Drop[90];
         readonly Mote[] _flies = new Mote[24];
 
@@ -297,7 +297,13 @@ namespace Swarm.Presentation
                 else spr = (loaded ? (int)Spr.BeeLoadA : (int)Spr.BeeA) + f4;
                 float bob = swarm.Stuck[i] > 0f ? 0f : Mathf.Sin(time * 7f + ph) * 1.2f;
                 Color32 bc = role == BeeRole.Squad ? new Color32(200, 228, 255, 255) : role == BeeRole.Worker ? new Color32(205, 245, 170, 255) : White;
-                if (role == BeeRole.Guard && swarm.Hp[i] < swarm.MaxHp[i] - 0.05f) bc = new Color32(255, 190, 180, 255);
+                if (role == BeeRole.Guard && swarm.Hp[i] < swarm.MaxHp[i] - 0.05f)
+                {
+                    bc = new Color32(255, 190, 180, 255);
+                    // лечение у летка: зелёное кольцо-пульс
+                    if ((p - (sim.World.HivePos + BeeSwarm.HiveEntranceOffset)).sqrMagnitude < 50f * 50f)
+                        _glow.Add(Spr.KRing1, p.x, p.y - 2f, new Color32(150, 255, 140, (byte)(90 + 60 * Mathf.Sin(time * 8f + ph))));
+                }
                 _shadow.Add(Spr.ShadowS, p.x, p.y - 6f, A(60));
                 _fly.Add(spr, p.x, p.y + bob, bc, swarm.Vel[i].x < 0f);
             }
@@ -513,11 +519,17 @@ namespace Swarm.Presentation
                     d.Life -= dt;
                     if (d.Life <= 0f || !r.Contains(d.Pos))
                     {
+                        if (d.Life <= 0f) { d.SplashPos = d.Pos; d.Splash = 0.18f; }   // капля упала — всплеск
                         d.Pos = new Vector2(r.x + (float)_rnd.NextDouble() * r.width, r.y + (float)_rnd.NextDouble() * r.height);
                         d.Life = 0.3f + (float)_rnd.NextDouble() * 0.4f;
                     }
                     d.Pos += new Vector2(-40f, -220f) * dt;
                     _weather.Add(Spr.RainDrop, d.Pos.x, d.Pos.y, new Color32(200, 225, 255, 170));
+                    if (d.Splash > 0f)
+                    {
+                        d.Splash -= dt;
+                        _weather.Add(d.Splash > 0.09f ? Spr.KRing0 : Spr.KRing1, d.SplashPos.x, d.SplashPos.y, new Color32(200, 225, 255, (byte)(700 * d.Splash)));
+                    }
                 }
             }
             else if (sky.Current == Weather.Heat && wb > 0.02f)

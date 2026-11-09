@@ -174,6 +174,13 @@ namespace Swarm.Presentation
                         bool cooked = e.Value > 0.5f;
                         Emit(Spr.KRing0, e.Pos, Vector2.zero, hornet ? 0.4f : 0.3f, White, true, drag: 0f, sprEnd: Spr.KRing2);
                         Emit(Spr.KBurst, e.Pos, Vector2.zero, 0.18f, cooked ? Heat : Honey, true, drag: 0f);
+                        // «пуф»: облачка разлетаются кольцом и тают (приём из pixelfx)
+                        int puffs = queenK ? 10 : hornet ? 6 : 4;
+                        for (int k = 0; k < puffs; k++)
+                        {
+                            float an = k * (6.2832f / puffs) + R;
+                            Emit(R < 0.5f ? Spr.KSmokeA : Spr.KSmokeB, e.Pos, new Vector2(Mathf.Cos(an), Mathf.Sin(an)) * (hornet ? 34f : 24f), 0.45f, new Color32(240, 232, 220, 170), drag: 5f);
+                        }
                         Emit(Spr.KSlash, e.Pos + new Vector2(0f, 2f), new Vector2(0f, 4f), 0.22f, White, true, drag: 0f, flip: R < 0.5f);
                         int n = hornet ? 16 : 9;
                         for (int k = 0; k < n; k++)
