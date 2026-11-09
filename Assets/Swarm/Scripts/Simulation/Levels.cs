@@ -21,8 +21,8 @@ namespace Swarm.Simulation
         public static readonly LevelDef[] Campaign =
         {
             new LevelDef { Name = "ВЕСНА", Sub = "ЦВЕТУЩИЙ ЛУГ", Biome = Biome.Meadow, GoalBees = 100, GoalHoney = 450, WaveMul = 0.8f, UnlockStars = 0 },
-            new LevelDef { Name = "ЛЕТО", Sub = "СТАРЫЙ САД", Biome = Biome.Garden, GoalBees = 120, GoalHoney = 600, WaveMul = 1f, UnlockStars = 2 },
-            new LevelDef { Name = "ОСЕНЬ", Sub = "ТУМАННОЕ БОЛОТО", Biome = Biome.Swamp, GoalBees = 130, GoalHoney = 700, WaveMul = 1.12f, UnlockStars = 4 },
+            new LevelDef { Name = "ЛЕТО", Sub = "СТАРЫЙ САД", Biome = Biome.Garden, GoalBees = 120, GoalHoney = 650, WaveMul = 1.15f, UnlockStars = 2 },
+            new LevelDef { Name = "ОСЕНЬ", Sub = "ТУМАННОЕ БОЛОТО", Biome = Biome.Swamp, GoalBees = 130, GoalHoney = 700, WaveMul = 1.25f, UnlockStars = 4 },
         };
 
         public static SimConfig Make(GameMode mode, int level)

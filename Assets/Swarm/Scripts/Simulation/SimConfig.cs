@@ -99,6 +99,12 @@ namespace Swarm.Simulation
         public Biome Biome = Biome.Meadow;
         public float WaveMul = 1f;            // множитель размера волн
         public bool Endless;                  // выживание: лето не кончается, волны крепчают по кругу
+        // --- пост (отряд на охране места)
+        public float PostShare = 0.25f;
+        public int PostMax = 30, PostMinSwarm = 16;
+        public float PostRadius = 40f;
+        public bool BirdsEnabled = false;     // птицы-охотники (выключены по отзыву)
+        public bool FogEnabled = false;       // туман войны (выключен по отзыву; метки разведчиц работают)
         public bool SkyEnabled = true;        // день/ночь и погода
         public bool NestEnabled = true;       // осиное гнездо на карте
         public float WindStrength = 16f;

@@ -81,7 +81,7 @@ namespace Swarm.Simulation
             var ev = sim.Events;
 
             // ---------------- птицы
-            if (sim.Time >= _nextBird && sw.SwarmCount > 15)
+            if (sim.Cfg.BirdsEnabled && sim.Time >= _nextBird && sw.SwarmCount > 15)
             {
                 _nextBird = sim.Time + sim.Rng.Range(sim.Cfg.BirdIntervalMin, sim.Cfg.BirdIntervalMax);
                 for (int i = 0; i < MaxBirds; i++)

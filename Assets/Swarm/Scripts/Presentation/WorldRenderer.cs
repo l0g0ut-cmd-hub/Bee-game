@@ -446,6 +446,19 @@ namespace Swarm.Presentation
         // ------------------------------------------------------------ метки разведчиц и редкие цветы
         void DrawMarks(GameSim sim, Rect view, float time)
         {
+            var sw = sim.Swarm;
+            if (sw.SquadActive && view.Contains(sw.SquadTarget))
+            {
+                Vector2 sp = sw.SquadTarget;
+                _overlay.Add(Spr.IconSquad, sp.x, sp.y + 24f + Mathf.Round(Mathf.Sin(time * 3f)), new Color32(200, 228, 255, 230));
+                // пунктир зоны поста
+                float r = sim.Cfg.PostRadius;
+                for (int k = 0; k < 20; k++)
+                {
+                    float an = k * 0.31416f + time * 0.15f;
+                    _glow.Add(Spr.Pixel2, Mathf.Round(sp.x + Mathf.Cos(an) * r), Mathf.Round(sp.y + Mathf.Sin(an) * r * 0.82f), new Color32(200, 228, 255, 90));
+                }
+            }
             var fog = sim.Fog;
             for (int m = 0; m < FogMap.MaxMarks; m++)
             {
@@ -502,7 +515,7 @@ namespace Swarm.Presentation
             float dark = sky.Darkness(sim.Time);
             if (dark > 0.01f)
             {
-                _night.Rect(r.x, r.y, r.width, r.height, new Color32(18, 26, 70, (byte)(165 * dark)));
+                _night.Rect(r.x, r.y, r.width, r.height, new Color32(30, 40, 96, (byte)(95 * dark)));
                 // светлячки и тёплый свет улья
                 for (int i = 0; i < _flies.Length; i++)
                 {
@@ -518,8 +531,7 @@ namespace Swarm.Presentation
                     float tw = Mathf.Max(0f, Mathf.Sin(time * 2.5f + f.Phase));
                     _nightGlow.Add(Spr.Pixel2, f.Pos.x, f.Pos.y, new Color32(200, 255, 120, (byte)(220 * tw * dark)));
                 }
-                Vector2 e = sim.World.HivePos + BeeSwarm.HiveEntranceOffset;
-                _nightGlow.AddStretched((int)Spr.Glow, e.x - 30f, e.y - 16f, 60f, 32f, new Color32(255, 190, 90, (byte)(150 * dark)));
+
             }
             _weather.End(); _night.End(); _nightGlow.End();
         }

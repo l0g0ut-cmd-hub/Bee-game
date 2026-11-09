@@ -238,6 +238,9 @@ namespace Swarm.Game
                 case UiAction.ToMenu: EnterMenu(); break;
                 case UiAction.OpenHive: if (_state == State.Playing) _state = State.Hive; break;
                 case UiAction.CloseHive: if (_state == State.Hive) { _state = State.Playing; _input.Reset(); } break;
+                case UiAction.PostSquad:
+                    if (_state == State.Playing) { if (_sim.Swarm.SquadActive) _sim.RecallSquad(); else _sim.PostSquad(); _audio.Play(Sfx.Click); }
+                    break;
                 case UiAction.ToggleSound: _audio.ToggleMute(); break;
                 case UiAction.ToggleHaptics: Haptics.Toggle(); break;
                 case UiAction.ToggleShake:
@@ -286,11 +289,6 @@ namespace Swarm.Game
                 inp.Hold = _holdTimer >= HoldTime;
             }
             else _holdTimer = 0f;
-            if (_input.Held2 && _input.Held)
-            {
-                inp.Active2 = true;
-                inp.Target2 = _screen.PixelToWorld(_screen.ScreenToPixel(_input.ScreenPos2));
-            }
             return inp;
         }
 

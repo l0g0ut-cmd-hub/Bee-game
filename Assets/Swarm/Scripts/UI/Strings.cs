@@ -19,7 +19,7 @@ namespace Swarm.UI
         public const string HintMove = "ВЕДИ РОЙ ПАЛЬЦЕМ";
         public const string HintFlowers = "ЛЕТИ К ЦВЕТАМ - ПЧЁЛЫ СОБЕРУТ НЕКТАР";
         public const string HintDeliver = "ОТНЕСИ НЕКТАР В УЛЕЙ";
-        public const string HintHatch = "ЖМИ \"УЛЕЙ\": МАТКА, ЗАЩИТНИКИ, УЛУЧШЕНИЯ";
+        public const string HintHatch = "ЖМИ \"УЛЕЙ\": ТАМ МАТКА, ЗАЩИТНИКИ И УЛУЧШЕНИЯ";
 
         public const string WaveScouts = "ОСЫ-РАЗВЕДЧИЦЫ";
         public const string WaveWasps = "ОСЫ!";
@@ -82,12 +82,17 @@ namespace Swarm.UI
         public const string RareSprout = "ВЫРОС ЗОЛОТОЙ ЦВЕТОК!";
         public const string HintBird = "ТЕНЬ ПТИЦЫ - УВОДИ РОЙ!";
         public const string HintThirst = "ЖАЖДА! ЛЕТИ К ПРУДУ";
-        public const string HintSquad = "ВТОРЫМ ПАЛЬЦЕМ МОЖНО ОТПРАВИТЬ ОТРЯД";
+        public const string HintSquad = "КНОПКА \"ОТРЯД\" ОСТАВИТ ЧАСТЬ ПЧЁЛ СТЕРЕЧЬ ЭТО МЕСТО И СОБИРАТЬ НЕКТАР";
+        public const string PostName = "ОТРЯД";
+        public const string PostRecall = "ВЕРНУТЬ";
         public const string HintWeb = "ПЧЁЛЫ В ПАУТИНЕ - ПРОЛЕТИ РОЕМ, ЧТОБЫ ПОРВАТЬ";
 
         // --- улей
         public const string QueenName = "МАТКА";
         public const string QueenSub = "РАСПЛОД ";
+        public const string QueenHelp = "МАТКА САМА ВЫВОДИТ ПЧЁЛ ИЗ МЁДА УЛЬЯ. БЫСТРЕЕ КЛАДКА - БОЛЬШЕ ПЧЁЛ, НО МЕНЬШЕ МЁДА КОПИТСЯ НА ЦЕЛЬ";
+        public const string QueenStopped = "КЛАДКА ОСТАНОВЛЕНА";
+        public static readonly string[] BroodNames = { "СТОП", "МЕДЛ.", "НОРМА", "БЫСТРО", "МАКС" };
         public const string DefName = "ЗАЩИТНИКИ";
         public const string DefSub = "У УЛЬЯ: ";
         public const string HiveTitle = "УЛЕЙ";

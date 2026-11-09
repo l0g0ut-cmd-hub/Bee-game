@@ -10,8 +10,6 @@ namespace Swarm.Simulation
         public bool Active;
         public Vector2 Target;
         /// <summary>Второй палец: отряд отделяется от роя и летит сюда, пока палец на экране.</summary>
-        public bool Active2;
-        public Vector2 Target2;
         /// <summary>Палец удерживается почти неподвижно — у врага это тепловой шар.</summary>
         public bool Hold;
     }
@@ -124,7 +122,7 @@ namespace Swarm.Simulation
             for (int i = 0; i < Cfg.StartBees; i++) Swarm.Spawn(start, Rng);
             Stats.PeakBees = Swarm.Count;
             Hazards.Reset(this);
-            Fog.Enabled = !AttractMode;
+            Fog.Enabled = Cfg.FogEnabled && !AttractMode;
             Fog.Reset(World.HivePos);
             Sky.Enabled = Cfg.SkyEnabled && !AttractMode;
             Sky.Reset(Rng);
@@ -150,6 +148,10 @@ namespace Swarm.Simulation
 
         // ------------------------------------------------------------ матка
         public float BroodShare => BroodSteps[BroodIndex];
+        public bool CanPost => !Swarm.SquadActive && Swarm.SwarmCount >= Cfg.PostMinSwarm;
+        public bool PostSquad() => Swarm.PostSquad(Cfg);
+        public void RecallSquad() => Swarm.RecallSquad();
+        public float BroodPerMinute => Cfg.BroodRate * BroodShare * Mods.Brood * 60f;
         public void CycleBrood() => BroodIndex = (BroodIndex + 1) % BroodSteps.Length;
         /// <summary>Мёд за одну новую пчелу (дорожает с ростом колонии).</summary>
         public float BroodCostPerBee => Colony.HatchCost(Swarm.SwarmCount) / (float)Cfg.HatchBatch * Mods.BroodCost;

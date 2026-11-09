@@ -84,13 +84,13 @@ namespace Swarm.EditorTools
             Shot("02_levels", attract, () => _gui.DrawLevels(profile, _t), menu: true);
             Shot("03_achievements", attract, () => _gui.DrawAchievements(profile), menu: true);
 
-            // 4. Старт партии (лето, сад): подсказка обучения, туман войны
+            // 4. Старт партии (лето, сад): подсказка обучения, 
             var sim = new GameSim(Levels.Make(GameMode.Campaign, 1), 777u);
             _gui.TutorialStep = 0;
             _fx.Clear();
             Snap(sim);
             Play(sim, 1.2f, s => s.Swarm.LeaderPos);
-            Shot("04_start_fog", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            Shot("04_start", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
 
             // 5. Сбор: рой 70 пчёл — «облако»
             Grow(sim, 70);
@@ -137,24 +137,15 @@ namespace Swarm.EditorTools
             Play(sim, 2.5f, s => s.Enemies.Count > 0 ? s.Enemies.Pos[0] : s.Swarm.LeaderPos, hold: true);
             _log.Append($"PROBE|ball_end|hornets {sim.Enemies.Count} killed {sim.Stats.HornetsKilled} heatLost {sim.Stats.LostToHeat}\n");
 
-            // 9. Тень птицы над роем
-            sim.Enemies.Clear();
-            Play(sim, 1f, s => NearestFlower(s));
             var hz = sim.Hazards;
-            hz.BState[0] = BirdState.Shadow;
-            hz.BTimer[0] = 99f;
-            hz.BTarget[0] = sim.Swarm.LeaderPos;
-            hz.BDir[0] = new Vector2(0.8f, 0.6f).normalized;
-            Play(sim, 0.5f, s => s.Swarm.LeaderPos);
-            Shot("09_bird_shadow", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
-            hz.BState[0] = BirdState.None;
+            sim.Enemies.Clear();
 
             // 10. Паутина
             if (hz.WebCount > 0)
             {
                 Vector2 wp = hz.WPos[0];
                 Play(sim, 3f, s => wp);
-                Shot("10_web", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+                Shot("09_web", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
             }
 
             // 11-12. Улей: матка, защитники, меню
@@ -166,6 +157,16 @@ namespace Swarm.EditorTools
             Shot("11_hive_menu", sim, () => _gui.DrawHive(sim, _t));
             Play(sim, 3f, s => NearestFlower(s));
             Shot("12_defenders", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+
+            // 12b. Пост: отряд оставлен у цветов, рой улетел
+            Vector2 postAt = NearestFlower(sim);
+            Play(sim, 4f, s => postAt);
+            sim.PostSquad();
+            Vector2 away = postAt + new Vector2(70f, 40f);
+            Play(sim, 3f, s => away);
+            _log.Append($"PROBE|post|active {sim.Swarm.SquadActive} squad {sim.Swarm.SquadCount}\n");
+            Shot("12b_post", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            sim.RecallSquad();
 
             // 13. Выбор перка
             sim.PerkOffer[0] = (PerkId)0; sim.PerkOffer[1] = (PerkId)3; sim.PerkOffer[2] = (PerkId)6;

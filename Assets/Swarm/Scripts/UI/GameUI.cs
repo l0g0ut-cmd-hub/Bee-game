@@ -10,7 +10,7 @@ namespace Swarm.UI
     {
         None, OpenCampaign, StartLevel, PlayEndless, PlayDaily, OpenAchievements, Back,
         Pause, Resume, Restart, ToMenu, OpenHive, CloseHive, ChoosePerk,
-        ToggleSound, ToggleHaptics, ToggleShake
+        ToggleSound, ToggleHaptics, ToggleShake, PostSquad
     }
 
     /// <summary>
@@ -342,11 +342,17 @@ namespace Swarm.UI
 
             if (sw.Balling && Mathf.Repeat(time * 5f, 1f) < 0.75f)
                 _ui.Text(Strings.Balling, W * 0.5f, bottom + 34, new Color32(255, 150, 60, 255), 1, 1);
-            if (sw.SquadActive)
+            // кнопка поста: оставить отряд стеречь место / вернуть его в рой
             {
-                _ui.Icon(Spr.IconSquad, W * 0.5f - 14, bottom + 26);
-                _b.Clear().Append(sw.SquadCount);
-                _ui.Text(_b, W * 0.5f - 7, bottom + 23, new Color32(200, 228, 255, 255));
+                var pr = new Rect(Mathf.Round(W * 0.5f - 29), bottom - 2, 58, 22);
+                if (sw.SquadActive)
+                {
+                    if (_ui.Button(21, pr, Strings.PostRecall)) a = UiAction.PostSquad;
+                    _ui.Icon(Spr.IconSquad, pr.center.x - 8, pr.yMax + 7);
+                    _b.Clear().Append(sw.SquadCount);
+                    _ui.Text(_b, pr.center.x - 1, pr.yMax + 4, new Color32(200, 228, 255, 255));
+                }
+                else if (_ui.Button(21, pr, Strings.PostName, sim.CanPost, 1, Spr.IconSquad)) a = UiAction.PostSquad;
             }
 
             if (sim.SwarmAtHive)
@@ -427,7 +433,7 @@ namespace Swarm.UI
                     if (sim.Time > 100f) TutorialStep = 4;
                     return sim.SwarmAtHive ? Strings.HintHatch : null;
                 default:
-                    if (_squadHintTime < 6f && sim.Time > 150f && sw.SwarmCount >= 40 && !sw.SquadActive) { _squadHintTime += dt; return Strings.HintSquad; }
+                    if (_squadHintTime < 7f && sim.Time > 120f && sw.SwarmCount >= 40 && !sw.SquadActive) { _squadHintTime += dt; return Strings.HintSquad; }
                     return null;
             }
         }
@@ -446,6 +452,8 @@ namespace Swarm.UI
                 Spr icon = t == EnemyType.Hornet || t == EnemyType.Bear ? Spr.IconSkull : Spr.IconWasp;
                 EdgeArrow(screen, en.Pos[i], W, minY, maxY, PixelUI.Red, icon, time, i * 0.7f);
             }
+            if (sim.Swarm.SquadActive)
+                EdgeArrow(screen, sim.Swarm.SquadTarget, W, minY, maxY, new Color32(200, 228, 255, 255), Spr.IconSquad, time, 3f);
             var fog = sim.Fog;
             for (int m = 0; m < FogMap.MaxMarks; m++)
                 if (fog.MarkTime[m] > 0f)
@@ -485,7 +493,7 @@ namespace Swarm.UI
             var col = sim.Colony;
             _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 140));
 
-            float pw = Mathf.Min(W - 10, 220), ph = 300;
+            float pw = Mathf.Min(W - 10, 220), ph = 340;
             var panel = new Rect(Mathf.Round((W - pw) * 0.5f), Mathf.Round((H - ph) * 0.5f), pw, ph);
             _ui.Blocker(new Rect(0, 0, W, H));
             _ui.Panel(panel);
@@ -498,7 +506,9 @@ namespace Swarm.UI
             _ui.Icon(Spr.IconHoney, panel.center.x - tw * 0.5f - 6, y + 3);
             _ui.Text(_b, panel.center.x - tw * 0.5f + 1, y, PixelUI.Honey, 1, 0, true);
 
-            y -= 8;
+            y -= 2;
+            TextWrapped(Strings.QueenHelp, panel.center.x, y, (int)pw - 16, PixelUI.Ink, false);
+            y -= Wrap(Strings.QueenHelp, (int)pw - 16).Length * 10 + 2;
             float rowH = 36f;
             // 1. матка: доля мёда на расплод
             {
@@ -508,19 +518,21 @@ namespace Swarm.UI
                 _ui.Text(Strings.QueenName, x0 + 24, y + 19, PixelUI.Ink, 1, 0, false);
                 bool full = sim.Swarm.SwarmCount >= col.MaxBees;
                 if (full) _ui.Text(Strings.HatchFull, x0 + 24, y + 8, PixelUI.Red, 1, 0, false);
+                else if (sim.BroodShare <= 0f) _ui.Text(Strings.QueenStopped, x0 + 24, y + 8, SubText, 1, 0, false);
                 else
                 {
-                    _b.Clear().AppendDecimal(sim.BroodCostPerBee, 1).Append(" МЁДА/ПЧЕЛА");
+                    // +N пчёл/мин по X мёда за каждую
+                    _b.Clear().Append('+').Append(Mathf.RoundToInt(sim.BroodPerMinute)).Append("/МИН ПО ").AppendDecimal(sim.BroodCostPerBee, 1);
                     _ui.Text(_b, x0 + 24, y + 8, SubText, 1, 0, false);
+                    _ui.Icon(Spr.IconHoney, x0 + 26 + PixelFont.Measure(_b) + 3, y + 11);
                 }
-                _b.Clear().Append(Mathf.RoundToInt(sim.BroodShare * 100f)).Append('%');
-                if (_ui.ButtonBuf(31, new Rect(x1 - 50, y + 6, 46, 20), _b, true, Spr.Count)) sim.CycleBrood();
+                if (_ui.Button(31, new Rect(x1 - 50, y + 6, 46, 20), Strings.BroodNames[sim.BroodIndex])) sim.CycleBrood();
             }
             // 2. защитники
             {
                 y -= rowH;
                 RowFrame(x0, y, x1 - x0, rowH - 3);
-                _ui.Icon(Spr.SoldierA, x0 + 12, y + rowH * 0.5f, null, 2);
+                _ui.Icon(Spr.SoldierA, x0 + 12, y + rowH * 0.5f);
                 _ui.Text(Strings.DefName, x0 + 24, y + 19, PixelUI.Ink, 1, 0, false);
                 _b.Clear().Append(Strings.DefSub).Append(sim.Swarm.GuardCount).Append('/').Append(sim.Cfg.DefenderMax);
                 _ui.Text(_b, x0 + 24, y + 8, SubText, 1, 0, false);

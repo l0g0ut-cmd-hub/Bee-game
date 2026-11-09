@@ -273,32 +273,12 @@ namespace Swarm.Simulation
             for (int i = 0; i < Count; i++) if (Role[i] == BeeRole.Guard) guards++;
             GuardCount = guards;
 
-            // ---------------- отряд второго пальца: набор при касании, роспуск при отпускании
-            if (input.Active2 && !SquadActive && SwarmCount >= 12)
-            {
-                SquadActive = true;
-                SquadTarget = input.Target2;
-                int want = Mathf.Min(40, Mathf.RoundToInt(SwarmCount * 0.3f));
-                // берём пчёл, ближайших к месту второго касания (простой отбор по порогу расстояния)
-                float thr = 0f;
-                for (int pass = 0; pass < 12 && SquadCount < want; pass++)
-                {
-                    thr += 25f;
-                    for (int i = 0; i < Count && SquadCount < want; i++)
-                        if (Role[i] == BeeRole.Swarm && (Pos[i] - input.Target2).sqrMagnitude < thr * thr) { Role[i] = BeeRole.Squad; SquadCount++; }
-                }
-            }
-            else if (!input.Active2 && SquadActive)
-            {
-                SquadActive = false;
-                for (int i = 0; i < Count; i++) if (Role[i] == BeeRole.Squad) Role[i] = BeeRole.Swarm;
-                SquadCount = 0;
-            }
-            if (SquadActive) SquadTarget = Vector2.MoveTowards(SquadTarget, input.Target2, maxSpd * 1.1f * dt);
+            // ---------------- пост: отряд стоит там, где его оставили (команды PostSquad/RecallSquad)
             int squad = 0;
             for (int i = 0; i < Count; i++) if (Role[i] == BeeRole.Squad) squad++;
             SquadCount = squad;
-            if (SquadActive) CollectFlowersAt(flowers, SquadTarget, 30f, _squadFlowers, _squadFlowerDist, ref _squadFlowerCount);
+            if (SquadActive && SquadCount == 0) SquadActive = false;   // отряд погиб целиком
+            if (SquadActive) CollectFlowersAt(flowers, SquadTarget, cfg.PostRadius, _squadFlowers, _squadFlowerDist, ref _squadFlowerCount);
 
             Radius = cfg.SwarmRadiusBase + cfg.SwarmRadiusPerSqrtBee * Mathf.Sqrt(Mathf.Max(1, SwarmCount - SquadCount));
             float squadR = 6f + 2.6f * Mathf.Sqrt(Mathf.Max(1, SquadCount));
@@ -408,17 +388,19 @@ namespace Swarm.Simulation
                 }
                 else if (Role[i] == BeeRole.Squad)
                 {
-                    // --- отряд: своя маленькая формация у второго пальца, собирает и жалит там
+                    // --- пост: стережёт место — жалит врагов в зоне поста, собирает рядом, сам носит нектар в улей
                     float k = Mathf.Sqrt((squadIdx + 0.5f) * invSquad);
                     float ang = squadIdx * 2.39996f + time * 0.4f;
                     squadIdx++;
                     task = BeeTask.Follow;
                     target = SquadTarget + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang) * 0.82f) * (squadR * k);
-                    float best = aggroSq;
+                    float best = float.MaxValue;
+                    float postSq = (cfg.PostRadius + 12f) * (cfg.PostRadius + 12f);
                     for (int e = 0; e < enemies.Count; e++)
                     {
                         if (_attackers[e] >= EnemySystem.MaxStingers(enemies.Type[e], cfg)) continue;
                         float sq = (enemies.Pos[e] - p).sqrMagnitude;
+                        if (sq >= aggroSq && (enemies.Pos[e] - SquadTarget).sqrMagnitude >= postSq) continue;
                         if (sq < best) { best = sq; targetIdx = e; }
                     }
                     if (targetIdx >= 0)
@@ -435,7 +417,7 @@ namespace Swarm.Simulation
                         float oa = ph * 3f + time * 4f;
                         target = flowers.Pos[targetIdx] + new Vector2(Mathf.Cos(oa) * 3f, Mathf.Sin(oa) * 2f);
                     }
-                    else if (Carry[i] > 0f && (SquadTarget - entrance).sqrMagnitude < 50f * 50f)
+                    else if (Carry[i] > 0f)
                     {
                         task = BeeTask.Deliver;
                         target = entrance;
@@ -594,6 +576,28 @@ namespace Swarm.Simulation
                 TotalCarry += Carry[i];
                 if (Role[i] != BeeRole.Guard) FieldCarry += Carry[i];
             }
+        }
+
+        /// <summary>Оставить отряд стеречь текущее место роя. Берутся пчёлы без ноши, ближние к центру.</summary>
+        public bool PostSquad(SimConfig cfg)
+        {
+            if (SquadActive || SwarmCount < cfg.PostMinSwarm) return false;
+            int want = Mathf.Clamp(Mathf.RoundToInt(SwarmCount * cfg.PostShare), 6, cfg.PostMax);
+            SquadActive = true;
+            SquadTarget = LeaderPos;
+            SquadCount = 0;
+            for (int pass = 0; pass < 2 && SquadCount < want; pass++)
+                for (int i = 0; i < Count && SquadCount < want; i++)
+                    if (Role[i] == BeeRole.Swarm && !Dead[i] && (pass == 1 || Carry[i] <= 0f)) { Role[i] = BeeRole.Squad; SquadCount++; }
+            return true;
+        }
+
+        /// <summary>Отряд возвращается в рой.</summary>
+        public void RecallSquad()
+        {
+            for (int i = 0; i < Count; i++) if (Role[i] == BeeRole.Squad) Role[i] = BeeRole.Swarm;
+            SquadActive = false;
+            SquadCount = 0;
         }
 
         void CollectFlowersAt(FlowerField flowers, Vector2 c, float reach, int[] list, float[] dist, ref int count)
