@@ -99,7 +99,7 @@ namespace Swarm.UI
         public const string BreedLabel = "ПОРОДА";
         public const string WonNoBoss = "БЕЗ ПОБЕДЫ НАД КОРОЛЕВОЙ - НЕ БОЛЬШЕ 2 ЗВЁЗД";
         public const string WorkerName = "СБОРЩИЦЫ";
-        public const string WorkerSub = "НОСЯТ НЕКТАР САМИ: ";
+        public const string WorkerSub = "САМИ НОСЯТ: ";
         public const string AutoOn = "АВТОПИЛОТ  (КНОПКА А - ВЫКЛ)";
         public const string AutoBtnOn = "АВТОПИЛОТ";
         public const string AutoBtnOff = "АВТОПИЛОТ: ВЫКЛ";
