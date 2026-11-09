@@ -56,7 +56,7 @@ namespace Swarm.UI
         public const string Round = "КРУГ ";
         public const string Day = "ДЕНЬ ";
         public const string NewAchievement = "ДОСТИЖЕНИЕ: ";
-        public const string Version = "V";
+        public const string Version = "";
 
         // --- события
         public const string BearTitle = "МЕДВЕДЬ!";
@@ -84,6 +84,20 @@ namespace Swarm.UI
         public const string HintThirst = "ЖАЖДА! ЛЕТИ К ПРУДУ";
         public const string HintSquad = "КНОПКА \"ОТРЯД\" ОСТАВИТ ЧАСТЬ ПЧЁЛ СТЕРЕЧЬ ЭТО МЕСТО И СОБИРАТЬ НЕКТАР";
         public const string PostName = "ОТРЯД";
+        public const string BossTitle = "КОРОЛЕВА ШЕРШНЕЙ!";
+        public const string BossFinal = "ФИНАЛ СЕЗОНА: ПОБЕДИ КОРОЛЕВУ";
+        public const string BossSub = "ДВОЙНОЙ ТАП - МЕТКА, ДЕРЖИ ПАЛЕЦ - ШАР";
+        public const string BossRage = "КОРОЛЕВА В ЯРОСТИ!";
+        public const string BossRageSub = "ЗОВЁТ СВИТУ";
+        public const string BossDown = "КОРОЛЕВА ПОВЕРЖЕНА!";
+        public const string BossDownSub = "+150 МЁДА";
+        public const string BossName = "КОРОЛЕВА";
+        public const string PoppyTitle = "МАК: ЖАЛО СИЛЬНЕЕ!";
+        public const string VioletTitle = "ФИАЛКА: КРЫЛЬЯ БЫСТРЕЕ!";
+        public const string HintFocus = "ДВОЙНОЙ ТАП ПО ВРАГУ - МЕТКА: РОЙ БЬЁТ ЕГО ПЕРВЫМ";
+        public const string HintBuffs = "МАК УСИЛИВАЕТ ЖАЛО, ФИАЛКА УСКОРЯЕТ РОЙ";
+        public const string BreedLabel = "ПОРОДА";
+        public const string WonNoBoss = "БЕЗ ПОБЕДЫ НАД КОРОЛЕВОЙ - НЕ БОЛЬШЕ 2 ЗВЁЗД";
         public const string WorkerName = "СБОРЩИЦЫ";
         public const string WorkerSub = "НОСЯТ НЕКТАР САМИ: ";
         public const string AutoOn = "АВТОПИЛОТ  (КНОПКА А - ВЫКЛ)";

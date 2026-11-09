@@ -166,6 +166,23 @@ BEE_WINGS_DOWN = [
     '.vvv.vvv...',
     'vWwwvWwwv..',
 ]
+BEE_WINGS_MID = [
+    '...........',
+    '..vvvvvv...',
+    '.vWwvWwwv..',
+]
+# смазанный кадр на большой скорости: тело длиннее, крылья отброшены назад
+BEE_FAST_BODY = [
+    '...kkkkkkkk..',
+    'kkkyYhKYhKkk.',
+    '.skdyyKyyKKek',
+    'kkkddyKdyKKk.',
+    '...kkkkkkkk..',
+]
+BEE_FAST_WINGS = [
+    ['.vvvv.......', 'vWwwwv......', '.vwwvv......'],
+    ['............', 'vvvvv.......', 'vWwwwvv.....'],
+]
 
 
 def make_bee(wings, loaded):
@@ -179,10 +196,34 @@ def make_bee(wings, loaded):
     return cv
 
 
-add('BeeA', make_bee(BEE_WINGS_UP, False))
-add('BeeB', make_bee(BEE_WINGS_DOWN, False))
-add('BeeLoadA', make_bee(BEE_WINGS_UP, True))
-add('BeeLoadB', make_bee(BEE_WINGS_DOWN, True))
+def make_bee_fast(wings, loaded):
+    cv = Canvas(13, 9)
+    cv.pattern(BEE_FAST_BODY, BEE_MAP, 0, 3)
+    cv.pattern(wings, BEE_MAP, 0, 0)
+    if loaded:
+        cv.pattern(['.....O.O.....', '.....o.o.....'], BEE_MAP, 0, 7)
+    return cv
+
+
+def make_bee_dead():
+    """Погибшая пчела: на спине, лапки вверх."""
+    cv = Canvas(11, 7)
+    cv.pattern(['..k.k.k....'], BEE_MAP, 0, 0)
+    cv.pattern(list(reversed(BEE_BODY)), BEE_MAP, 0, 1)
+    cv.pattern(['..vvvvvv...'], BEE_MAP, 0, 6)
+    return cv
+
+
+# 4 кадра крыльев: вверх — середина — вниз — середина (рой «дрожит» плавнее)
+for i, wg in enumerate([BEE_WINGS_UP, BEE_WINGS_MID, BEE_WINGS_DOWN, BEE_WINGS_MID]):
+    add('Bee%s' % 'ABCD'[i], make_bee(wg, False))
+for i, wg in enumerate([BEE_WINGS_UP, BEE_WINGS_MID, BEE_WINGS_DOWN, BEE_WINGS_MID]):
+    add('BeeLoad%s' % 'ABCD'[i], make_bee(wg, True))
+for i in range(2):
+    add('BeeFast%s' % 'AB'[i], make_bee_fast(BEE_FAST_WINGS[i], False), (6, 5))
+for i in range(2):
+    add('BeeLoadFast%s' % 'AB'[i], make_bee_fast(BEE_FAST_WINGS[i], True), (6, 5))
+add('BeeDead', make_bee_dead())
 
 
 # ------------------------------------------------------------------ осы и шершни (процедурно)
@@ -227,35 +268,77 @@ def insect(w, h, parts, wings, stripe_cols=(), stripe_c=INK[1], stinger=None, ey
     return cv
 
 
-def wasp(frame, flash=False):
-    wings = [(8, 3, 3.2, 2.2), (11, 3, 2.6, 2.0)] if frame == 0 else [(6, 5, 3.6, 1.6), (9, 5, 3.0, 1.4)]
+def wing_lerp(a, b, t):
+    return [tuple(a[i][k] + (b[i][k] - a[i][k]) * t for k in range(4)) for i in range(len(a))]
+
+
+WING_T = [0.0, 0.5, 1.0, 0.5]   # 4 кадра: вверх — середина — вниз — середина
+
+
+def wasp(frame, flash=False, windup=False):
+    up = [(8, 3, 3.2, 2.2), (11, 3, 2.6, 2.0)]
+    down = [(6, 5, 3.6, 1.6), (9, 5, 3.0, 1.4)]
+    wings = [(5, 2, 4.0, 2.0), (8, 2, 3.4, 1.8)] if windup else wing_lerp(up, down, WING_T[frame % 4])
+    gy = 9.2 if windup else 8      # на замахе брюшко поджато вниз, жало вперёд
     parts = [
-        (5, 8, 4.2, 2.6, [HONEY[3], HONEY[4], HONEY[5], WHITE[3]]),
+        (5, gy, 4.2, 2.6, [HONEY[3], HONEY[4], HONEY[5], WHITE[3]]),
         (9.5, 7.5, 1.9, 2.0, [INK[0], INK[1], INK[2], STONE[2]]),
         (12.5, 7.5, 1.9, 1.9, [HONEY[3], HONEY[4], HONEY[5], WHITE[3]]),
     ]
-    return insect(16, 12, parts, wings, stripe_cols=(2, 4, 6), stripe_c=INK[0], stinger=(0, 8), eye=(13, 7),
+    return insect(16, 12, parts, wings, stripe_cols=(2, 4, 6), stripe_c=INK[0], stinger=(2, 11) if windup else (0, 8), eye=(13, 7),
                   legs=[(8, 10), (10, 10), (11, 10)], antenna=[(14, 5), (15, 4)], flash=flash, outline=RED[1])
 
 
-def hornet(frame, flash=False):
-    wings = [(11, 4, 4.6, 3.0), (15, 4, 3.8, 2.6)] if frame == 0 else [(8, 7, 5.4, 2.1), (12, 7, 4.6, 1.9)]
+def hornet(frame, flash=False, windup=False):
+    up = [(11, 4, 4.6, 3.0), (15, 4, 3.8, 2.6)]
+    down = [(8, 7, 5.4, 2.1), (12, 7, 4.6, 1.9)]
+    wings = [(7, 3, 5.6, 2.6), (11, 3, 4.8, 2.4)] if windup else wing_lerp(up, down, WING_T[frame % 4])
+    gy = 12.4 if windup else 11
     parts = [
-        (7, 11, 6.0, 3.8, [HONEY[0], HONEY[1], HONEY[2], HONEY[3], HONEY[4]]),
+        (7, gy, 6.0, 3.8, [HONEY[0], HONEY[1], HONEY[2], HONEY[3], HONEY[4]]),
         (13.5, 10.5, 2.8, 3.0, HORNET),
         (18, 10.5, 2.8, 2.7, [HORNET[1], HORNET[2], HORNET[3], ORANGE[4]]),
     ]
-    return insect(22, 16, parts, wings, stripe_cols=(3, 4, 7, 8), stripe_c=HORNET[0], stinger=(0, 11),
+    return insect(22, 16, parts, wings, stripe_cols=(3, 4, 7, 8), stripe_c=HORNET[0], stinger=(2, 15) if windup else (0, 11),
                   eye=(19, 10), legs=[(11, 14), (12, 15), (14, 15), (16, 14)], antenna=[(20, 7), (21, 6), (21, 5)],
                   flash=flash, outline=RED[0])
 
 
-add('WaspA', wasp(0))
-add('WaspB', wasp(1))
+def queen(frame, flash=False, windup=False):
+    """Королева шершней — босс сезона: крупнее шершня, тёмно-багровая, с золотой короной."""
+    up = [(15, 5, 6.4, 4.0), (21, 5, 5.2, 3.4)]
+    down = [(11, 9, 7.4, 2.8), (17, 9, 6.2, 2.5)]
+    wings = [(9, 4, 7.6, 3.4), (15, 4, 6.4, 3.0)] if windup else wing_lerp(up, down, WING_T[frame % 4])
+    gy = 16.5 if windup else 15
+    parts = [
+        (10, gy, 8.4, 5.0, [RED[0], HORNET[1], HORNET[2], HONEY[2], HONEY[3]]),
+        (19, 14, 3.8, 4.0, [INK[0], RED[0], HORNET[1], HORNET[2]]),
+        (25, 13.5, 3.6, 3.6, [RED[0], HORNET[1], HORNET[2], HORNET[3]]),
+    ]
+    cv = insect(31, 22, parts, wings, stripe_cols=(4, 5, 9, 10, 14), stripe_c=INK[0], stinger=(3, 21) if windup else (0, 15),
+                eye=(26, 13), legs=[(15, 19), (16, 20), (19, 20), (22, 19)], antenna=[(27, 9), (28, 8), (29, 7)],
+                flash=flash, outline=INK[0])
+    if not flash:
+        for x, y in [(23, 9), (25, 8), (27, 9)]:          # зубцы короны
+            cv.set(x, y, HONEY[4])
+        for x in range(23, 28):
+            cv.set(x, 10, HONEY[3])
+        cv.set(25, 10, RED[3])                            # камень
+    return cv
+
+
+for i in range(4):
+    add('Wasp%s' % 'ABCD'[i], wasp(i))
 add('WaspFlash', wasp(0, True))
-add('HornetA', hornet(0))
-add('HornetB', hornet(1))
+add('WaspWind', wasp(0, windup=True))
+for i in range(4):
+    add('Hornet%s' % 'ABCD'[i], hornet(i))
 add('HornetFlash', hornet(0, True))
+add('HornetWind', hornet(0, windup=True))
+for i in range(4):
+    add('Queen%s' % 'ABCD'[i], queen(i))
+add('QueenFlash', queen(0, True))
+add('QueenWind', queen(0, windup=True))
 
 
 # ------------------------------------------------------------------ тени / частицы
@@ -422,6 +505,31 @@ def hive():
 
 
 add('Hive', hive(), (22, 3))
+
+
+def hive_honey(level):
+    """Накладка на улей: чем больше мёда, тем больше подтёков и лужица на подставке (level 1..4)."""
+    cv = Canvas(44, 50)
+    cx = 22
+    drips = [(cx - 14, 5), (cx - 4, 6), (cx + 9, 5), (cx + 16, 3), (cx - 9, 7), (cx + 3, 4), (cx + 12, 6), (cx - 17, 3)]
+    n = [0, 2, 4, 6, 8][level]
+    for k, (x, ln) in enumerate(drips[:n]):
+        ln = ln + level - 1
+        y0 = 20 + (k * 3) % 9
+        for i in range(ln):
+            cv.set(x, y0 + i, HONEY[3] if i < ln - 2 else HONEY[4])
+        cv.set(x, y0 + ln, HONEY[5])
+    if level >= 3:
+        for x in range(cx - 10 - level * 2, cx + 11 + level * 2):
+            cv.set(x, 38, HONEY[3] if (x % 3) else HONEY[4])
+    if level >= 4:
+        for x in range(cx - 8, cx + 9):
+            cv.set(x, 46, HONEY[2]); cv.set(x, 47, HONEY[3])
+    return cv
+
+
+for lv in range(1, 5):
+    add('HiveHoney%d' % lv, hive_honey(lv), (22, 3))
 
 
 def comb_glow():

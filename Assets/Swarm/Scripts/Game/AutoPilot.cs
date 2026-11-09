@@ -32,7 +32,7 @@ namespace Swarm.Game
         public float HoldStill;
 
         // нажатие кнопки: подвод → нажатие → отпускание
-        enum Tap { None, Move, Press }
+        enum Tap { None, Move, Press, Focus }
         Tap _tap;
         int _tapId;
         float _tapTimer;
@@ -43,6 +43,9 @@ namespace Swarm.Game
         float _think;
         float _hiveCooldown, _postCooldown, _perkDelay = -1f;
         float _postAge;
+        // двойной тап по врагу (метка-приказ)
+        int _focusUid, _focusStep;
+        float _focusCd;
 
         const float CursorSpeed = 260f, TapSpeed = 420f;
         public const float HoldTime = 0.3f;
@@ -76,8 +79,10 @@ namespace Swarm.Game
             Steering = false;
             _hiveCooldown -= dt;
             _postCooldown -= dt;
+            _focusCd -= dt;
             if (sim.Swarm.SquadActive) _postAge += dt; else _postAge = 0f;
 
+            if (_tap == Tap.Focus) { RunFocus(sim, screen, dt); return; }
             if (_tap != Tap.None) { RunTap(ui, dt); return; }
             if (_wait > 0f) { _wait -= dt; Held = false; WantHold = false; return; }
 
@@ -140,6 +145,35 @@ namespace Swarm.Game
             }
         }
 
+        /// <summary>Подвести палец к врагу и дважды коснуться: видно, кого автопилот отметил.</summary>
+        void RunFocus(GameSim sim, PixelScreen screen, float dt)
+        {
+            int fi = sim.Enemies.IndexOfUid(_focusUid);
+            if (fi < 0) { _tap = Tap.None; Held = false; return; }
+            Vector2 ep = screen.WorldToPixel(sim.Enemies.Pos[fi]);
+            Steering = false;
+            if (_focusStep == 0)
+            {
+                Held = false;
+                Cursor = Vector2.MoveTowards(Cursor, ep, TapSpeed * 1.4f * dt);
+                if ((Cursor - ep).sqrMagnitude < 4f) { _focusStep = 1; _tapTimer = 0.07f; }
+                return;
+            }
+            Cursor = ep;
+            _tapTimer -= dt;
+            Held = _focusStep == 1 || _focusStep == 3;     // касание — пауза — касание
+            if (_tapTimer > 0f) return;
+            _focusStep++;
+            _tapTimer = 0.07f;
+            if (_focusStep >= 4)
+            {
+                sim.SetFocus(sim.Enemies.Pos[fi]);
+                _tap = Tap.None;
+                Held = false;
+                _wait = 0.15f;
+            }
+        }
+
         // ------------------------------------------------------------------ поле
         void PlayField(GameSim sim, PixelUI ui, PixelScreen screen, float dt)
         {
@@ -171,6 +205,26 @@ namespace Swarm.Game
             // 3. Полёт
             _think -= dt;
             if (_think <= 0f) { _think = 0.25f; Brain.Decide(sim); WantHold = Brain.WantHold; }
+
+            // 4. Метка-приказ: двойной тап по цели, если мозг выбрал её, а метка стоит не там
+            if (Brain.WantFocusUid != 0 && Brain.WantFocusUid != sim.FocusUid && _focusCd <= 0f)
+            {
+                int fi = sim.Enemies.IndexOfUid(Brain.WantFocusUid);
+                if (fi >= 0)
+                {
+                    Vector2 ep = screen.WorldToPixel(sim.Enemies.Pos[fi]);
+                    if (ep.x > 10f && ep.x < screen.Width - 10f && ep.y > screen.SafeBottom + 40f && ep.y < screen.Height - screen.SafeTop - 50f)
+                    {
+                        _tap = Tap.Focus;
+                        _focusUid = Brain.WantFocusUid;
+                        _focusStep = 0;
+                        _tapTimer = 0f;
+                        _focusCd = 4f;
+                        Held = false;
+                        return;
+                    }
+                }
+            }
             Vector2 want = screen.WorldToPixel(Brain.WorldTarget);
             float top = screen.Height - screen.SafeTop - 46f, bottom = screen.SafeBottom + 34f;
             want.x = Mathf.Clamp(want.x, 8f, screen.Width - 8f);
@@ -186,7 +240,7 @@ namespace Swarm.Game
         public void DrawCursor(PixelUI ui, float time)
         {
             var c = new Color32(255, 240, 160, 235);
-            bool pressing = _tap == Tap.Press;
+            bool pressing = _tap == Tap.Press || (_tap == Tap.Focus && Held);
             Spr ring = pressing ? Spr.KRing0 : (WantHold && HoldStill > 0.1f ? Spr.KRing2 : Spr.KRing1);
             float x = Mathf.Round(Cursor.x), y = Mathf.Round(Cursor.y);
             ui.Icon(ring, x + 1, y - 1, new Color32(23, 18, 28, 160), 2);   // тень — видно на светлых кнопках

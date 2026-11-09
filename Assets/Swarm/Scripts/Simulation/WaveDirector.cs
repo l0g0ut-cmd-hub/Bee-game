@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Swarm.Simulation
 {
-    public enum WaveMessage : byte { Scouts, Wasps, Hornet, Invasion, Bear, Ants }
+    public enum WaveMessage : byte { Scouts, Wasps, Hornet, Invasion, Bear, Ants, Boss }
 
     /// <summary>Расписание нападений на одну «летнюю» сессию.</summary>
     public sealed class WaveDirector
@@ -10,10 +10,10 @@ namespace Swarm.Simulation
         public struct Wave
         {
             public float Time;
-            public int Wasps, Hornets, Bears, Ants;
+            public int Wasps, Hornets, Bears, Ants, Queens;
             public WaveMessage Message;
-            public Wave(float time, int wasps, int hornets, WaveMessage msg, int bears = 0, int ants = 0)
-            { Time = time; Wasps = wasps; Hornets = hornets; Message = msg; Bears = bears; Ants = ants; }
+            public Wave(float time, int wasps, int hornets, WaveMessage msg, int bears = 0, int ants = 0, int queens = 0)
+            { Time = time; Wasps = wasps; Hornets = hornets; Message = msg; Bears = bears; Ants = ants; Queens = queens; }
         }
 
         public static readonly Wave[] Schedule =
@@ -30,6 +30,7 @@ namespace Swarm.Simulation
             new Wave(395f, 3, 2, WaveMessage.Hornet),
             new Wave(430f, 0, 0, WaveMessage.Ants, 0, 12),
             new Wave(445f, 7, 1, WaveMessage.Wasps),
+            new Wave(470f, 2, 0, WaveMessage.Boss, 0, 0, 1),
             new Wave(495f, 4, 2, WaveMessage.Invasion),
             new Wave(550f, 5, 2, WaveMessage.Invasion),
         };
@@ -65,11 +66,12 @@ namespace Swarm.Simulation
             {
                 // нелётная погода и ночь: осы ждут (муравьи и медведь — нет)
                 var peek = Schedule[_next];
-                if (peek.Bears == 0 && peek.Ants == 0 && sim.Sky.EnemiesGrounded(time))
+                if (peek.Bears == 0 && peek.Ants == 0 && peek.Queens == 0 && sim.Sky.EnemiesGrounded(time))
                 {
                     _delay += 2f;
                     return;
                 }
+                if (peek.Queens > 0 && !cfg.BossEnabled) { _next++; continue; }
                 if (_postponed < cfg.WaveMaxPostpones && sim.RecentLosses > sim.Swarm.Count * cfg.WaveLossThreshold)
                 {
                     _delay += cfg.WavePostpone;
@@ -106,6 +108,8 @@ namespace Swarm.Simulation
                 float d = (p - sim.Swarm.LeaderPos).sqrMagnitude;
                 if (d > bestD) { bestD = d; best = p; }
             }
+            // королева шершней (в кампании — одна за лето; в выживании — каждый круг)
+            if (w.Queens > 0 && (sim.Cfg.Endless || !sim.BossSummoned)) sim.SummonBoss();
             int total = w.Wasps + w.Hornets + w.Bears;
             bool fromNest = sim.Enemies.NestAlive;
             for (int k = 0; k < total; k++)

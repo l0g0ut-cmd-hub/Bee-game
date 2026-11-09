@@ -10,6 +10,8 @@ namespace Swarm.Simulation
     {
         public Vector2 WorldTarget;
         public bool WantHold;
+        /// <summary>Кого отметить меткой-приказом (uid врага; 0 — никого).</summary>
+        public int WantFocusUid;
         public int TargetFlower => _flower;
         public bool Delivering => _delivering;
         int _flower = -1;
@@ -49,12 +51,13 @@ namespace Swarm.Simulation
             Vector2 hive = sim.World.HivePos + BeeSwarm.HiveEntranceOffset;
             float cap = cfg.CarryBase * col.CarryMul * sim.Mods.Carry * Mathf.Max(1, sw.SwarmCount - sw.SquadCount);
             var en = sim.Enemies;
-            int nest = -1;
+            int nest = -1, queen = -1;
             int threat = -1, raider = -1;
             float threatD = 140f * 140f;
             for (int e = 0; e < en.Count; e++)
             {
                 if (en.Type[e] == EnemyType.Nest) { nest = e; continue; }
+                if (en.Type[e] == EnemyType.Queen) queen = e;
                 if (en.Type[e] == EnemyType.Bear && sw.SwarmCount < 60) continue;
                 if (en.Mode[e] == EnemyMode.Flee) continue;   // спит/убегает — не гоняемся
                 float d = (en.Pos[e] - sw.LeaderPos).sqrMagnitude;
@@ -62,17 +65,36 @@ namespace Swarm.Simulation
                 if (en.Mode[e] == EnemyMode.Raid && (en.Pos[e] - hive).sqrMagnitude < 90f * 90f) raider = e;
             }
             WantHold = false;
-            if (threat >= 0 && en.Type[threat] == EnemyType.Hornet && sw.SwarmCount >= 40)
+            WantFocusUid = 0;
+            float queenD = queen >= 0 ? (en.Pos[queen] - sw.LeaderPos).sqrMagnitude : float.MaxValue;
+            if (queen >= 0 && queenD < 160f * 160f && sw.SwarmCount >= 60)
+            {
+                // босс: большим роем — шар и метка на королеву (если рядом мак — сперва за ним)
+                int poppy = sim.BuffSting <= 0f && queenD > 90f * 90f ? NearestKind(sim, FlowerKind.Poppy, 70f) : -1;
+                if (poppy >= 0) WorldTarget = sim.Flowers.Pos[poppy];
+                else { WorldTarget = en.Pos[queen]; WantHold = true; WantFocusUid = en.Uid[queen]; }
+            }
+            else if (queen >= 0 && queenD < 120f * 120f)
+            {
+                // рой мал для королевы — уводим к улью под защиту солдат
+                WorldTarget = hive + (sw.LeaderPos - en.Pos[queen]).normalized * 30f;
+            }
+            else if (threat >= 0 && en.Type[threat] == EnemyType.Hornet && sw.SwarmCount >= 40)
             {
                 WorldTarget = en.Pos[threat];
                 WantHold = true;
+                WantFocusUid = en.Uid[threat];
             }
             else if (threat >= 0 && en.Type[threat] == EnemyType.Hornet && sw.SwarmCount < 70)
             {
                 Vector2 away = sw.LeaderPos - en.Pos[threat];
                 WorldTarget = sw.LeaderPos + away.normalized * 80f;
             }
-            else if (threat >= 0 && threatD < 90f * 90f) WorldTarget = en.Pos[threat];
+            else if (threat >= 0 && threatD < 90f * 90f)
+            {
+                WorldTarget = en.Pos[threat];
+                if (en.Type[threat] == EnemyType.Bear) WantFocusUid = en.Uid[threat];   // медведь — бить всем роем
+            }
             else if (raider >= 0) WorldTarget = en.Pos[raider];
             else if (StuckWeb(sim, out Vector2 web)) WorldTarget = web;   // пчёлы в паутине — пролетаем роем, рвём сеть
             else if (nest >= 0 && sw.SwarmCount >= 100 && col.Level[(int)UpgradeType.Sting] >= 2 && en.Count <= 2 && sw.FieldCarry < cap * 0.3f)
@@ -133,6 +155,9 @@ namespace Swarm.Simulation
                             if (fl.IsBlooming(g) && (fl.Pos[g] - fl.Pos[f]).sqrMagnitude < 32f * 32f) patch += fl.Nectar[g];
                         float d = (fl.Pos[f] - sw.LeaderPos).magnitude + (fl.Pos[f] - hive).magnitude * 0.5f;
                         float score = (d + 40f) / (2f + patch);
+                        // цветы-усилители: мак перед боями, фиалка — когда далеко летать
+                        if (fl.Kind[f] == FlowerKind.Poppy && sim.BuffSting <= 0f && en.Count > 1) score *= 0.6f;
+                        if (fl.Kind[f] == FlowerKind.Violet && sim.BuffSpeed <= 0f && d > 150f) score *= 0.7f;
                         if (score < best) { best = score; _flower = f; }
                     }
                     _progT = 0f;
@@ -142,6 +167,20 @@ namespace Swarm.Simulation
                 else if (sw.FieldCarry > 0.5f) { _delivering = true; WorldTarget = hive; }
                 else WorldTarget = hive + new Vector2(0f, -24f);
             }
+        }
+
+        static int NearestKind(GameSim sim, FlowerKind k, float maxDist)
+        {
+            var fl = sim.Flowers;
+            int best = -1;
+            float bd = maxDist * maxDist;
+            for (int f = 0; f < fl.Count; f++)
+            {
+                if (fl.Kind[f] != k || !fl.IsBlooming(f)) continue;
+                float d = (fl.Pos[f] - sim.Swarm.LeaderPos).sqrMagnitude;
+                if (d < bd) { bd = d; best = f; }
+            }
+            return best;
         }
 
         /// <summary>Есть ли застрявшие в паутине (3+) — и где.</summary>

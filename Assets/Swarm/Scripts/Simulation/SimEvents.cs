@@ -35,6 +35,11 @@ namespace Swarm.Simulation
         HoneyRecovered,
         WaveIncoming,
         Upgrade,
+        BossIncoming,
+        BossPhase,
+        BossKilled,
+        FocusSet,
+        BuffTaken,
     }
 
     public struct SimEvent

@@ -10,7 +10,7 @@ namespace Swarm.UI
     {
         None, OpenCampaign, StartLevel, PlayEndless, PlayDaily, OpenAchievements, Back,
         Pause, Resume, Restart, ToMenu, OpenHive, CloseHive, ChoosePerk,
-        ToggleSound, ToggleHaptics, ToggleShake, PostSquad, ToggleAuto
+        ToggleSound, ToggleHaptics, ToggleShake, PostSquad, ToggleAuto, CycleBreed
     }
 
     /// <summary>
@@ -33,7 +33,7 @@ namespace Swarm.UI
         public string VersionText = "";
         float _hintAlpha;
         bool _lateSummerShown;
-        float _ballHintTime, _birdHintTime, _thirstHintTime, _squadHintTime, _webHintTime;
+        float _ballHintTime, _birdHintTime, _thirstHintTime, _squadHintTime, _webHintTime, _focusHintTime, _buffHintTime;
 
         static readonly Color32 SubText = new Color32(255, 230, 180, 255);
         static readonly Color32 Brown = new Color32(90, 60, 40, 255);
@@ -66,7 +66,7 @@ namespace Swarm.UI
         {
             _bannerTime = 0f;
             _lateSummerShown = false;
-            _ballHintTime = _birdHintTime = _thirstHintTime = _squadHintTime = _webHintTime = 0f;
+            _ballHintTime = _birdHintTime = _thirstHintTime = _squadHintTime = _webHintTime = _focusHintTime = _buffHintTime = 0f;
         }
 
         /// <summary>Для съёмки кадров в CI: плавные проявления сразу в конечном состоянии.</summary>
@@ -176,6 +176,21 @@ namespace Swarm.UI
                 }
                 else Stars(r.xMax - 36, r.yMax - 14, profile.LevelStars[i], 1);
             }
+            // порода пчёл: открывается звёздами кампании
+            {
+                var br = profile.SelectedBreed;
+                float ry = _ui.SafeBottom + 40;
+                _b.Clear().Append(Strings.BreedLabel).Append(": ").Append(Breeds.Name(br));
+                if (_ui.ButtonBuf(28, new Rect(12, ry + 12, W - 24, 22), _b, true, Spr.IconBee)) a = UiAction.CycleBreed;
+                _ui.Text(Breeds.Desc(br), W * 0.5f, ry, SubText, 1, 1);
+                int next = -1;
+                for (int k = 0; k < (int)Breed.Count; k++) if (!profile.BreedUnlocked((Breed)k)) { next = k; break; }
+                if (next >= 0)
+                {
+                    _b.Clear().Append(Breeds.Name((Breed)next)).Append(": ").Append(Strings.NeedStars).Append(Breeds.UnlockStars[next]);
+                    _ui.Text(_b, W * 0.5f, ry + 38, PixelUI.Muted, 1, 1);
+                }
+            }
             if (_ui.Button(29, new Rect(Mathf.Round(W * 0.5f - 46), _ui.SafeBottom + 10, 92, 22), Strings.Back)) a = UiAction.Back;
             return a;
         }
@@ -269,7 +284,7 @@ namespace Swarm.UI
             bool auto = AutoPilot.Enabled;
             if (_ui.Button(11, new Rect(W - 41, top - 19, 18, 18), "А", true, 1, Spr.Count, auto ? new Color32(40, 120, 30, 255) : (Color32?)null)) a = UiAction.ToggleAuto;
             if (auto && Mathf.Repeat(time, 2f) < 1.6f)
-                _ui.Text(Strings.AutoOn, W * 0.5f, top - 59, new Color32(255, 240, 160, 255), 1, 1);
+                _ui.Text(Strings.AutoOn, W * 0.5f, top - 88, new Color32(255, 240, 160, 255), 1, 1);
 
             // --- вторая строка: цель / выживание
             float gy = top - 33;
@@ -347,6 +362,36 @@ namespace Swarm.UI
                     var lines = Wrap(_bannerSub, W - 8);   // длинные подписи переносятся, а не уходят за край
                     for (int li = 0; li < lines.Length; li++)
                         _ui.Text(lines[li], W * 0.5f, by - 10 - li * 10, new Color32(255, 250, 240, (byte)(220 * k)), 1, 1);
+                }
+            }
+
+            // --- босс: полоса здоровья королевы под строкой цели
+            for (int e = 0; e < sim.Enemies.Count; e++)
+            {
+                if (sim.Enemies.Type[e] != EnemyType.Queen) continue;
+                float by2 = top - 72f;
+                _ui.Fill(new Rect(20, by2 - 4, W - 40, 14), new Color32(23, 18, 28, 190));
+                _ui.Text(Strings.BossName, 24, by2, new Color32(255, 140, 120, 255), 1, 0, false);
+                float bx = 24 + PixelFont.Measure(Strings.BossName) + 4;
+                _ui.Bar(new Rect(bx, by2 + 1, W - 24 - bx - 4, 4), sim.Enemies.Hp[e] / sim.Enemies.MaxHp[e], PixelUI.Red, new Color32(60, 30, 30, 255));
+                break;
+            }
+
+            // --- активные усилители цветов
+            {
+                float bx = 10f, byb = _ui.SafeBottom + 32f;
+                if (sim.BuffSting > 0f && (sim.BuffSting > 3f || Mathf.Repeat(time * 4f, 1f) < 0.6f))
+                {
+                    _ui.Icon(Spr.IconSting, bx + 3, byb + 3);
+                    _b.Clear().Append(Mathf.CeilToInt(sim.BuffSting));
+                    _ui.Text(_b, bx + 9, byb, new Color32(255, 130, 110, 255));
+                    bx += 24;
+                }
+                if (sim.BuffSpeed > 0f && (sim.BuffSpeed > 3f || Mathf.Repeat(time * 4f, 1f) < 0.6f))
+                {
+                    _ui.Icon(Spr.IconSpeed, bx + 3, byb + 3);
+                    _b.Clear().Append(Mathf.CeilToInt(sim.BuffSpeed));
+                    _ui.Text(_b, bx + 9, byb, new Color32(200, 170, 255, 255));
                 }
             }
 
@@ -436,6 +481,15 @@ namespace Swarm.UI
                     { _ballHintTime += dt; return Strings.HintBall; }
             }
             if (_thirstHintTime < 8f && sim.Sky.Thirst > 0.5f) { _thirstHintTime += dt; return Strings.HintThirst; }
+            if (_focusHintTime < 7f && sim.FocusUid == 0)
+            {
+                var en2 = sim.Enemies;
+                for (int i = 0; i < en2.Count; i++)
+                    if ((en2.Type[i] == EnemyType.Hornet || en2.Type[i] == EnemyType.Queen || en2.Type[i] == EnemyType.Bear) &&
+                        (en2.Pos[i] - sw.LeaderPos).sqrMagnitude < 120f * 120f && sim.Time > 150f)
+                    { _focusHintTime += dt; return Strings.HintFocus; }
+            }
+            if (_buffHintTime < 6f && sim.Time > 70f && sim.Time < 140f) { _buffHintTime += dt; return Strings.HintBuffs; }
             if (_webHintTime < 6f)
                 for (int i = 0; i < sw.Count; i += 3)
                     if (sw.Stuck[i] > 1f) { _webHintTime += dt; return Strings.HintWeb; }
@@ -674,7 +728,11 @@ namespace Swarm.UI
             switch (sim.Result)
             {
                 case SimResult.Won: title = Strings.Won; sub = Strings.WonSub; tc = PixelUI.Green; break;
-                case SimResult.Wintered: title = Strings.Wintered; sub = Strings.WinteredSub; tc = PixelUI.Honey; break;
+                case SimResult.Wintered:
+                    title = Strings.Wintered;
+                    sub = sim.GoalBeesMet && sim.GoalHoneyMet && sim.Stats.BossesKilled == 0 ? Strings.WonNoBoss : Strings.WinteredSub;
+                    tc = PixelUI.Honey;
+                    break;
                 case SimResult.LostSwarm:
                     title = endless ? Strings.ModeEndless : Strings.LostSwarm;
                     sub = Strings.LostSwarmSub;

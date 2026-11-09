@@ -19,14 +19,14 @@ namespace Swarm.Simulation
         public float NectarCollected, HoneyDelivered, HoneyStolen;
         public int BeesHatched, BeesLost, WaspsKilled, HornetsKilled, BearsRepelled, PeakBees;
         public int LostToHeat, LostToDash, LostToBite, LostGuards, LostToBird, LostToSpider;
-        public int FlowersSprouted, RareFound, DefendersHired, WorkersHired, AntsKilled, NestsDestroyed, HornetsCooked;
+        public int FlowersSprouted, RareFound, DefendersHired, WorkersHired, BossesKilled, AntsKilled, NestsDestroyed, HornetsCooked;
 
         public void Reset()
         {
             NectarCollected = HoneyDelivered = HoneyStolen = 0f;
             BeesHatched = BeesLost = WaspsKilled = HornetsKilled = BearsRepelled = PeakBees = 0;
             LostToHeat = LostToDash = LostToBite = LostGuards = LostToBird = LostToSpider = 0;
-            FlowersSprouted = RareFound = DefendersHired = WorkersHired = AntsKilled = NestsDestroyed = HornetsCooked = 0;
+            FlowersSprouted = RareFound = DefendersHired = WorkersHired = BossesKilled = AntsKilled = NestsDestroyed = HornetsCooked = 0;
         }
     }
 
@@ -121,6 +121,10 @@ namespace Swarm.Simulation
             Vector2 start = World.HivePos + new Vector2(0f, -30f);
             Swarm.ResetLeader(start);
             for (int i = 0; i < Cfg.StartBees; i++) Swarm.Spawn(start, Rng);
+            BuffSting = BuffSpeed = 0f;
+            BossSummoned = false;
+            FocusUid = 0; FocusEnemy = -1;
+            if (!AttractMode) Breeds.Apply(Cfg.Breed, this);
             Stats.PeakBees = Swarm.Count;
             Hazards.Reset(this);
             Fog.Enabled = Cfg.FogEnabled && !AttractMode;
@@ -167,6 +171,7 @@ namespace Swarm.Simulation
             while (BroodProgress >= 1f && Colony.Honey >= cost && Swarm.SwarmCount < Colony.MaxBees)
             {
                 if (!Swarm.Spawn(at, Rng)) break;
+                Swarm.Vel[Swarm.Count - 1] = new Vector2(Rng.Signed * 18f, 48f);   // вылетает из летка вверх
                 Colony.Honey -= cost;
                 BroodProgress -= 1f;
                 Stats.BeesHatched++;
@@ -308,11 +313,84 @@ namespace Swarm.Simulation
             return 0;
         }
 
+        /// <summary>Звёзды к концу лета: без победы над королевой — не больше двух.</summary>
+        int FinalStars()
+        {
+            int st = WinterStars();
+            if (Cfg.BossEnabled && Stats.BossesKilled == 0) st = Mathf.Min(st, 2);
+            return st;
+        }
+
+        // ------------------------------------------------------------ босс
+        public bool BossSummoned;
+
+        /// <summary>Королева шершней прилетает с края карты, подальше от роя.</summary>
+        public void SummonBoss()
+        {
+            BossSummoned = true;
+            Vector2 best = World.HivePos;
+            float bd = -1f;
+            for (int a = 0; a < 8; a++)
+            {
+                float ang = a * 0.785f;
+                Vector2 p = World.ClampToWorld(World.HivePos + new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * 900f, 4f);
+                float d = (p - Swarm.LeaderPos).sqrMagnitude;
+                if (d > bd) { bd = d; best = p; }
+            }
+            if (!Enemies.Spawn(EnemyType.Queen, best, Rng)) return;
+            int qi = Enemies.Count - 1;
+            float qm = Cfg.WaveMul * (1f + 0.5f * Waves.Cycle);
+            Enemies.Hp[qi] = Enemies.MaxHp[qi] = Enemies.MaxHp[qi] * qm;
+            Events.Push(SimEventType.BossIncoming, best, 0f, qi);
+        }
+
         public bool GoalBeesMet => Swarm.SwarmCount >= Cfg.GoalBees;
         public bool GoalHoneyMet => Colony.Honey >= Cfg.GoalHoney;
 
+        // --- цветы-усилители: мак — жало сильнее, фиалка — крылья быстрее
+        public float BuffSting, BuffSpeed;
+
+        public void TakeBuff(FlowerKind k, Vector2 at)
+        {
+            if (k == FlowerKind.Poppy)
+            {
+                if (BuffSting < 1f) Events.Push(SimEventType.BuffTaken, at, 0f, (int)k);
+                BuffSting = Cfg.BuffTime;
+            }
+            else if (k == FlowerKind.Violet)
+            {
+                if (BuffSpeed < 1f) Events.Push(SimEventType.BuffTaken, at, 0f, (int)k);
+                BuffSpeed = Cfg.BuffTime;
+            }
+        }
+
+        // --- метка-приказ: рой бьёт в первую очередь отмеченного врага
+        public int FocusUid;
+        public int FocusEnemy = -1;
+
+        /// <summary>Отметить врага рядом с точкой (двойной тап). Пусто — снять метку. true — метка поставлена.</summary>
+        public bool SetFocus(Vector2 world)
+        {
+            int best = -1;
+            float bd = float.MaxValue;
+            for (int e = 0; e < Enemies.Count; e++)
+            {
+                float r = EnemySystem.RadiusOf(Enemies.Type[e]) + 14f;
+                float d = (Enemies.Pos[e] - world).sqrMagnitude;
+                if (d < r * r && d < bd) { bd = d; best = e; }
+            }
+            FocusUid = best >= 0 ? Enemies.Uid[best] : 0;
+            FocusEnemy = best;
+            Events.Push(SimEventType.FocusSet, world, best >= 0 ? 1f : 0f, best);
+            return best >= 0;
+        }
+
         public void Step(float dt, in SimInput input)
         {
+            if (BuffSting > 0f) BuffSting -= dt;
+            if (BuffSpeed > 0f) BuffSpeed -= dt;
+            FocusEnemy = Enemies.IndexOfUid(FocusUid);
+            if (FocusEnemy < 0) FocusUid = 0;
             if (Result != SimResult.Running) return;
             Time += dt;
             RecentLosses *= Mathf.Exp(-dt / 30f);
@@ -353,10 +431,11 @@ namespace Swarm.Simulation
             CheckPerkMilestone();
             if (Swarm.SwarmCount == 0) { Result = SimResult.LostSwarm; Stars = Cfg.Endless ? EndlessStars() : 0; }
             else if (Cfg.Endless) { }
-            else if (GoalBeesMet && GoalHoneyMet) { Result = SimResult.Won; Stars = 3; }
+            else if (GoalBeesMet && GoalHoneyMet && (!Cfg.BossEnabled || Stats.BossesKilled > 0)) { Result = SimResult.Won; Stars = 3; }
+            else if (GoalBeesMet && GoalHoneyMet && !BossSummoned) SummonBoss();   // финал сезона: прилетает королева
             else if (Time >= Cfg.SessionTime)
             {
-                Stars = WinterStars();
+                Stars = FinalStars();
                 Result = Stars > 0 ? SimResult.Wintered : SimResult.LostSummer;
             }
         }

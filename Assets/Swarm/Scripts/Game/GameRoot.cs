@@ -81,11 +81,20 @@ namespace Swarm.Game
             _attract = new GameSim(_cfg, 4242u) { AttractMode = true };
             _profile = Profile.Load();
             var info = Resources.Load<TextAsset>("BuildInfo");
-            _gameUi.VersionText = info != null ? info.text.Trim() : Application.version;
+            _gameUi.VersionText = BuildLabel(info != null ? info.text : Application.version);
             Haptics.Load();
             AutoPilot.Load();
             FxSystem.ShakeEnabled = PlayerPrefs.GetInt("swarm_shake", 1) == 1;
             EnterMenu();
+        }
+
+        /// <summary>«0.2.7» → «СБОРКА 7» — тот же номер, что у запуска сборки на GitHub.</summary>
+        public static string BuildLabel(string ver)
+        {
+            ver = (ver ?? "").Trim().Split(' ')[0];
+            int dot = ver.LastIndexOf('.');
+            string n = dot >= 0 ? ver.Substring(dot + 1) : ver;
+            return n.Length > 0 && n != "0" ? "СБОРКА " + n : "СБОРКА DEV";
         }
 
         void OnDestroy()
@@ -120,6 +129,7 @@ namespace Swarm.Game
             _level = level;
             uint seed = mode == GameMode.Daily ? Levels.DailySeed(System.DateTime.UtcNow) : (uint)_rnd.Next(1, int.MaxValue);
             _cfg = Levels.Make(mode, level);
+            _cfg.Breed = _profile.SelectedBreed;
             _sim = new GameSim(_cfg, seed);
             _fresh = null;
             _best = 0f;
@@ -258,6 +268,7 @@ namespace Swarm.Game
                     break;
                 case UiAction.ToggleSound: _audio.ToggleMute(); break;
                 case UiAction.ToggleHaptics: Haptics.Toggle(); break;
+                case UiAction.CycleBreed: _profile.CycleBreed(); break;
                 case UiAction.ToggleAuto:
                     AutoPilot.Toggle();
                     if (_sim != null) _auto.Reset(_screen);
@@ -302,10 +313,23 @@ namespace Swarm.Game
             };
         }
 
+        float _lastTapT = -9f, _buffBannerT = -99f;
+        Vector2 _lastTapPx;
+
         SimInput PlayerInput(float dt)
         {
             var inp = new SimInput();
             Vector2 px = _screen.ScreenToPixel(_input.ScreenPos);
+            // двойной тап — метка-приказ на врага (или снять метку)
+            if (_input.Down && !_ui.Captured)
+            {
+                if (_time - _lastTapT < 0.32f && (px - _lastTapPx).sqrMagnitude < 14f * 14f)
+                {
+                    _sim.SetFocus(_screen.PixelToWorld(px));
+                    _lastTapT = -9f;
+                }
+                else { _lastTapT = _time; _lastTapPx = px; }
+            }
             if (_input.Held && !_ui.Captured)
             {
                 inp.Active = true;
@@ -352,7 +376,17 @@ namespace Swarm.Game
         {
             switch (e.Type)
             {
-                case SimEventType.WaveIncoming: _gameUi.ShowWave((WaveMessage)e.Data); break;
+                case SimEventType.WaveIncoming: if ((WaveMessage)e.Data != WaveMessage.Boss) _gameUi.ShowWave((WaveMessage)e.Data); break;
+                case SimEventType.BossIncoming:
+                    _gameUi.ShowBanner(_sim != null && _sim.GoalBeesMet && _sim.GoalHoneyMet ? Strings.BossFinal : Strings.BossTitle, Strings.BossSub, PixelUI.Red);
+                    break;
+                case SimEventType.BossPhase: _gameUi.ShowBanner(Strings.BossRage, Strings.BossRageSub, PixelUI.Red); break;
+                case SimEventType.BossKilled: _gameUi.ShowBanner(Strings.BossDown, Strings.BossDownSub, PixelUI.Green); break;
+                case SimEventType.BuffTaken:
+                    if (_time - _buffBannerT < 45f) break;
+                    _buffBannerT = _time;
+                    _gameUi.ShowBanner(e.Data == (int)FlowerKind.Poppy ? Strings.PoppyTitle : Strings.VioletTitle, null, e.Data == (int)FlowerKind.Poppy ? new Color32(255, 130, 110, 255) : new Color32(200, 170, 255, 255));
+                    break;
                 case SimEventType.BearRepelled: _gameUi.ShowBanner(Strings.BearGone, null, PixelUI.Green); break;
                 case SimEventType.NestDestroyed: _gameUi.ShowBanner(Strings.NestDown, Strings.NestDownSub, PixelUI.Green); break;
                 case SimEventType.LindenBloom: _gameUi.ShowBanner(Strings.LindenTitle, Strings.LindenSub, PixelUI.Honey); break;

@@ -249,6 +249,12 @@ namespace Swarm.Presentation
                         break;
                     case StandKind.Hive:
                         _stand.Add(Spr.Hive, it.Pos.x, it.Pos.y + (_hiveBounce > 0f ? 1f : 0f), White);
+                        {
+                            // мёд виден на самом улье: подтёки и лужица растут к цели
+                            float goal = sim.Cfg.Endless ? 600f : sim.Cfg.GoalHoney;
+                            int lv = Mathf.Clamp(Mathf.FloorToInt(sim.Colony.Honey / goal * 4f + 0.5f), 0, 4);
+                            if (lv > 0) _stand.Add((int)Spr.HiveHoney1 + lv - 1, it.Pos.x, it.Pos.y + (_hiveBounce > 0f ? 1f : 0f), White);
+                        }
                         if (_hiveGlow > 0.01f)
                         {
                             float pulse = 0.6f + 0.4f * Mathf.Sin(time * 5f);
@@ -267,21 +273,28 @@ namespace Swarm.Presentation
                 float t = time * (0.9f + i * 0.13f) + ph;
                 Vector2 p = ent + new Vector2(Mathf.Sin(t) * (14f + i * 2f), Mathf.Sin(t * 2f) * 6f + 6f + (i % 3) * 3f);
                 bool flip = Mathf.Cos(t) < 0f;
-                int fr = ((int)(time * 24f + i) & 1) == 0 ? (int)Spr.BeeA : (int)Spr.BeeB;
+                int fr = (int)Spr.BeeA + ((int)(time * 30f + i) & 3);
                 _shadow.Add(Spr.ShadowS, p.x, p.y - 7f, A(55));
                 _fly.Add(fr, p.x, p.y, White, flip);
             }
 
             // --- рой
+            float fastV = sim.Cfg.LeaderSpeed * sim.Colony.SpeedMul * 1.25f;
+            float fastSq = fastV * fastV;
             for (int i = 0; i < swarm.Count; i++)
             {
                 Vector2 p = swarm.Pos[i];
                 if (!view.Contains(p)) continue;
                 float ph = swarm.Phase[i];
                 bool loaded = swarm.Carry[i] > cap * 0.3f;
-                int fr = ((int)(time * 26f + ph) & 1) == 0 ? 0 : 1;
+                int f4 = (int)(time * 32f + ph) & 3;      // 4 кадра крыльев
                 var role = swarm.Role[i];
-                int spr = role == BeeRole.Guard ? (int)Spr.SoldierA + fr : (loaded ? (int)Spr.BeeLoadA + fr : (int)Spr.BeeA + fr);
+                // смазанный кадр на большой скорости — рой «тянется» в рывке
+                bool fast = role != BeeRole.Guard && swarm.Stuck[i] <= 0f && swarm.Vel[i].sqrMagnitude > fastSq;
+                int spr;
+                if (role == BeeRole.Guard) spr = (int)Spr.SoldierA + (f4 >> 1);
+                else if (fast) spr = (loaded ? (int)Spr.BeeLoadFastA : (int)Spr.BeeFastA) + (f4 & 1);
+                else spr = (loaded ? (int)Spr.BeeLoadA : (int)Spr.BeeA) + f4;
                 float bob = swarm.Stuck[i] > 0f ? 0f : Mathf.Sin(time * 7f + ph) * 1.2f;
                 Color32 bc = role == BeeRole.Squad ? new Color32(200, 228, 255, 255) : role == BeeRole.Worker ? new Color32(205, 245, 170, 255) : White;
                 if (role == BeeRole.Guard && swarm.Hp[i] < swarm.MaxHp[i] - 0.05f) bc = new Color32(255, 190, 180, 255);
@@ -297,19 +310,30 @@ namespace Swarm.Presentation
                 if (!view.Contains(p)) continue;
                 var et = en.Type[i];
                 if (et == EnemyType.Nest || et == EnemyType.Ant || et == EnemyType.Bear) { DrawGroundEnemy(en, i, p, time); continue; }
-                bool hornet = et == EnemyType.Hornet;
-                int fr = ((int)(time * 22f + en.Phase[i]) & 1);
+                bool queen = et == EnemyType.Queen;
+                bool hornet = et == EnemyType.Hornet || queen;   // крупный — для теней/полос
+                int fr = (int)(time * 30f + en.Phase[i]) & 3;
                 int spr;
                 bool windup = en.Act[i] == EnemyAct.Windup;
                 bool dash = en.Act[i] == EnemyAct.Dash;
-                if (en.Flash[i] > 0.06f || (windup && ((int)(time * 16f) & 1) == 0)) spr = hornet ? (int)Spr.HornetFlash : (int)Spr.WaspFlash;
-                else spr = hornet ? (int)Spr.HornetA + fr : (int)Spr.WaspA + fr;
+                int baseA = queen ? (int)Spr.QueenA : et == EnemyType.Hornet ? (int)Spr.HornetA : (int)Spr.WaspA;
+                int flashS = queen ? (int)Spr.QueenFlash : et == EnemyType.Hornet ? (int)Spr.HornetFlash : (int)Spr.WaspFlash;
+                int windS = queen ? (int)Spr.QueenWind : et == EnemyType.Hornet ? (int)Spr.HornetWind : (int)Spr.WaspWind;
+                if (en.Flash[i] > 0.06f || (windup && ((int)(time * 16f) & 3) == 0)) spr = flashS;
+                else if (windup) spr = windS;                // поза замаха: брюшко поджато, жало вперёд
+                else spr = baseA + fr;
                 float bob = windup ? 0f : Mathf.Sin(time * 6f + en.Phase[i]) * 1.5f;
                 // замах: дрожь на пиксель, чтобы читалось «сейчас бросится»
                 float jx = windup ? (((int)(time * 40f) & 1) == 0 ? 1f : -1f) : 0f;
                 bool flipE = windup || dash ? en.DashDir[i].x < 0f : en.Vel[i].x < 0f;
-                float footY = p.y - (hornet ? 11f : 8f);
-                _shadow.Add(hornet ? Spr.ShadowL : Spr.ShadowM, p.x, footY, A(70));
+                float footY = p.y - (queen ? 15f : hornet ? 11f : 8f);
+                _shadow.Add(queen ? Spr.ShadowXL : hornet ? Spr.ShadowL : Spr.ShadowM, p.x, footY, A(70));
+                if (en.Uid[i] == sim.FocusUid)
+                {
+                    // метка-приказ: пульсирующий прицел над врагом
+                    float fp = Mathf.Repeat(time * 2f, 1f);
+                    _overlay.Add(fp < 0.5f ? Spr.KCross : Spr.KStar, p.x, p.y + (queen ? 22f : hornet ? 16f : 12f), new Color32(255, 240, 160, 230));
+                }
                 // кольцо опасности под врагом — враги читаются даже в гуще роя
                 byte ra = (byte)(windup ? 230 : 110);
                 _shadow.Add(hornet ? Spr.KRing1 : Spr.KRing0, p.x, footY, new Color32(238, 70, 60, ra));
@@ -322,8 +346,8 @@ namespace Swarm.Presentation
                 _fly.Add(spr, p.x + jx, p.y + bob, White, flipE);
                 if (en.Hp[i] < en.MaxHp[i])
                 {
-                    float w = hornet ? 16f : 10f;
-                    float y = p.y + (hornet ? 10f : 8f);
+                    float w = queen ? 26f : hornet ? 16f : 10f;
+                    float y = p.y + (queen ? 15f : hornet ? 10f : 8f);
                     _overlay.Rect(p.x - w * 0.5f - 1f, y - 1f, w + 2f, 4f, new Color32(23, 18, 28, 220));
                     _overlay.Rect(p.x - w * 0.5f, y, Mathf.Max(1f, w * en.Hp[i] / en.MaxHp[i]), 2f, new Color32(238, 106, 82, 255));
                 }

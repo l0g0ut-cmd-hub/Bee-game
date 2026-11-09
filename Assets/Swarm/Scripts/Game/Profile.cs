@@ -18,7 +18,22 @@ namespace Swarm.Game
         public int DailyDate;          // yyyymmdd последнего задания дня
         public int DailyStars;
         public int Achievements;       // битовая маска
-        public int TotalCooked, TotalNests, TotalBears, TotalRare;
+        public int TotalCooked, TotalNests, TotalBears, TotalRare, TotalBosses;
+        public int BreedIndex;         // выбранная порода (Swarm.Simulation.Breed)
+
+        public bool BreedUnlocked(Simulation.Breed b) => CampaignStars >= Breeds.UnlockStars[(int)b];
+
+        /// <summary>Следующая открытая порода по кругу.</summary>
+        public void CycleBreed()
+        {
+            for (int k = 1; k <= (int)Simulation.Breed.Count; k++)
+            {
+                int n = (BreedIndex + k) % (int)Simulation.Breed.Count;
+                if (BreedUnlocked((Simulation.Breed)n)) { BreedIndex = n; Save(); return; }
+            }
+        }
+
+        public Simulation.Breed SelectedBreed => BreedUnlocked((Simulation.Breed)BreedIndex) ? (Simulation.Breed)BreedIndex : Simulation.Breed.Central;
 
         const string Key = "swarm_profile_v1";
 
@@ -73,6 +88,7 @@ namespace Swarm.Game
             TotalNests += st.NestsDestroyed;
             TotalBears += st.BearsRepelled;
             TotalRare += st.RareFound;
+            TotalBosses += st.BossesKilled;
             switch (mode)
             {
                 case GameMode.Campaign:
@@ -104,7 +120,7 @@ namespace Swarm.Game
     public enum Achievement
     {
         FirstHoney, Cook10, NestBuster, BearRepeller, GoldFind, GreatSwarm, ThreeStars, Campaign,
-        Survivor, FullGuard, Flawless, Daily, Count
+        Survivor, FullGuard, Flawless, Daily, QueenSlayer, Count
     }
 
     public static class Achievements_
@@ -124,6 +140,7 @@ namespace Swarm.Game
                 case Achievement.Survivor: return "ВЫЖИВШИЙ";
                 case Achievement.FullGuard: return "ГВАРДИЯ";
                 case Achievement.Flawless: return "БЕЗ ПОТЕРЬ";
+                case Achievement.QueenSlayer: return "ЦАРЕУБИЙЦА";
                 default: return "ЗАДАНИЕ ДНЯ";
             }
         }
@@ -143,6 +160,7 @@ namespace Swarm.Game
                 case Achievement.Survivor: return "20 МИНУТ В ВЫЖИВАНИИ";
                 case Achievement.FullGuard: return "НАЙМИ 24 ЗАЩИТНИКА";
                 case Achievement.Flawless: return "ПОБЕДА, ПОТЕРЯВ < 25 ПЧЁЛ";
+                case Achievement.QueenSlayer: return "ПОБЕДИ КОРОЛЕВУ ШЕРШНЕЙ";
                 default: return "ЗВЕЗДА В ЗАДАНИИ ДНЯ";
             }
         }
@@ -163,6 +181,7 @@ namespace Swarm.Game
                 case Achievement.Survivor: return mode == GameMode.Endless && sim.Time >= 1200f;
                 case Achievement.FullGuard: return st.DefendersHired >= 24;
                 case Achievement.Flawless: return sim.Result == SimResult.Won && st.BeesLost < 25;
+                case Achievement.QueenSlayer: return p.TotalBosses > 0;
                 default: return mode == GameMode.Daily && sim.Stars > 0;
             }
         }

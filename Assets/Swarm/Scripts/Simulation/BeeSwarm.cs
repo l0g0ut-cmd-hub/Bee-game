@@ -229,7 +229,7 @@ namespace Swarm.Simulation
             Vector2 entrance = world.HivePos + HiveEntranceOffset;
 
             // ---------------- тепловой шар: палец удерживается у врага
-            float maxSpd = cfg.LeaderSpeed * colony.SpeedMul * sim.Mods.Speed * sim.Sky.SpeedMul(time);
+            float maxSpd = cfg.LeaderSpeed * colony.SpeedMul * sim.Mods.Speed * sim.Sky.SpeedMul(time) * (sim.BuffSpeed > 0f ? cfg.VioletSpeedMul : 1f);
             Vector2 wind = sim.Sky.Wind;
             int ballE = -1;
             if (input.Active && input.Hold && SwarmCount >= cfg.BallMinBees)
@@ -506,7 +506,12 @@ namespace Swarm.Simulation
                     else if (distLeaderSq < leashSq)
                     {
                         float best = aggroSq;
-                        for (int c = 0; c < candCount; c++)
+                        // метка-приказ: отмеченный враг в приоритете и с удвоенным числом мест
+                        int fe = sim.FocusEnemy;
+                        if (fe >= 0 && _attackers[fe] < EnemySystem.MaxStingers(enemies.Type[fe], cfg) * 2 &&
+                            (enemies.Pos[fe] - p).sqrMagnitude < (cfg.AggroRadius + 70f) * (cfg.AggroRadius + 70f))
+                        { targetIdx = fe; best = -1f; }
+                        for (int c = 0; c < candCount && best >= 0f; c++)
                         {
                             int e = _enemyCand[c];
                             if (_attackers[e] >= EnemySystem.MaxStingers(enemies.Type[e], cfg)) continue;
@@ -602,6 +607,11 @@ namespace Swarm.Simulation
                         }
                         Carry[i] += got;
                         sim.Stats.NectarCollected += got;
+                        if (got > 0f && (Role[i] == BeeRole.Swarm || Role[i] == BeeRole.Squad))
+                        {
+                            var fk = flowers.Kind[targetIdx];
+                            if (fk == FlowerKind.Poppy || fk == FlowerKind.Violet) sim.TakeBuff(fk, flowers.Pos[targetIdx]);
+                        }
                         if (got > 0f && sim.Rng.Value < dt * 1.5f)
                             sim.Events.Push(SimEventType.NectarCollected, p, got, targetIdx);
                     }

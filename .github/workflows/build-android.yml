@@ -83,8 +83,7 @@ jobs:
 
       - name: Stamp build version
         run: |
-          SHA=$(echo "$GITHUB_SHA" | cut -c1-7 | tr 'a-f' 'A-F')
-          echo "0.2.${GITHUB_RUN_NUMBER} · ${SHA}" > Assets/Swarm/Resources/BuildInfo.txt
+          echo "0.2.${GITHUB_RUN_NUMBER}" > Assets/Swarm/Resources/BuildInfo.txt
           echo "SWARM_VERSION=0.2.${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
           echo "SWARM_VERSION_CODE=${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
           cat Assets/Swarm/Resources/BuildInfo.txt

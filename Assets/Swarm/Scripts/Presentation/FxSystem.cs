@@ -125,7 +125,8 @@ namespace Swarm.Presentation
                     {
                         bool heat = e.Data == 99;
                         // пчела падает, кувыркаясь, + облачко дыма (от перегрева — оранжевое)
-                        Emit(Spr.BeeA, e.Pos, new Vector2(S * 20f, 0f), 0.9f, heat ? new Color32(230, 140, 90, 255) : new Color32(200, 190, 170, 255), z: 2f, vz: 30f, drag: 1f, flip: R < 0.5f);
+                        // падает на спину на землю (к своей тени), полежит и растает
+                        Emit(Spr.BeeDead, e.Pos - new Vector2(0f, 6f), new Vector2(S * 14f, 0f), 1.8f, heat ? new Color32(230, 140, 90, 255) : new Color32(215, 205, 185, 255), z: 6f, vz: 28f, drag: 1f, flip: R < 0.5f);
                         Emit(R < 0.5f ? Spr.KSmokeA : Spr.KSmokeB, e.Pos, new Vector2(S * 6f, 10f), 0.5f, heat ? new Color32(255, 170, 90, 170) : new Color32(255, 255, 255, 140), drag: 3f);
                         if (_sound) Feedback(Tier.Small);
                         audio?.Play(Sfx.BeeDie);
@@ -168,7 +169,8 @@ namespace Swarm.Presentation
                         break;
                     case SimEventType.EnemyKilled:
                     {
-                        bool hornet = e.Data == (int)EnemyType.Hornet;
+                        bool queenK = e.Data == (int)EnemyType.Queen;
+                        bool hornet = e.Data == (int)EnemyType.Hornet || queenK;
                         bool cooked = e.Value > 0.5f;
                         Emit(Spr.KRing0, e.Pos, Vector2.zero, hornet ? 0.4f : 0.3f, White, true, drag: 0f, sprEnd: Spr.KRing2);
                         Emit(Spr.KBurst, e.Pos, Vector2.zero, 0.18f, cooked ? Heat : Honey, true, drag: 0f);
@@ -181,9 +183,42 @@ namespace Swarm.Presentation
                         }
                         for (int k = 0; k < (hornet ? 3 : 1); k++)
                             Emit(Spr.KSmokeB, e.Pos + new Vector2(S * 5f, S * 3f), new Vector2(S * 8f, 12f), 0.6f, new Color32(255, 255, 255, 120), drag: 2f);
-                        Emit(hornet ? Spr.HornetA : Spr.WaspA, e.Pos, new Vector2(S * 10f, 0f), 1.0f, new Color32(150, 140, 130, 255), z: 3f, vz: 35f, drag: 1f, flip: R < 0.5f);
+                        Emit(queenK ? Spr.QueenA : hornet ? Spr.HornetA : Spr.WaspA, e.Pos, new Vector2(S * 10f, 0f), 1.0f, new Color32(150, 140, 130, 255), z: 3f, vz: 35f, drag: 1f, flip: R < 0.5f);
                         Feedback(hornet ? Tier.Large : Tier.Medium);
                         audio?.Play(hornet ? Sfx.KillBig : Sfx.Kill);
+                        break;
+                    }
+                    case SimEventType.BossIncoming:
+                        Feedback(Tier.Large);
+                        audio?.Play(Sfx.Alarm);
+                        break;
+                    case SimEventType.BossPhase:
+                        for (int k = 0; k < 3; k++)
+                            Emit(Spr.KRing0, e.Pos, Vector2.zero, 0.5f + k * 0.15f, new Color32(238, 90, 70, 255), true, drag: 0f, sprEnd: Spr.KRing2);
+                        Feedback(Tier.Large);
+                        audio?.Play(Sfx.Alarm);
+                        break;
+                    case SimEventType.BossKilled:
+                        for (int k = 0; k < 4; k++)
+                            Emit(Spr.KRing0, e.Pos, Vector2.zero, 0.5f + k * 0.2f, Honey, true, drag: 0f, sprEnd: Spr.KRing2);
+                        for (int k = 0; k < 24; k++)
+                            Emit(Spr.HoneyDrop, e.Pos, new Vector2(S, S) * 60f, 0.9f + R * 0.4f, White, z: 4f, vz: 40f + R * 30f, drag: 2f);
+                        Text(e.Pos + new Vector2(0f, 16f), Mathf.RoundToInt(e.Value), Honey, 1);
+                        Feedback(Tier.Large);
+                        audio?.Play(Sfx.Win);
+                        break;
+                    case SimEventType.FocusSet:
+                        Emit(Spr.KRing0, e.Pos, Vector2.zero, 0.35f, e.Value > 0.5f ? new Color32(255, 240, 160, 255) : new Color32(200, 200, 200, 160), true, drag: 0f, sprEnd: Spr.KRing2);
+                        audio?.Play(Sfx.Click);
+                        break;
+                    case SimEventType.BuffTaken:
+                    {
+                        bool poppy = e.Data == (int)FlowerKind.Poppy;
+                        var bc = poppy ? new Color32(255, 110, 90, 255) : new Color32(190, 150, 255, 255);
+                        for (int k = 0; k < 10; k++)
+                            Emit(Spr.KSpark, e.Pos + new Vector2(S * 6f, S * 4f), new Vector2(S * 12f, 20f + R * 10f), 0.7f, bc, true);
+                        Emit(Spr.KRing0, e.Pos, Vector2.zero, 0.4f, bc, true, drag: 0f, sprEnd: Spr.KRing2);
+                        audio?.Play(Sfx.Upgrade, 0.7f);
                         break;
                     }
                     case SimEventType.HoneyStolen:

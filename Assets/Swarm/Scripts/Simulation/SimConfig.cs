@@ -99,6 +99,15 @@ namespace Swarm.Simulation
         public Biome Biome = Biome.Meadow;
         public float WaveMul = 1f;            // множитель размера волн
         public bool Endless;                  // выживание: лето не кончается, волны крепчают по кругу
+        public Breed Breed = Breed.Central;   // порода пчёл (выбирается перед партией)
+
+        // --- цветы-усилители
+        public float BuffTime = 15f, PoppyStingMul = 1.4f, VioletSpeedMul = 1.2f;
+
+        // --- босс сезона
+        public float BossReward = 150f;
+        public bool BossEnabled = true;
+
         // --- сборщицы (автономные, только нектар)
         public int WorkerBatch = 3, WorkerMax = 18;
         public int WorkerCostBase = 30, WorkerCostPer = 4;

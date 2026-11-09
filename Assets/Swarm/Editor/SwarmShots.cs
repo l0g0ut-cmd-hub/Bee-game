@@ -74,7 +74,7 @@ namespace Swarm.EditorTools
             profile.LevelStars[0] = 3; profile.LevelStars[1] = 1;
             profile.EndlessBest = 1234f;
             profile.Achievements = (1 << (int)Game.Achievement.FirstHoney) | (1 << (int)Game.Achievement.Cook10) | (1 << (int)Game.Achievement.ThreeStars);
-            { var bi = Resources.Load<TextAsset>("BuildInfo"); _gui.VersionText = bi != null ? bi.text.Trim() : "?"; }
+            { var bi = Resources.Load<TextAsset>("BuildInfo"); _gui.VersionText = Game.GameRoot.BuildLabel(bi != null ? bi.text : ""); }
 
             // 1. Главное меню: витрина с роем на фоне, версия внизу
             var attract = new GameSim(cfg, 4242u) { AttractMode = true };
@@ -82,6 +82,8 @@ namespace Swarm.EditorTools
             Play(attract, 7f, s => NearestFlower(s), menu: true);
             Shot("01_menu", attract, () => _gui.DrawMenu(_t, profile, false), menu: true);
             Shot("02_levels", attract, () => _gui.DrawLevels(profile, _t), menu: true);
+            profile.BreedIndex = 1;
+            Shot("02b_levels_breed", attract, () => _gui.DrawLevels(profile, _t), menu: true);
             Shot("03_achievements", attract, () => _gui.DrawAchievements(profile), menu: true);
 
             // 4. Старт партии (лето, сад): подсказка обучения, 
@@ -179,6 +181,26 @@ namespace Swarm.EditorTools
             Shot("14_bear", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
             sim.Enemies.Clear();
 
+            // 14b. Королева шершней: метка + шар, усилитель мака
+            {
+                lp = sim.Swarm.LeaderPos;
+                sim.Enemies.Spawn(EnemyType.Queen, lp + new Vector2(60f, 40f), sim.Rng);
+                int qi = sim.Enemies.Count - 1;
+                sim.Enemies.DashCd[qi] = 99f;
+                sim.SetFocus(sim.Enemies.Pos[qi]);
+                sim.BuffSting = 12f; sim.BuffSpeed = 7f;
+                _gui.ShowBanner(Strings.BossTitle, Strings.BossSub, PixelUI.Red);
+                Play(sim, 1.2f, s => s.Enemies.IndexOfUid(s.FocusUid) >= 0 ? s.Enemies.Pos[s.Enemies.IndexOfUid(s.FocusUid)] : s.Swarm.LeaderPos, hold: true);
+                Shot("14b_boss", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+                _log.Append($"PROBE|boss|queenHp {(sim.Enemies.IndexOfUid(sim.FocusUid) >= 0 ? sim.Enemies.Hp[sim.Enemies.IndexOfUid(sim.FocusUid)] : -1f):F0} focus {sim.FocusEnemy} balling {sim.Swarm.Balling}\n");
+                sim.Enemies.Clear();
+                sim.FocusUid = 0;
+            }
+            // 14c. Мёд на улье
+            sim.Colony.Honey = sim.Cfg.GoalHoney * 0.8f;
+            Play(sim, 3f, s => s.World.HivePos + new Vector2(0f, -40f));
+            Shot("14c_hive_honey", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+
             // 15. Дождь
             sim.Sky.Current = Weather.Rain;
             sim.Sky.WeatherBlend = 1f;
@@ -229,7 +251,7 @@ namespace Swarm.EditorTools
             int state = 0;            // 0 поле, 1 улей, 2 дар
             int hiveVisits = 0, posts = 0, perks = 0, presses = 0;
             bool shotHive = false, shotPerk = false, shotPost = false;
-            int steps = Mathf.RoundToInt(240f / Dt);
+            int steps = Mathf.RoundToInt(420f / Dt);
             for (int i = 0; i < steps && sim.Result == SimResult.Running; i++)
             {
                 var ctx = state == 0 ? Game.AutoContext.Playing : state == 1 ? Game.AutoContext.Hive : Game.AutoContext.Perk;
@@ -267,7 +289,7 @@ namespace Swarm.EditorTools
             var col = sim.Colony;
             _log.Append($"PROBE|auto|t {sim.Time:F0} result {sim.Result} bees {sim.Swarm.SwarmCount}/{col.MaxBees} honey {col.Honey:F0} delivered {sim.Stats.HoneyDelivered:F0} " +
                         $"hive {hiveVisits} presses {presses} posts {posts} perks {perks} brood {sim.BroodIndex} def {sim.Swarm.GuardCount} " +
-                        $"lv spd{col.Level[0]} car{col.Level[1]} sti{col.Level[2]} comb{col.Level[3]} cooked {sim.Stats.HornetsCooked}\n");
+                        $"lv spd{col.Level[0]} car{col.Level[1]} sti{col.Level[2]} comb{col.Level[3]} cooked {sim.Stats.HornetsCooked} boss {sim.Stats.BossesKilled} focusUid {sim.FocusUid} workers {sim.Swarm.WorkerCount}\n");
         }
 
         // ------------------------------------------------------------------ прогон

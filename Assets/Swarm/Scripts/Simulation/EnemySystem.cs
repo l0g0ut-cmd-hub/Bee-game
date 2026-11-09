@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Swarm.Simulation
 {
-    public enum EnemyType : byte { Wasp, Hornet, Bear, Nest, Ant }
+    public enum EnemyType : byte { Wasp, Hornet, Bear, Nest, Ant, Queen }
     public enum EnemyMode : byte { Hunt, Raid, Flee }
     public enum EnemyAct : byte { Move, Windup, Dash }
 
@@ -31,32 +31,43 @@ namespace Swarm.Simulation
         public readonly float[] Phase = new float[Capacity];
         public readonly float[] Heat = new float[Capacity];
         public readonly int[] Stingers = new int[Capacity];
+        public readonly byte[] Stage = new byte[Capacity];
+        public readonly int[] Uid = new int[Capacity];      // постоянный id (индексы меняются при удалении)
+        int _nextUid = 1;
+
+        public int IndexOfUid(int uid)
+        {
+            if (uid <= 0) return -1;
+            for (int i = 0; i < Count; i++) if (Uid[i] == uid) return i;
+            return -1;
+        }   // фаза босса (0 → 1 при 60% → 2 при 30%)
         public int Count;
 
         public static float RadiusOf(EnemyType t)
         {
-            switch (t) { case EnemyType.Wasp: return 5f; case EnemyType.Hornet: return 8f; case EnemyType.Bear: return 15f; case EnemyType.Nest: return 11f; default: return 3f; }
+            switch (t) { case EnemyType.Wasp: return 5f; case EnemyType.Hornet: return 8f; case EnemyType.Bear: return 15f; case EnemyType.Nest: return 11f; case EnemyType.Queen: return 12f; default: return 3f; }
         }
         public static float SpeedOf(EnemyType t)
         {
-            switch (t) { case EnemyType.Wasp: return 50f; case EnemyType.Hornet: return 40f; case EnemyType.Bear: return 20f; case EnemyType.Nest: return 0f; default: return 13f; }
+            switch (t) { case EnemyType.Wasp: return 50f; case EnemyType.Hornet: return 40f; case EnemyType.Bear: return 20f; case EnemyType.Nest: return 0f; case EnemyType.Queen: return 34f; default: return 13f; }
         }
         public static float HpOf(EnemyType t)
         {
-            switch (t) { case EnemyType.Wasp: return 10f; case EnemyType.Hornet: return 45f; case EnemyType.Bear: return 300f; case EnemyType.Nest: return 220f; default: return 3f; }
+            switch (t) { case EnemyType.Wasp: return 10f; case EnemyType.Hornet: return 45f; case EnemyType.Bear: return 300f; case EnemyType.Nest: return 220f; case EnemyType.Queen: return 1000f; default: return 3f; }
         }
         public static float BiteCooldown(EnemyType t)
         {
-            switch (t) { case EnemyType.Wasp: return 1.1f; case EnemyType.Hornet: return 0.85f; case EnemyType.Bear: return 1.4f; case EnemyType.Nest: return 9999f; default: return 2.4f; }
+            switch (t) { case EnemyType.Wasp: return 1.1f; case EnemyType.Hornet: return 0.85f; case EnemyType.Bear: return 1.4f; case EnemyType.Nest: return 9999f; case EnemyType.Queen: return 0.75f; default: return 2.4f; }
         }
-        static int BiteKills(EnemyType t) => t == EnemyType.Bear ? 3 : (t == EnemyType.Nest ? 0 : 1);   // медведь бьёт лапой по площади
-        public static bool Flies(EnemyType t) => t == EnemyType.Wasp || t == EnemyType.Hornet;
+        static int BiteKills(EnemyType t) => t == EnemyType.Bear || t == EnemyType.Queen ? 3 : (t == EnemyType.Nest ? 0 : 1);   // медведь бьёт лапой по площади
+        public static bool Flies(EnemyType t) => t == EnemyType.Wasp || t == EnemyType.Hornet || t == EnemyType.Queen;
         public static bool IsStatic(EnemyType t) => t == EnemyType.Nest;
-        static float WindupTime(EnemyType t) => t == EnemyType.Wasp ? 0.45f : 0.65f;
-        static float DashTime(EnemyType t) => t == EnemyType.Wasp ? 0.3f : 0.45f;
-        static float DashRange(EnemyType t) => t == EnemyType.Wasp ? 42f : 58f;
-        static float DashCooldown(EnemyType t) => t == EnemyType.Wasp ? 7f : 5f;
-        static int DashMaxKills(EnemyType t) => t == EnemyType.Wasp ? 1 : 2;
+        public static bool IsBoss(EnemyType t) => t == EnemyType.Queen;
+        static float WindupTime(EnemyType t) => t == EnemyType.Wasp ? 0.45f : t == EnemyType.Queen ? 0.8f : 0.65f;
+        static float DashTime(EnemyType t) => t == EnemyType.Wasp ? 0.3f : t == EnemyType.Queen ? 0.5f : 0.45f;
+        static float DashRange(EnemyType t) => t == EnemyType.Wasp ? 42f : t == EnemyType.Queen ? 75f : 58f;
+        static float DashCooldown(EnemyType t) => t == EnemyType.Wasp ? 7f : t == EnemyType.Queen ? 4f : 5f;
+        static int DashMaxKills(EnemyType t) => t == EnemyType.Wasp ? 1 : t == EnemyType.Queen ? 4 : 2;
 
         /// <summary>Сколько пчёл одновременно помещается вокруг врага.</summary>
         public static int MaxStingers(EnemyType t, SimConfig cfg)
@@ -66,6 +77,7 @@ namespace Swarm.Simulation
                 case EnemyType.Wasp: return cfg.MaxStingersPerEnemy;
                 case EnemyType.Hornet: return cfg.MaxStingersPerEnemy * 2;
                 case EnemyType.Ant: return 5;
+                case EnemyType.Queen: return cfg.MaxStingersPerEnemy * 3;
                 default: return cfg.MaxStingersPerEnemy * 4;
             }
         }
@@ -89,7 +101,9 @@ namespace Swarm.Simulation
             if (Count >= Capacity) return false;
             int i = Count++;
             Type[i] = t;
-            Mode[i] = t == EnemyType.Hornet ? EnemyMode.Hunt : EnemyMode.Raid;
+            Mode[i] = t == EnemyType.Hornet || t == EnemyType.Queen ? EnemyMode.Hunt : EnemyMode.Raid;
+            Stage[i] = 0;
+            Uid[i] = _nextUid++;
             if (!Flies(t)) DashCd[i] = 9999f;
             if (t == EnemyType.Nest) { NestAlive = true; NestBrood = 0; _nestSpawnTimer = 0f; }
             Act[i] = EnemyAct.Move;
@@ -117,7 +131,7 @@ namespace Swarm.Simulation
                 Type[i] = Type[last]; Mode[i] = Mode[last]; Act[i] = Act[last]; Pos[i] = Pos[last]; Vel[i] = Vel[last];
                 DashDir[i] = DashDir[last]; Hp[i] = Hp[last]; MaxHp[i] = MaxHp[last]; BiteTimer[i] = BiteTimer[last];
                 ActTimer[i] = ActTimer[last]; DashCd[i] = DashCd[last]; Flash[i] = Flash[last]; Stolen[i] = Stolen[last];
-                Phase[i] = Phase[last]; Heat[i] = Heat[last]; Stingers[i] = Stingers[last]; _dashKills[i] = _dashKills[last];
+                Phase[i] = Phase[last]; Heat[i] = Heat[last]; Stingers[i] = Stingers[last]; _dashKills[i] = _dashKills[last]; Stage[i] = Stage[last]; Uid[i] = Uid[last];
             }
             Count--;
         }
@@ -134,7 +148,7 @@ namespace Swarm.Simulation
             var cfg = sim.Cfg;
             var buf = swarm.QueryBuffer;
             Vector2 entrance = world.HivePos + BeeSwarm.HiveEntranceOffset;
-            float stingMul = colony.StingMul * sim.Mods.Dps;
+            float stingMul = colony.StingMul * sim.Mods.Dps * (sim.BuffSting > 0f ? sim.Cfg.PoppyStingMul : 1f);
             int ballTarget = swarm.Balling ? swarm.BallTarget : -1;
             bool grounded = sim.Sky.EnemiesGrounded(sim.Time);
             Vector2 wind = sim.Sky.Wind;
@@ -157,11 +171,34 @@ namespace Swarm.Simulation
                 {
                     bool swarmClose = swarm.Count > 0 && (swarm.LeaderPos - p).sqrMagnitude < WaspAggro * WaspAggro;
                     if (!Flies(t)) Mode[i] = IsStatic(t) ? EnemyMode.Hunt : EnemyMode.Raid;   // медведю и муравьям нужен только мёд
-                    else Mode[i] = (t == EnemyType.Hornet && swarm.Count > 0) || swarmClose ? EnemyMode.Hunt : EnemyMode.Raid;
+                    else Mode[i] = ((t == EnemyType.Hornet || t == EnemyType.Queen) && swarm.Count > 0) || swarmClose ? EnemyMode.Hunt : EnemyMode.Raid;
                 }
 
-                // ночью и в ливень осы и шершни улетают в укрытие
-                if (grounded && Flies(t) && Mode[i] != EnemyMode.Flee) Mode[i] = EnemyMode.Flee;
+                // ночью и в ливень осы и шершни улетают в укрытие (королева — нет)
+                if (grounded && Flies(t) && !IsBoss(t) && Mode[i] != EnemyMode.Flee) Mode[i] = EnemyMode.Flee;
+
+                // королева: на 60% и 30% здоровья зовёт свиту и злеет
+                if (t == EnemyType.Queen)
+                {
+                    float hpf = Hp[i] / MaxHp[i];
+                    int want = hpf < 0.3f ? 2 : hpf < 0.6f ? 1 : 0;
+                    if (want > Stage[i])
+                    {
+                        Stage[i] = (byte)want;
+                        int n = want == 1 ? 3 : 2;
+                        for (int k = 0; k < n; k++)
+                        {
+                            var et = want == 2 && k == 0 ? EnemyType.Hornet : EnemyType.Wasp;
+                            if (Spawn(et, p + new Vector2(sim.Rng.Signed, sim.Rng.Signed) * 14f, sim.Rng))
+                            {
+                                Mode[Count - 1] = EnemyMode.Hunt;
+                                ev.Push(SimEventType.EnemySpawned, p, 0f, (int)et);
+                            }
+                        }
+                        ev.Push(SimEventType.BossPhase, p, want, i);
+                    }
+                    if (Stage[i] > 0) speed *= 1f + 0.12f * Stage[i];
+                }
 
                 // гнездо: стоит на месте; когда его жалят — выпускает ос на защиту
                 if (IsStatic(t))
@@ -300,14 +337,15 @@ namespace Swarm.Simulation
                 }
                 if (guardStingers > stingers) guardStingers = stingers;
                 int maxSt = MaxStingers(t, cfg);
-                if (balled) maxSt = Mathf.RoundToInt(maxSt * cfg.BallStingerMul);
+                if (Uid[i] == sim.FocusUid) maxSt = maxSt * 3 / 2;   // по отмеченному врагу бьёт больше пчёл
+                if (balled) maxSt = Mathf.RoundToInt(maxSt * (t == EnemyType.Queen ? 1.4f : cfg.BallStingerMul));
                 if (stingers > maxSt) { guardStingers = guardStingers * maxSt / stingers; stingers = maxSt; }
                 Stingers[i] = stingers;
                 Heat[i] = Mathf.MoveTowards(Heat[i], balled && stingers > 0 ? 1f : 0f, dt * 1.5f);
                 if (stingers > 0)
                 {
                     float power = stingers + guardStingers * (cfg.GuardStingMul - 1f);
-                    float dmg = power * cfg.BeeDps * stingMul * dt * (balled ? cfg.HeatDamageMul : 1f);
+                    float dmg = power * cfg.BeeDps * stingMul * dt * (balled ? (t == EnemyType.Queen ? 1.4f : cfg.HeatDamageMul) : 1f);
                     Hp[i] -= dmg;
                     if (Flash[i] <= 0f)
                     {
@@ -315,7 +353,7 @@ namespace Swarm.Simulation
                         ev.Push(SimEventType.EnemyHit, p, dmg, (int)t);
                     }
                     if (IsStatic(t)) { }
-                    else if (balled && stingers >= 6)
+                    else if (balled && stingers >= (t == EnemyType.Queen ? 16 : 6))
                     {
                         // в шаре враг обездвижен: только трепыхается на месте, рывок срывается
                         v = Vector2.MoveTowards(v, Vector2.zero, 900f * dt) + new Vector2(sim.Rng.Signed, sim.Rng.Signed) * 12f;
@@ -382,6 +420,14 @@ namespace Swarm.Simulation
                     if (t == EnemyType.Nest) { NestAlive = false; sim.Stats.NestsDestroyed++; ev.Push(SimEventType.NestDestroyed, p, 0f, 0); }
                     if (balled && t == EnemyType.Hornet) sim.Stats.HornetsCooked++;
                     if (t == EnemyType.Ant) sim.Stats.AntsKilled++;
+                    if (t == EnemyType.Queen)
+                    {
+                        sim.Stats.BossesKilled++;
+                        float reward = sim.Cfg.BossReward;
+                        colony.Honey += reward;
+                        sim.Stats.HoneyDelivered += reward;
+                        ev.Push(SimEventType.BossKilled, p, reward, 0);
+                    }
                     if (t == EnemyType.Wasp) sim.Stats.WaspsKilled++;
                     else if (t == EnemyType.Hornet) sim.Stats.HornetsKilled++;
                     if (Stolen[i] > 0f)
