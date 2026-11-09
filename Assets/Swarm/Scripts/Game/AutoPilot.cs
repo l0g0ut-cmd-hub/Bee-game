@@ -313,8 +313,10 @@ namespace Swarm.Game
             var c = new Color32(255, 240, 160, 235);
             bool pressing = _tap == Tap.Press;
             Spr ring = pressing ? Spr.KRing0 : (WantHold && HoldStill > 0.1f ? Spr.KRing2 : Spr.KRing1);
-            ui.Icon(ring, Mathf.Round(Cursor.x), Mathf.Round(Cursor.y), c);
-            ui.Icon(Spr.Pixel2, Mathf.Round(Cursor.x), Mathf.Round(Cursor.y), pressing ? PixelUI.Honey : PixelUI.White);
+            float x = Mathf.Round(Cursor.x), y = Mathf.Round(Cursor.y);
+            ui.Icon(ring, x + 1, y - 1, new Color32(23, 18, 28, 160), 2);   // тень — видно на светлых кнопках
+            ui.Icon(ring, x, y, c, 2);
+            ui.Icon(Spr.Dot3, x, y, pressing ? PixelUI.Honey : PixelUI.White);
         }
     }
 }
