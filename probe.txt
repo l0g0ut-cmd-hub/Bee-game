@@ -1,0 +1,44 @@
+PROBE|version|0.2.11 code 11
+PROBE|gfx|OpenGLCore|llvmpipe (LLVM 15.0.7, 256 bits)
+PROBE|bench|1800 шагов, старт 170 пчёл + 8 врагов: 0.535 мс/шаг (редактор, Mono), в конце пчёл 153, врагов 1
+PROBE|shots|rt 216x468 scale 5
+PROBE|shot|01_menu|bees 20 enemies 1 honey 0 carry 19.9
+PROBE|shot|00_splash|bees 20 enemies 1 honey 0 carry 19.9
+PROBE|shot|02_levels|bees 20 enemies 1 honey 0 carry 19.9
+PROBE|shot|02b_levels_breed|bees 20 enemies 1 honey 0 carry 19.9
+PROBE|shot|03_achievements|bees 20 enemies 1 honey 0 carry 19.9
+PROBE|shot|03b_intro_summer|bees 20 enemies 1 honey 0 carry 19.9
+PROBE|shot|04_start|bees 20 enemies 0 honey 0 carry 0.0
+PROBE|shot|04b_help|bees 20 enemies 0 honey 0 carry 0.0
+PROBE|shot|05_cloud_gather|bees 70 enemies 0 honey 0 carry 69.8
+PROBE|cloud|R 32.1 speed01 0.00 gather 0 scout 0
+PROBE|shot|06_comet|bees 70 enemies 0 honey 53 carry 16.9
+PROBE|shot|07_windup|bees 70 enemies 2 honey 61 carry 9.0
+PROBE|windup|seen True after 0.05s
+PROBE|shot|08_heat_ball|bees 80 enemies 0 honey 81 carry 4.8
+PROBE|ball|balling False inBall 0 hornets 0 heatLost 0
+PROBE|ball_end|hornets 0 killed 1 heatLost 0
+PROBE|shot|09_web|bees 80 enemies 0 honey 81 carry 23.0
+PROBE|hive|atHive True defenders 9 honey 161
+PROBE|shot|11_hive_menu|bees 89 enemies 0 honey 161 carry 0.0
+PROBE|shot|12_defenders|bees 89 enemies 0 honey 161 carry 11.1
+PROBE|post|active True squad 20
+PROBE|shot|12b_post|bees 89 enemies 0 honey 190 carry 61.2
+PROBE|shot|13_perk|bees 89 enemies 0 honey 190 carry 61.2
+PROBE|shot|14_bear|bees 86 enemies 1 honey 190 carry 60.2
+PROBE|shot|14b_boss|bees 80 enemies 1 honey 190 carry 54.8
+PROBE|boss|queenHp 932 focus 0 balling True
+PROBE|shot|14c_hive_honey|bees 80 enemies 0 honey 569 carry 11.7
+PROBE|shot|15_rain_big_swarm|bees 170 enemies 0 honey 576 carry 20.8
+PROBE|shot|16_night|bees 170 enemies 0 honey 583 carry 13.4
+PROBE|shot|17_pause|bees 170 enemies 0 honey 583 carry 13.4
+PROBE|shot|18_result|bees 170 enemies 0 honey 583 carry 13.4
+PROBE|shot|20_auto_hive|bees 36 enemies 0 honey 31 carry 0.0
+PROBE|shot|21_auto_perk|bees 40 enemies 0 honey 70 carry 0.0
+PROBE|shot|22_auto_post|bees 66 enemies 0 honey 62 carry 35.6
+PROBE|shot|23_auto_field|bees 110 enemies 0 honey 596 carry 231.0
+PROBE|auto|t 362 result Running bees 85/130 honey 596 delivered 3384 hive 13 presses 76 posts 6 perks 3 brood 0 def 14 lv spd1 car4 sti2 comb3 cooked 0 boss 1 focusUid 0 workers 11
+PROBE|wild|alive True rivals 1 wildHoney 0.0
+PROBE|shot|19b_wild_hive|bees 59 enemies 3 honey 0 carry 5.5
+PROBE|shot|19_endless|bees 60 enemies 64 honey 0 carry 29.0
+PROBE|snapshot|bytes 112884 load True roundtrip True err 
