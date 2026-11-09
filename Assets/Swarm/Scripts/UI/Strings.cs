@@ -84,6 +84,8 @@ namespace Swarm.UI
         public const string HintThirst = "ЖАЖДА! ЛЕТИ К ПРУДУ";
         public const string HintSquad = "КНОПКА \"ОТРЯД\" ОСТАВИТ ЧАСТЬ ПЧЁЛ СТЕРЕЧЬ ЭТО МЕСТО И СОБИРАТЬ НЕКТАР";
         public const string PostName = "ОТРЯД";
+        public const string WorkerName = "СБОРЩИЦЫ";
+        public const string WorkerSub = "НОСЯТ НЕКТАР САМИ: ";
         public const string AutoOn = "АВТОПИЛОТ  (КНОПКА А - ВЫКЛ)";
         public const string AutoBtnOn = "АВТОПИЛОТ";
         public const string AutoBtnOff = "АВТОПИЛОТ: ВЫКЛ";

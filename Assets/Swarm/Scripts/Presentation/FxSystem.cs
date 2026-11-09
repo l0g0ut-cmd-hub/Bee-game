@@ -257,7 +257,7 @@ namespace Swarm.Presentation
                         break;
                     case SimEventType.DefendersHired:
                         for (int k = 0; k < 10; k++)
-                            Emit(Spr.KSpark, e.Pos + new Vector2(S * 10f, S * 6f), new Vector2(S * 10f, 16f), 0.6f, new Color32(255, 150, 120, 255), true);
+                            Emit(Spr.KSpark, e.Pos + new Vector2(S * 10f, S * 6f), new Vector2(S * 10f, 16f), 0.6f, e.Data == 1 ? new Color32(200, 240, 160, 255) : new Color32(255, 150, 120, 255), true);
                         audio?.Play(Sfx.Hatch, 0.8f);
                         break;
                     case SimEventType.NightFall:

@@ -246,13 +246,7 @@ namespace Swarm.UI
             _ui.Icon(Spr.IconBee, 9, ty + 3);
             _b.Clear().Append(sw.SwarmCount).Append('/').Append(col.MaxBees);
             _ui.Text(_b, 15, ty, sw.SwarmCount >= col.MaxBees ? PixelUI.Honey : PixelUI.White);
-            float x = 15 + PixelFont.Measure(_b) + 5;
-            if (sw.GuardCount > 0)
-            {
-                _ui.Icon(Spr.IconGuard, x + 3, ty + 3);
-                _b.Clear().Append(sw.GuardCount);
-                _ui.Text(_b, x + 8, ty, new Color32(255, 170, 150, 255));
-            }
+
             float hx = Mathf.Round(W * 0.43f);
             _ui.Icon(Spr.IconHoney, hx, ty + 3);
             _b.Clear().Append(Mathf.FloorToInt(col.Honey));
@@ -309,10 +303,27 @@ namespace Swarm.UI
                 _b.Clear().Append(Strings.Day).Append(sim.Sky.Day(sim.Time));
                 _ui.Text(_b, W - 6, gy - 13, night ? new Color32(170, 190, 255, 255) : PixelUI.Muted, 1, 2);
             }
+            // защитники и сборщицы — под строкой цели слева
+            {
+                float cx = 8f;
+                if (sw.GuardCount > 0)
+                {
+                    _ui.Icon(Spr.IconGuard, cx + 2, gy - 10);
+                    _b.Clear().Append(sw.GuardCount);
+                    _ui.Text(_b, cx + 7, gy - 13, new Color32(255, 170, 150, 255));
+                    cx += 14 + PixelFont.Measure(_b);
+                }
+                if (sw.WorkerCount > 0)
+                {
+                    _ui.Icon(Spr.IconNectar, cx + 2, gy - 10);
+                    _b.Clear().Append(sw.WorkerCount);
+                    _ui.Text(_b, cx + 7, gy - 13, new Color32(200, 240, 160, 255));
+                }
+            }
             if (sim.Sky.Thirst > 0.05f)
             {
-                _ui.Icon(Spr.IconWater, 10, gy - 9);
-                _ui.Bar(new Rect(17, gy - 11, 50, 3), sim.Sky.Thirst, new Color32(110, 170, 230, 255), new Color32(40, 50, 70, 255));
+                _ui.Icon(Spr.IconWater, 10, gy - 21);
+                _ui.Bar(new Rect(17, gy - 23, 50, 3), sim.Sky.Thirst, new Color32(110, 170, 230, 255), new Color32(40, 50, 70, 255));
             }
 
             // --- баннер
@@ -497,7 +508,7 @@ namespace Swarm.UI
             var col = sim.Colony;
             _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 140));
 
-            float pw = Mathf.Min(W - 10, 220), ph = 340;
+            float pw = Mathf.Min(W - 10, 220), ph = 360;
             var panel = new Rect(Mathf.Round((W - pw) * 0.5f), Mathf.Round((H - ph) * 0.5f), pw, ph);
             _ui.Blocker(new Rect(0, 0, W, H));
             _ui.Panel(panel);
@@ -513,7 +524,7 @@ namespace Swarm.UI
             y -= 2;
             TextWrapped(Strings.QueenHelp, panel.center.x, y, (int)pw - 16, PixelUI.Ink, false);
             y -= Wrap(Strings.QueenHelp, (int)pw - 16).Length * 10 + 2;
-            float rowH = 36f;
+            float rowH = 34f;
             // 1. матка: доля мёда на расплод
             {
                 y -= rowH;
@@ -545,6 +556,21 @@ namespace Swarm.UI
                 {
                     _b.Clear().Append('+').Append(sim.DefenderRoom).Append(' ').Append(sim.DefenderCost);
                     if (_ui.ButtonBuf(32, new Rect(x1 - 50, y + 6, 46, 20), _b, sim.CanHireDefenders, Spr.IconHoney)) sim.HireDefenders();
+                }
+            }
+            // 3. сборщицы
+            {
+                y -= rowH;
+                RowFrame(x0, y, x1 - x0, rowH - 3);
+                _ui.Icon(Spr.BeeLoadA, x0 + 12, y + rowH * 0.5f, new Color32(200, 240, 160, 255), 2);
+                _ui.Text(Strings.WorkerName, x0 + 24, y + 18, PixelUI.Ink, 1, 0, false);
+                _b.Clear().Append(Strings.WorkerSub).Append(sim.Swarm.WorkerCount).Append('/').Append(sim.Cfg.WorkerMax);
+                _ui.Text(_b, x0 + 24, y + 7, SubText, 1, 0, false);
+                if (sim.WorkerRoom <= 0) _ui.Button(37, new Rect(x1 - 50, y + 5, 46, 20), Strings.Max, false);
+                else
+                {
+                    _b.Clear().Append('+').Append(sim.WorkerRoom).Append(' ').Append(sim.WorkerCost);
+                    if (_ui.ButtonBuf(37, new Rect(x1 - 50, y + 5, 46, 20), _b, sim.CanHireWorkers, Spr.IconHoney)) sim.HireWorkers();
                 }
             }
             y = UpgradeRow(sim, UpgradeType.Comb, 33, Spr.IconComb, Strings.CombName, x0, x1, y, rowH);

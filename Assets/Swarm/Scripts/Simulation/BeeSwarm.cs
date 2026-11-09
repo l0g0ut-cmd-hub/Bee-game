@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Swarm.Simulation
 {
     public enum BeeTask : byte { Follow, Gather, Attack, Deliver, Guard, Scout, Ball }
-    public enum BeeRole : byte { Swarm, Guard, Squad }
+    public enum BeeRole : byte { Swarm, Guard, Squad, Worker }
 
     /// <summary>
     /// Рой как структура массивов. Центр роя («лидер») ведёт игрок, каждая пчела — boid со своим характером.
@@ -23,6 +23,7 @@ namespace Swarm.Simulation
         public readonly float[] Carry, Phase, SpeedMul, WanderMul, Hp, MaxHp, Stuck;
         public readonly BeeTask[] Task;
         public readonly BeeRole[] Role;
+        public readonly int[] Forage;     // сборщица: цветок, к которому она летает
         public readonly bool[] Scout;
         public readonly bool[] Dead;
         public int Count;
@@ -38,7 +39,9 @@ namespace Swarm.Simulation
 
         // защитники улья (Role.Guard) — отдельная каста, в рой и цель не входят
         public int GuardCount;
-        public int SwarmCount => Count - GuardCount;
+        // сборщицы (Role.Worker) — автономные, только носят нектар; в рой и цель не входят
+        public int WorkerCount;
+        public int SwarmCount => Count - GuardCount - WorkerCount;
         // отряд второго пальца (входит в рой и в цель)
         public int SquadCount;
         public bool SquadActive;
@@ -92,6 +95,7 @@ namespace Swarm.Simulation
             Stuck = new float[Capacity];
             Task = new BeeTask[Capacity];
             Role = new BeeRole[Capacity];
+            Forage = new int[Capacity];
             Scout = new bool[Capacity];
             Dead = new bool[Capacity];
             Grid = new SpatialGrid(cfg.WorldWidth, cfg.WorldHeight, 6f, Capacity);
@@ -108,6 +112,18 @@ namespace Swarm.Simulation
             Hp[i] = MaxHp[i] = hp;
             SpeedMul[i] = 1.05f;
             GuardCount++;
+            return true;
+        }
+
+        public bool SpawnWorker(Vector2 p, Rng rng)
+        {
+            if (!Spawn(p, rng)) return false;
+            int i = Count - 1;
+            Role[i] = BeeRole.Worker;
+            Scout[i] = false;
+            Forage[i] = -1;
+            SpeedMul[i] = 0.8f + rng.Value * 0.1f;
+            WorkerCount++;
             return true;
         }
 
@@ -146,17 +162,19 @@ namespace Swarm.Simulation
                 if (!Dead[i]) continue;
                 int last = Count - 1;
                 if (Role[i] == BeeRole.Guard) GuardCount--;
+                else if (Role[i] == BeeRole.Worker) WorkerCount--;
                 if (i != last)
                 {
                     Pos[i] = Pos[last]; Vel[i] = Vel[last]; Carry[i] = Carry[last];
                     Phase[i] = Phase[last]; SpeedMul[i] = SpeedMul[last]; WanderMul[i] = WanderMul[last];
                     Hp[i] = Hp[last]; MaxHp[i] = MaxHp[last]; Stuck[i] = Stuck[last];
-                    Scout[i] = Scout[last]; Task[i] = Task[last]; Role[i] = Role[last]; Dead[i] = Dead[last];
+                    Scout[i] = Scout[last]; Task[i] = Task[last]; Role[i] = Role[last]; Dead[i] = Dead[last]; Forage[i] = Forage[last];
                 }
                 Dead[last] = false;
                 Count--;
             }
             if (GuardCount < 0) GuardCount = 0;
+            if (WorkerCount < 0) WorkerCount = 0;
             _deadCount = 0;
         }
 
@@ -270,8 +288,10 @@ namespace Swarm.Simulation
             Vector2 perp = new Vector2(-Heading.y, Heading.x);
 
             int guards = 0;
-            for (int i = 0; i < Count; i++) if (Role[i] == BeeRole.Guard) guards++;
+            int workers = 0;
+            for (int i = 0; i < Count; i++) { if (Role[i] == BeeRole.Guard) guards++; else if (Role[i] == BeeRole.Worker) workers++; }
             GuardCount = guards;
+            WorkerCount = workers;
 
             // ---------------- пост: отряд стоит там, где его оставили (команды PostSquad/RecallSquad)
             int squad = 0;
@@ -347,7 +367,7 @@ namespace Swarm.Simulation
                         TotalCarry += Carry[i];
                         if (Role[i] == BeeRole.Swarm) { FieldCarry += Carry[i]; swarmIdx++; }
                         else if (Role[i] == BeeRole.Squad) { FieldCarry += Carry[i]; squadIdx++; }
-                        else guardIdx++;
+                        else if (Role[i] == BeeRole.Guard) guardIdx++;
                         continue;
                     }
                 }
@@ -384,6 +404,33 @@ namespace Swarm.Simulation
                     {
                         task = BeeTask.Deliver;
                         target = entrance;
+                    }
+                }
+                else if (Role[i] == BeeRole.Worker)
+                {
+                    // --- сборщица: цветок → улей → цветок; не воюет
+                    if (Carry[i] >= cap * cfg.WorkerCarryMul - 0.01f || (Carry[i] > 0f && !ForageValid(i, flowers)))
+                    {
+                        task = BeeTask.Deliver;
+                        target = entrance + new Vector2(Mathf.Sin(ph) * 3f, 0f);
+                    }
+                    else
+                    {
+                        if (!ForageValid(i, flowers)) Forage[i] = PickForage(i, flowers, entrance, sim);
+                        if (Forage[i] >= 0)
+                        {
+                            task = BeeTask.Gather;
+                            targetIdx = Forage[i];
+                            float oa = ph * 3f + time * 4f;
+                            target = flowers.Pos[targetIdx] + new Vector2(Mathf.Cos(oa) * 3f, Mathf.Sin(oa) * 2f);
+                        }
+                        else
+                        {
+                            // цветы закрыты (ночь) — ждут у улья
+                            task = BeeTask.Guard;
+                            float ga = time * 0.5f + ph;
+                            target = entrance + new Vector2(Mathf.Cos(ga) * 26f, Mathf.Sin(ga) * 12f + 4f);
+                        }
                     }
                 }
                 else if (Role[i] == BeeRole.Squad)
@@ -543,7 +590,9 @@ namespace Swarm.Simulation
                     if (task == BeeTask.Gather) GatheringCount++; else ScoutingCount++;
                     if ((target - p).sqrMagnitude < 25f)
                     {
-                        float got = flowers.Take(targetIdx, Mathf.Min(collectRate * dt, cap - Carry[i]), cfg.FlowerRegrowTime, sim.Events);
+                        bool worker = Role[i] == BeeRole.Worker;
+                        float myCap = worker ? cap * cfg.WorkerCarryMul : cap;
+                        float got = flowers.Take(targetIdx, Mathf.Max(0f, Mathf.Min(collectRate * (worker ? cfg.WorkerCollectMul : 1f) * dt, myCap - Carry[i])), cfg.FlowerRegrowTime, sim.Events);
                         if (task == BeeTask.Scout && got > 0f) sim.Fog.ScoutVisit(sim, targetIdx);
                         if (got > 0f && flowers.Rare[targetIdx] && !flowers.RareCredited[targetIdx])
                         {
@@ -574,7 +623,7 @@ namespace Swarm.Simulation
                 Vel[i] = v;
                 Task[i] = task;
                 TotalCarry += Carry[i];
-                if (Role[i] != BeeRole.Guard) FieldCarry += Carry[i];
+                if (Role[i] == BeeRole.Swarm || Role[i] == BeeRole.Squad) FieldCarry += Carry[i];
             }
         }
 
@@ -598,6 +647,28 @@ namespace Swarm.Simulation
             for (int i = 0; i < Count; i++) if (Role[i] == BeeRole.Squad) Role[i] = BeeRole.Swarm;
             SquadActive = false;
             SquadCount = 0;
+        }
+
+        bool ForageValid(int i, FlowerField flowers)
+        {
+            int f = Forage[i];
+            return f >= 0 && f < flowers.Count && flowers.IsBlooming(f) && flowers.Nectar[f] > 0.4f;
+        }
+
+        /// <summary>Цветок для сборщицы: близко к улью и с нектаром; разные сборщицы — разные цветы.</summary>
+        int PickForage(int i, FlowerField flowers, Vector2 entrance, GameSim sim)
+        {
+            int best = -1, second = -1;
+            float bs = float.MaxValue, ss = float.MaxValue;
+            for (int f = 0; f < flowers.Count; f++)
+            {
+                if (!flowers.IsBlooming(f) || flowers.Nectar[f] < 1f) continue;
+                float d = (flowers.Pos[f] - entrance).magnitude;
+                float score = (d + 30f) / (1f + flowers.Nectar[f]) * (1f + 0.25f * Mathf.Sin(f * 12.9898f + i * 78.233f));
+                if (score < bs) { ss = bs; second = best; bs = score; best = f; }
+                else if (score < ss) { ss = score; second = f; }
+            }
+            return (i & 1) == 1 && second >= 0 ? second : best;
         }
 
         void CollectFlowersAt(FlowerField flowers, Vector2 c, float reach, int[] list, float[] dist, ref int count)

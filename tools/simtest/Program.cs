@@ -9,6 +9,7 @@ static class Program
 {
     enum BotState { Gather, Deliver, Defend }
     static readonly bool NoBall = Environment.GetEnvironmentVariable("BOT_NOBALL") == "1";
+    static readonly bool NoWorkers = Environment.GetEnvironmentVariable("BOT_NOWORK") == "1";
     static readonly bool NoGuard = Environment.GetEnvironmentVariable("BOT_NOGUARD") == "1";
 
     static int Main(string[] args)
@@ -159,6 +160,7 @@ static class Program
                     else if (!saving && col.Level[(int)UpgradeType.Sting] < 2 && sim.Time > 150 && sim.CanUpgrade(UpgradeType.Sting)) bought = sim.TryUpgrade(UpgradeType.Sting);
                     else if (!saving && col.Level[(int)UpgradeType.Speed] < 1 && sim.CanUpgrade(UpgradeType.Speed)) bought = sim.TryUpgrade(UpgradeType.Speed);
                     else if (sw.GuardCount < wantDef && sim.CanHireDefenders && col.Honey > sim.DefenderCost + 40) bought = sim.HireDefenders();
+                    else if (!NoWorkers && !saving && sim.Time > 40f && sim.CanHireWorkers && col.Honey > sim.WorkerCost + 30) bought = sim.HireWorkers();
                     if (!bought) break;
                 }
             }
@@ -195,7 +197,7 @@ static class Program
         var st = sim.Stats;
         Console.WriteLine($" seed {seed,6}: {sim.Result,-10} ★{sim.Stars} post={sim.Waves.Postponements} t={sim.Time,5:F0}s bees={sim.Swarm.SwarmCount,3} honey={sim.Colony.Honey,4:F0} " +
                           $"delivered={st.HoneyDelivered,5:F0} hatched={st.BeesHatched,3} lost={st.BeesLost,3} kills w{st.WaspsKilled}/h{st.HornetsKilled} " +
-                          $"stolen={st.HoneyStolen,4:F0} night={sim.Sky.Day(sim.Time)}d nest={(sim.Enemies.NestAlive ? 1 : 0)} ants={st.AntsKilled} cooked={st.HornetsCooked} heat/dash/bite/bird/spider={st.LostToHeat}/{st.LostToDash}/{st.LostToBite}/{st.LostToBird}/{st.LostToSpider} guards={st.LostGuards} bears={st.BearsRepelled} sprouts={st.FlowersSprouted} spread avg={spreadAcc / Math.Max(1, spreadN):F1} max={maxSpread:F0} inObstacle={stuck}");
+                          $"stolen={st.HoneyStolen,4:F0} night={sim.Sky.Day(sim.Time)}d nest={(sim.Enemies.NestAlive ? 1 : 0)} ants={st.AntsKilled} cooked={st.HornetsCooked} heat/dash/bite/bird/spider={st.LostToHeat}/{st.LostToDash}/{st.LostToBite}/{st.LostToBird}/{st.LostToSpider} guards={st.LostGuards} workers={sim.Swarm.WorkerCount}/{st.WorkersHired} bears={st.BearsRepelled} sprouts={st.FlowersSprouted} spread avg={spreadAcc / Math.Max(1, spreadN):F1} max={maxSpread:F0} inObstacle={stuck}");
         return (sim.Result, sim.Time);
     }
 }

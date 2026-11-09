@@ -283,7 +283,7 @@ namespace Swarm.Presentation
                 var role = swarm.Role[i];
                 int spr = role == BeeRole.Guard ? (int)Spr.SoldierA + fr : (loaded ? (int)Spr.BeeLoadA + fr : (int)Spr.BeeA + fr);
                 float bob = swarm.Stuck[i] > 0f ? 0f : Mathf.Sin(time * 7f + ph) * 1.2f;
-                Color32 bc = role == BeeRole.Squad ? new Color32(200, 228, 255, 255) : White;
+                Color32 bc = role == BeeRole.Squad ? new Color32(200, 228, 255, 255) : role == BeeRole.Worker ? new Color32(205, 245, 170, 255) : White;
                 if (role == BeeRole.Guard && swarm.Hp[i] < swarm.MaxHp[i] - 0.05f) bc = new Color32(255, 190, 180, 255);
                 _shadow.Add(Spr.ShadowS, p.x, p.y - 6f, A(60));
                 _fly.Add(spr, p.x, p.y + bob, bc, swarm.Vel[i].x < 0f);

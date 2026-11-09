@@ -99,6 +99,11 @@ namespace Swarm.Simulation
         public Biome Biome = Biome.Meadow;
         public float WaveMul = 1f;            // множитель размера волн
         public bool Endless;                  // выживание: лето не кончается, волны крепчают по кругу
+        // --- сборщицы (автономные, только нектар)
+        public int WorkerBatch = 3, WorkerMax = 18;
+        public int WorkerCostBase = 30, WorkerCostPer = 4;
+        public float WorkerCarryMul = 1.5f, WorkerCollectMul = 0.8f;
+
         // --- пост (отряд на охране места)
         public float PostShare = 0.25f;
         public int PostMax = 30, PostMinSwarm = 16;

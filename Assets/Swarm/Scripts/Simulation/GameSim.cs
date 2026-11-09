@@ -19,14 +19,14 @@ namespace Swarm.Simulation
         public float NectarCollected, HoneyDelivered, HoneyStolen;
         public int BeesHatched, BeesLost, WaspsKilled, HornetsKilled, BearsRepelled, PeakBees;
         public int LostToHeat, LostToDash, LostToBite, LostGuards, LostToBird, LostToSpider;
-        public int FlowersSprouted, RareFound, DefendersHired, AntsKilled, NestsDestroyed, HornetsCooked;
+        public int FlowersSprouted, RareFound, DefendersHired, WorkersHired, AntsKilled, NestsDestroyed, HornetsCooked;
 
         public void Reset()
         {
             NectarCollected = HoneyDelivered = HoneyStolen = 0f;
             BeesHatched = BeesLost = WaspsKilled = HornetsKilled = BearsRepelled = PeakBees = 0;
             LostToHeat = LostToDash = LostToBite = LostGuards = LostToBird = LostToSpider = 0;
-            FlowersSprouted = RareFound = DefendersHired = AntsKilled = NestsDestroyed = HornetsCooked = 0;
+            FlowersSprouted = RareFound = DefendersHired = WorkersHired = AntsKilled = NestsDestroyed = HornetsCooked = 0;
         }
     }
 
@@ -116,6 +116,7 @@ namespace Swarm.Simulation
             _nextSprout = Rng.Range(Cfg.SproutIntervalMin, Cfg.SproutIntervalMax);
             Swarm.Count = 0;
             Swarm.GuardCount = 0;
+            Swarm.WorkerCount = 0;
             Swarm.ScoutChance = 0.07f;
             Vector2 start = World.HivePos + new Vector2(0f, -30f);
             Swarm.ResetLeader(start);
@@ -172,6 +173,23 @@ namespace Swarm.Simulation
                 Events.Push(SimEventType.BeeHatched, at, 0f, n++);
             }
             if (BroodProgress > 1f) BroodProgress = 1f;
+        }
+
+        // ------------------------------------------------------------ сборщицы
+        public int WorkerCost => Cfg.WorkerCostBase + Cfg.WorkerCostPer * Swarm.WorkerCount;
+        public int WorkerRoom => Mathf.Clamp(Cfg.WorkerMax - Swarm.WorkerCount, 0, Cfg.WorkerBatch);
+        public bool CanHireWorkers => SwarmAtHive && WorkerRoom > 0 && Colony.Honey >= WorkerCost;
+
+        public bool HireWorkers()
+        {
+            if (!CanHireWorkers) return false;
+            Colony.Honey -= WorkerCost;
+            int n = WorkerRoom;
+            Vector2 at = World.HivePos + BeeSwarm.HiveEntranceOffset;
+            for (int i = 0; i < n; i++)
+                if (Swarm.SpawnWorker(at, Rng)) Stats.WorkersHired++;
+            Events.Push(SimEventType.DefendersHired, at, n, 1);
+            return true;
         }
 
         // ------------------------------------------------------------ защитники

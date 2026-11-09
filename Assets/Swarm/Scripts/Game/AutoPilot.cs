@@ -286,6 +286,7 @@ namespace Swarm.Game
             if (!saving && col.Level[(int)UpgradeType.Sting] < 2 && sim.Time > 150f && sim.CanUpgrade(UpgradeType.Sting)) return 35;
             if (!saving && col.Level[(int)UpgradeType.Speed] < 1 && sim.CanUpgrade(UpgradeType.Speed)) return 36;
             if (sw.GuardCount < WantDefenders(sim) && sim.CanHireDefenders && col.Honey > sim.DefenderCost + 40) return 32;
+            if (!saving && sim.Time > 40f && sim.CanHireWorkers && col.Honey > sim.WorkerCost + 30) return 37;
             return 39;
         }
 
