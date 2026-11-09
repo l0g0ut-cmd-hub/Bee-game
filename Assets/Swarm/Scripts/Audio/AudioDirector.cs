@@ -62,8 +62,9 @@ namespace Swarm.Presentation
             }
             // гул роя — «хор» из многих пчёл: у каждой своя частота взмахов (~190–260 Гц), своё дрожание тона
             // и пролёт «ближе–дальше»; плюс шорох крыльев. Получается живое облако звука, а не мотор.
-            _buzz = MakeLoop("buzz", SwarmChorus(4f, 18, 190f, 262f, 0.16f, 11), 4f, 0.55f);
-            _buzzLow = MakeLoop("buzzlow", SwarmChorus(4f, 6, 105f, 135f, 0.10f, 23), 4f, 0.35f);
+            // гул роя убран по отзыву (синтез звучал как мотор); SwarmChorus оставлен на случай записи настоящего гула
+            _buzz = null;
+            _buzzLow = null;
             _musicCalm = MakeMusic("music_calm", CalmLoop());
             _musicThreat = MakeMusic("music_threat", ThreatLoop());
             _rain = MakeLoop("rain", 2f, (t, n) => Noise() * 0.5f * (0.85f + 0.15f * Sin(t * 3f)));
@@ -195,6 +196,7 @@ namespace Swarm.Presentation
         public void SetSwarm(int bees, float speed01, int enemies, bool active)
         {
             float target = active ? (Mathf.Clamp01(bees / 120f) * 0.2f + 0.04f) * (0.85f + 0.25f * speed01) : 0f;
+            if (_buzz == null) return;
             _buzz.volume = Mathf.MoveTowards(_buzz.volume, target, Time.unscaledDeltaTime * 0.6f);
             _buzz.pitch = 0.97f + speed01 * 0.08f;   // тон почти не меняется (большой сдвиг звучит как мотор)
             float low = active && enemies > 0 ? Mathf.Clamp01(enemies / 6f) * 0.18f + 0.05f : 0f;

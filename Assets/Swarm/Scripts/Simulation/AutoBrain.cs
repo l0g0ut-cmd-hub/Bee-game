@@ -9,7 +9,7 @@ namespace Swarm.Simulation
     public sealed class AutoBrain
     {
         public Vector2 WorldTarget;
-        public static bool NoWaspBall, NoRetreat;   // переключатели для A/B-замеров на стенде
+        public static bool NoWaspBall, NoRetreat, NoIntercept;   // переключатели для A/B-замеров на стенде
         public bool WantHold;
         /// <summary>Кого отметить меткой-приказом (uid врага; 0 — никого).</summary>
         public int WantFocusUid;
@@ -86,6 +86,27 @@ namespace Swarm.Simulation
             }
             if (enemyPow > 0f) enemyC /= enemyPow;
             float myPow = SwarmPower(sim);
+            // перехват: враг идёт грабить улей (ещё далеко) или охотится на пчёл — встречаем заранее, а не ждём у летка
+            int intercept = -1;
+            float bestI = float.MaxValue;
+            for (int e = 0; e < en.Count; e++)
+            {
+                var et = en.Type[e];
+                if (EnemySystem.IsStatic(et) || et == EnemyType.Queen || en.Mode[e] == EnemyMode.Flee) continue;
+                if (et == EnemyType.Rival) continue;
+                if (et == EnemyType.Bear && sw.SwarmCount < 60) continue;
+                float dHive = (en.Pos[e] - hive).magnitude, dMe = (en.Pos[e] - sw.LeaderPos).magnitude;
+                // мелочь у улья добьют защитники; рой встречает тех, с кем солдаты не справятся
+                bool heavy = et == EnemyType.Bear || et == EnemyType.Hornet;
+                bool guarded = sw.GuardCount >= 6 && !heavy;
+                bool raiding = en.Mode[e] == EnemyMode.Raid && dHive < (heavy ? 260f : 200f) && !guarded;
+                bool hunting = en.Mode[e] == EnemyMode.Hunt && dMe < 140f && heavy;   // мелочь, что сама летит к рою, встретит обычный бой
+                if (!raiding && !hunting) continue;
+                // кто ближе к улью — тот опаснее; рядом с роем — дешевле перехватить
+                float score = dMe + dHive * 0.6f - (et == EnemyType.Bear ? 80f : et == EnemyType.Hornet ? 40f : 0f);
+                if (score < bestI) { bestI = score; intercept = e; }
+            }
+            if (NoIntercept) intercept = -1;
             bool outmatched = enemyPow > 0f && myPow < enemyPow * 1.4f;
             float queenD = queen >= 0 ? (en.Pos[queen] - sw.LeaderPos).sqrMagnitude : float.MaxValue;
             if (queen >= 0 && queenD < 160f * 160f && sw.SwarmCount >= 60)
@@ -122,6 +143,14 @@ namespace Swarm.Simulation
                 // кучка ос вплотную — тепловой шар по центру кучки: обездвижить и сварить разом
                 WorldTarget = waspC / wasps;
                 WantHold = true;
+            }
+            else if (intercept >= 0 && !outmatched && sw.SwarmCount >= 20 && !(en.Type[intercept] == EnemyType.Hornet && sw.SwarmCount < 40))
+            {
+                // летим навстречу угрозе; тяжёлым — метка всем роем
+                WorldTarget = en.Pos[intercept] + en.Vel[intercept] * 0.4f;   // с упреждением
+                var it = en.Type[intercept];
+                if (it == EnemyType.Bear || it == EnemyType.Hornet) WantFocusUid = en.Uid[intercept];
+                if (it == EnemyType.Hornet && sw.SwarmCount >= 40) WantHold = (en.Pos[intercept] - sw.LeaderPos).sqrMagnitude < 40f * 40f;
             }
             else if (threat >= 0 && threatD < 90f * 90f)
             {

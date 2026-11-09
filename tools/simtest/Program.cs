@@ -56,6 +56,7 @@ static class Program
     {
         AutoBrain.NoWaspBall = Environment.GetEnvironmentVariable("NO_WBALL") == "1";
         AutoBrain.NoRetreat = Environment.GetEnvironmentVariable("NO_RETREAT") == "1";
+        AutoBrain.NoIntercept = Environment.GetEnvironmentVariable("NO_INTERCEPT") == "1";
         int fails = 0;
         int lvl = int.TryParse(Environment.GetEnvironmentVariable("LEVEL"), out var lv) ? lv : 1;
         for (int sd = 1; sd <= seeds; sd++)
