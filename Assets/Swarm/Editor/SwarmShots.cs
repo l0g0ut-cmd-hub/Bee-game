@@ -81,6 +81,7 @@ namespace Swarm.EditorTools
             Snap(attract);
             Play(attract, 7f, s => NearestFlower(s), menu: true);
             Shot("01_menu", attract, () => _gui.DrawMenu(_t, profile, false), menu: true);
+            Shot("00_splash", attract, () => _gui.DrawSplash(1f), menu: true);
             Shot("02_levels", attract, () => _gui.DrawLevels(profile, _t), menu: true);
             profile.BreedIndex = 1;
             Shot("02b_levels_breed", attract, () => _gui.DrawLevels(profile, _t), menu: true);

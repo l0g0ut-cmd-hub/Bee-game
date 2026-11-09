@@ -143,11 +143,13 @@ namespace Swarm.Presentation
                     case SimEventType.NectarCollected:
                         for (int k = 0; k < 2; k++)
                             Emit(Spr.Pollen, e.Pos + new Vector2(S * 3f, S * 3f), new Vector2(S * 8f, 10f + R * 12f), 0.6f + R * 0.4f, White, drag: 1.5f);
+                        if (R < 0.25f) Emit(Spr.FxPollen0, e.Pos + new Vector2(S * 4f, 4f + R * 4f), Vector2.zero, 0.36f, White, drag: 0f, fade: false, sprEnd: Spr.FxPollen5);
                         audio?.Play(Sfx.Collect);
                         break;
                     case SimEventType.NectarDeposited:
                         _depositAcc += e.Value;
                         if (R < 0.4f) Emit(Spr.HoneyDrop, e.Pos, new Vector2(S * 6f, -10f), 0.5f, White, drag: 1f);
+                        if (R < 0.12f) Emit(Spr.FxSplash0, e.Pos + new Vector2(S * 6f, -2f), Vector2.zero, 0.36f, White, drag: 0f, fade: false, sprEnd: Spr.FxSplash5);
                         world.NotifyDeposit();
                         break;
                     case SimEventType.FlowerBloomed:
@@ -164,7 +166,8 @@ namespace Swarm.Presentation
                         audio?.Play(Sfx.Windup);
                         break;
                     case SimEventType.EnemyHit:
-                        Emit(Spr.KCross, e.Pos + new Vector2(S * 4f, S * 4f), Vector2.zero, 0.12f, White, true, drag: 0f);
+                        if (R < 0.35f) Emit(Spr.FxHit0, e.Pos + new Vector2(S * 4f, S * 4f), Vector2.zero, 0.24f, White, drag: 0f, fade: false, sprEnd: Spr.FxHit5);
+                        else Emit(Spr.KCross, e.Pos + new Vector2(S * 4f, S * 4f), Vector2.zero, 0.12f, White, true, drag: 0f);
                         audio?.Play(Sfx.Hit);
                         break;
                     case SimEventType.EnemyKilled:
@@ -174,6 +177,7 @@ namespace Swarm.Presentation
                         bool cooked = e.Value > 0.5f;
                         Emit(Spr.KRing0, e.Pos, Vector2.zero, hornet ? 0.4f : 0.3f, White, true, drag: 0f, sprEnd: Spr.KRing2);
                         Emit(Spr.KBurst, e.Pos, Vector2.zero, 0.18f, cooked ? Heat : Honey, true, drag: 0f);
+                        Emit(cooked ? Spr.FxFlame0 : Spr.FxPuff0, e.Pos, Vector2.zero, 0.42f, White, drag: 0f, fade: false, sprEnd: cooked ? Spr.FxFlame5 : Spr.FxPuff5);
                         // «пуф»: облачка разлетаются кольцом и тают (приём из pixelfx)
                         int puffs = queenK ? 10 : hornet ? 6 : 4;
                         for (int k = 0; k < puffs; k++)

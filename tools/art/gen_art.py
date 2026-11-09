@@ -1304,6 +1304,133 @@ _bg = G.quantize(G.load('menu_bg_216x468.png'))
 add('MenuBg', canvas_of(_bg), (_bg.size[0] // 2, 0))
 
 
+# ------------------------------------------------------------------ арт ChatGPT, партия 2: замены по имени (порядок enum не меняется)
+def replace(name, cv, pivot=None):
+    for i, (n, _, _) in enumerate(SPRITES):
+        if n == name:
+            SPRITES[i] = (name, cv, pivot)
+            return
+    raise KeyError(name)
+
+
+def shift_top(img, rows, dx):
+    """Ветер: верхние rows строк сдвинуты на dx (второй кадр качания цветка)."""
+    out = Image.new('RGBA', img.size, (0, 0, 0, 0))
+    out.paste(img.crop((0, rows, img.size[0], img.size[1])), (0, rows))
+    out.alpha_composite(img.crop((0, 0, img.size[0], rows)), (dx, 0))
+    return out
+
+
+# цветы: 6 видов в цвету + увядшие; кадр B — головка качнулась от ветра
+_fl = G.load('flowers_big.png')
+_fw, _fh = _fl.size
+_bloom = G.frames(_fl.crop((0, 0, _fw, _fh // 2)), 6)
+_dry = G.frames(_fl.crop((0, _fh // 2, _fw, _fh)), 6)
+_sc = G.sheet_scale(_bloom, 18)
+for _cap, _b, _d in zip(['Daisy', 'Poppy', 'Corn', 'Violet', 'Pink', 'Sun'], _bloom, _dry):
+    _a = G.pixelize(_b, _sc)
+    _a2 = Image.new('RGBA', (_a.size[0] + 1, _a.size[1]), (0, 0, 0, 0))
+    _a2.paste(_a, (0, 0))
+    _dd = G.pixelize(_d, _sc)
+    replace('Flower%sA' % _cap, canvas_of(_a2), (_a.size[0] // 2, 0))
+    replace('Flower%sB' % _cap, canvas_of(shift_top(_a2, _a.size[1] * 6 // 10, 1)), (_a.size[0] // 2, 0))
+    replace('Flower%sDry' % _cap, canvas_of(_dd), (_dd.size[0] // 2, 0))
+
+# деревья (крона + ствол раздельно: крона рисуется поверх роя), кусты, камни, трава, гриб, пруд
+_pc, _ = G.components(G.load('props_big.png'), merge=-1000, min_area=30)
+# порядок: дерево, дерево в цвету, куст, куст в цвету, камень S, M, L, пруд, трава, трава, гриб
+
+
+def _tree(img, width, flip=False):
+    t = G.pixelize(img, img.size[0] / float(width))
+    if flip:
+        t = t.transpose(Image.FLIP_LEFT_RIGHT)
+    cut = round(t.size[1] * 0.74)
+    crown = t.crop((0, 0, t.size[0], cut))
+    base = t.crop((0, cut - 6, t.size[0], t.size[1]))
+    bb = base.getbbox()
+    return crown, base.crop((max(0, t.size[0] // 2 - 12), 0, min(t.size[0], t.size[0] // 2 + 12), base.size[1])) if bb else base
+
+
+_c1, _t1 = _tree(_pc[0], 58)
+_c2, _ = _tree(_pc[1], 46)
+_c3, _ = _tree(_pc[0], 52, flip=True)
+replace('CanopyA', canvas_of(_c1), (_c1.size[0] // 2, 4))
+replace('CanopyB', canvas_of(_c2), (_c2.size[0] // 2, 4))
+replace('CanopyC', canvas_of(_c3), (_c3.size[0] // 2, 4))
+replace('Trunk', canvas_of(_t1), (_t1.size[0] // 2, 2))
+for _nm, _i, _w in (('BushA', 2, 28), ('BushB', 3, 28), ('RockS', 4, 10), ('RockL', 6, 20), ('Pond', 7, 56),
+                    ('Tuft0', 8, 9), ('Tuft1', 9, 11), ('MushroomRed', 10, 9)):
+    _im = G.pixelize(_pc[_i], _pc[_i].size[0] / float(_w))
+    _piv = (_im.size[0] // 2, _im.size[1] // 2) if _nm == 'Pond' else (_im.size[0] // 2, 1)
+    replace(_nm, canvas_of(_im), _piv)
+    if _nm == 'Tuft0':
+        replace('Tuft2', canvas_of(_im.transpose(Image.FLIP_LEFT_RIGHT)), _piv)
+
+# интерфейс: панель 48x48 (кайма 7), кнопки 48x20 (кайма 5), квадратная кнопка 20x20 для маленьких
+_ui = G.quantize(G.load('ui_kit_116x92.png'))
+replace('Panel', canvas_of(_ui.crop((0, 0, 48, 48))))
+replace('Button', canvas_of(_ui.crop((68, 0, 116, 20))))
+replace('ButtonDown', canvas_of(_ui.crop((68, 24, 116, 44))))
+replace('ButtonOff', canvas_of(_ui.crop((68, 48, 116, 68))))
+add('ButtonSq', canvas_of(_ui.crop((68, 72, 88, 92))))
+add('ButtonSqDown', canvas_of(G.quantize(_ui.crop((68, 72, 88, 92)).point(lambda v: v))))
+
+# крупные иконки 16x16 (меню улья, карточки сезонов): порядок как в промте
+_icl = G.load('icons_big.png')
+_ic = []
+for _r in range(4):   # сетка 4x4 — делим лист на равные клетки (штрихи эффектов остаются со своей иконкой)
+    _ic += G.equal_frames(_icl.crop((0, _r * _icl.size[1] // 4, _icl.size[0], (_r + 1) * _icl.size[1] // 4)), 4)
+_icn = ['Bee', 'Honey', 'Nectar', 'Comb', 'Speed', 'Cap', 'Sting', 'Queen', 'Guard', 'Worker', 'Sun', 'Moon', 'Rain', 'Wind', 'Trophy', 'Lock']
+_icons_ok = len(_ic) == 16
+print('icons found', len(_ic))
+if _icons_ok:
+    for _nm, _im0 in zip(_icn, _ic):
+        _im = G.pixelize(_im0, max(_im0.size) / 15.0)
+        add('HIcon' + _nm, canvas_of(_im))
+
+# значки достижений 20x20 — по порядку enum Achievement
+_bd = G.load('badges_big.png')
+_bw2, _bh2 = _bd.size
+_badges = []
+for _r in range(2):
+    _row = _bd.crop((0, _r * _bh2 // 2, _bw2, (_r + 1) * _bh2 // 2))
+    _badges += G.equal_frames(_row, 7)
+for _i, _b in enumerate(_badges):
+    _im = G.pixelize(_b, max(_b.size) / 20.0)
+    add('Badge%d' % _i, canvas_of(_im))
+
+# карточки сезонов 96x48 (белый фон убирается заливкой от краёв)
+_sc_im = Image.open(os.path.join(G.VENDOR, 'season_cards_big.png')).convert('RGBA')
+_px = _sc_im.load()
+for _y in range(_sc_im.size[1]):          # светлый фон и серая тень вокруг карточек → прозрачно
+    for _x in range(_sc_im.size[0]):
+        _c = _px[_x, _y]
+        if min(_c[:3]) > 175 and max(_c[:3]) - min(_c[:3]) < 30:
+            _px[_x, _y] = (0, 0, 0, 0)
+for _i, _c in enumerate(G.equal_frames(_sc_im, 3)):
+    _im = G.pixelize(_c, _c.size[0] / 96.0, outline=False)
+    add('SeasonCard%d' % _i, canvas_of(_im))
+
+# эффекты: 5 анимаций по 6 кадров 16x16 (натуральный размер)
+_fx = G.quantize(G.load('fx_96x80.png'))
+for _r, _nm in enumerate(['FxPollen', 'FxSplash', 'FxPuff', 'FxHit', 'FxFlame']):
+    for _f in range(6):
+        _cell = _fx.crop((_f * 16, _r * 16, _f * 16 + 16, _r * 16 + 16))
+        add('%s%d' % (_nm, _f), canvas_of(_cell))
+
+# заставка при запуске (216x468)
+_sp = Image.open(os.path.join(G.VENDOR, 'splash_big.png')).convert('RGBA')
+_spi = G.pixelize(_sp, _sp.size[0] / 216.0, outline=False)
+add('Splash', canvas_of(_spi), (_spi.size[0] // 2, 0))
+
+# баннер магазина 1024x500 (не в атлас — отдельный файл для RuStore)
+_bn = Image.open(os.path.join(G.VENDOR, 'store_banner_big.png')).convert('RGBA')
+_bni = G.pixelize(_bn, _bn.size[0] / 256.0, outline=False).resize((1024, 500), Image.NEAREST)
+os.makedirs(os.path.join(os.path.dirname(__file__), '..', 'store'), exist_ok=True)
+_bni.convert('RGB').save(os.path.join(os.path.dirname(__file__), '..', 'store', 'banner_1024x500.png'))
+
+
 # ------------------------------------------------------------------ упаковка атласа
 def pack(items, size=1024, pad=1):
     order = sorted(range(len(items)), key=lambda i: (-items[i].h, -items[i].w))

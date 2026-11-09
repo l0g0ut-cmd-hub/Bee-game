@@ -12,7 +12,7 @@ namespace Swarm.Game
     /// </summary>
     public sealed class GameRoot : MonoBehaviour
     {
-        enum State { Menu, Levels, Achievements, Playing, Hive, Perk, Paused, Result, Intro, Help }
+        enum State { Menu, Levels, Achievements, Playing, Hive, Perk, Paused, Result, Intro, Help, Splash }
         float _introTime;
         bool _helpFromPause;
 
@@ -88,6 +88,8 @@ namespace Swarm.Game
             AutoPilot.Load();
             FxSystem.ShakeEnabled = PlayerPrefs.GetInt("swarm_shake", 1) == 1;
             EnterMenu();
+            _state = State.Splash;   // заставка при запуске: спящая пчёлка, затем меню
+            _introTime = 0f;
         }
 
         /// <summary>«0.2.7» → «СБОРКА 7» — тот же номер, что у запуска сборки на GitHub.</summary>
@@ -177,7 +179,7 @@ namespace Swarm.Game
             catch (System.Exception e) { Debug.LogWarning("[SWARM] не загрузил партию: " + e.Message); ClearRun(); EnterMenu(); }
         }
 
-        bool InMenus => _state == State.Menu || _state == State.Levels || _state == State.Achievements;
+        bool InMenus => _state == State.Menu || _state == State.Levels || _state == State.Achievements || _state == State.Splash;
         GameSim Active => InMenus ? _attract : _sim;
 
         // ------------------------------------------------------------ переходы
@@ -254,6 +256,11 @@ namespace Swarm.Game
             switch (_state)
             {
                 case State.Menu: act = _gameUi.DrawMenu(_time, _profile, _audio.Muted); break;
+                case State.Splash:
+                    _introTime += dt;
+                    _gameUi.DrawSplash(_introTime);
+                    if (_introTime > 1.8f || (_introTime > 0.4f && _input.Up)) { _state = State.Menu; _fade = 1f; _input.Reset(); }
+                    break;
                 case State.Levels: act = _gameUi.DrawLevels(_profile, _time); break;
                 case State.Achievements: act = _gameUi.DrawAchievements(_profile); break;
                 case State.Perk: act = _gameUi.DrawPerk(_sim, _time); break;

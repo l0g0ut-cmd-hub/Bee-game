@@ -174,4 +174,4 @@ python3 tools/compilecheck/check_api.py package
 
 Звуки интерфейса: Kenney Interface Sounds (CC0), `Assets/Swarm/Resources/Audio/KENNEY_LICENSE.txt`.
 
-Арт из ChatGPT (логотип, фон меню, улей 3 стадии, медведь, паук, гнездо, дикий улей): исходники в `tools/art/vendor/gpt/`, приводятся к сетке и палитре в `tools/art/gpt_import.py`.
+Арт из ChatGPT (логотип, фон меню, заставка, улей 3 стадии, медведь, паук, гнездо, дикий улей, цветы, деревья и кусты, камни, пруд, интерфейс, иконки, значки достижений, карточки сезонов, эффекты; баннер магазина — `tools/store/`): исходники в `tools/art/vendor/gpt/`, приводятся к сетке и палитре в `tools/art/gpt_import.py`.

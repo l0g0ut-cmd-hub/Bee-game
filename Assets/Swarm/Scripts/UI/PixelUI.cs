@@ -106,8 +106,13 @@ namespace Swarm.UI
                 AudioDirector.Instance?.Play(Sfx.Click);
             }
 
-            Spr skin = !enabled ? Spr.ButtonOff : (pressed ? Spr.ButtonDown : Spr.Button);
-            NineSlice((int)skin, r, 3);
+            if (r.width < 30f)
+                NineSlice((int)(pressed ? Spr.ButtonSqDown : Spr.ButtonSq), r, 5);   // маленькая квадратная кнопка
+            else
+            {
+                Spr skin = !enabled ? Spr.ButtonOff : (pressed ? Spr.ButtonDown : Spr.Button);
+                NineSlice((int)skin, r, r.height >= 14f ? 5 : 3);
+            }
             float dy = pressed ? -1f : 0f;
             Color32 tc = textColor ?? (enabled ? Ink : new Color32(60, 60, 70, 255));
             int tw = label != null ? PixelFont.Measure(label, scale) : 0;
@@ -143,7 +148,8 @@ namespace Swarm.UI
             return clicked;
         }
 
-        public void Panel(Rect r, bool dark = false) => NineSlice(dark ? (int)Spr.PanelDark : (int)Spr.Panel, r, 3);
+        public void Panel(Rect r, bool dark = false) =>
+            NineSlice(dark ? (int)Spr.PanelDark : (int)Spr.Panel, r, dark ? 3 : (r.width >= 40f && r.height >= 40f ? 7 : 3));
 
         public void Fill(Rect r, Color32 c) => Batch.Rect(r.x, r.y, r.width, r.height, c);
 

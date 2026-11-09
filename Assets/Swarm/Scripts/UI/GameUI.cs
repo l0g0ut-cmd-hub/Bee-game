@@ -125,6 +125,16 @@ namespace Swarm.UI
             }
         }
 
+        /// <summary>Заставка: картинка прижата к низу, сверху — цвет её фона; лёгкое «дыхание» затемнения.</summary>
+        public void DrawSplash(float t)
+        {
+            int W = _ui.W, H = _ui.H;
+            _ui.Fill(new Rect(0, 0, W, H), new Color32(247, 207, 85, 255));
+            _ui.Icon(Spr.Splash, Mathf.Round(W * 0.5f), 0f);
+            float k = Mathf.Clamp01(1f - t * 3f) + Mathf.Clamp01((t - 1.5f) * 3.3f);
+            if (k > 0.01f) _ui.Fill(new Rect(0, 0, W, H), new Color32(10, 8, 14, (byte)(255 * Mathf.Clamp01(k))));
+        }
+
         public string ContinueLabel;   // «ЛЕТО 4:12» — есть сохранённая партия; null — нет
 
         public UiAction DrawMenu(float time, Profile profile, bool muted)
@@ -191,25 +201,39 @@ namespace Swarm.UI
             _ui.Icon(Spr.IconStar, W * 0.5f - 20, top - 41);
             _ui.Text(_b, W * 0.5f - 12, top - 44, PixelUI.White);
 
-            float cw = W - 24, ch = 64;
+            float cw = W - 24, ch = 70;
             for (int i = 0; i < Levels.Campaign.Length; i++)
             {
                 var d = Levels.Campaign[i];
                 bool locked = profile.CampaignStars < d.UnlockStars;
-                var r = new Rect(12, top - 120 - i * (ch + 10), cw, ch);
+                var r = new Rect(12, top - 124 - i * (ch + 8), cw, ch);
                 if (_ui.Button(20 + i, r, null, !locked)) { SelectedLevel = i; a = UiAction.StartLevel; }
                 Color32 tc = locked ? new Color32(60, 60, 70, 255) : PixelUI.Ink;
-                _ui.Text(d.Name, r.x + 10, r.yMax - 18, tc, 2, 0, false);
-                _ui.Text(d.Sub, r.x + 10, r.yMax - 30, locked ? tc : Brown, 1, 0, false);
-                _b.Clear().Append("ЦЕЛЬ ").Append(d.GoalBees).Append(" ПЧЁЛ, ").Append(d.GoalHoney).Append(" МЁДА");
-                _ui.Text(_b, r.x + 10, r.y + 8, locked ? tc : Brown, 1, 0, false);
+                // картинка сезона слева, текст справа
+                Spr card = (Spr)((int)Spr.SeasonCard0 + Mathf.Clamp(i, 0, 2));
+                float cx0 = r.x + 6 + SpriteAtlas.W(card) * 0.5f, cy0 = r.center.y;
+                _ui.Icon(card, Mathf.Round(cx0), Mathf.Round(cy0), locked ? new Color32(110, 110, 120, 255) : (Color32?)null);
+                float tx = r.x + 108, tw = r.xMax - tx - 4;
+                int nameScale = PixelFont.Measure(d.Name, 2) <= tw ? 2 : 1;
+                _ui.Text(d.Name, tx, r.yMax - 19, tc, nameScale, 0, false);
+                var sub = Wrap(d.Sub, (int)tw);
+                for (int li = 0; li < sub.Length && li < 2; li++) _ui.Text(sub[li], tx, r.yMax - 31 - li * 10, locked ? tc : Brown, 1, 0, false);
                 if (locked)
                 {
-                    _ui.Icon(Spr.IconLock, r.xMax - 22, r.center.y + 6, null, 2);
+                    _ui.Icon(Spr.HIconLock, Mathf.Round(cx0), Mathf.Round(cy0));
                     _b.Clear().Append(Strings.NeedStars).Append(d.UnlockStars);
-                    _ui.Text(_b, r.xMax - 10, r.y + 8, tc, 1, 2, false);
+                    _ui.Text(_b, tx, r.y + 7, tc, 1, 0, false);
                 }
-                else Stars(r.xMax - 36, r.yMax - 14, profile.LevelStars[i], 1);
+                else
+                {
+                    _ui.Icon(Spr.IconBee, tx + 3, r.y + 10);
+                    _b.Clear().Append(d.GoalBees);
+                    _ui.Text(_b, tx + 8, r.y + 7, Brown, 1, 0, false);
+                    _ui.Icon(Spr.IconHoney, tx + 36, r.y + 10);
+                    _b.Clear().Append(d.GoalHoney);
+                    _ui.Text(_b, tx + 41, r.y + 7, Brown, 1, 0, false);
+                    Stars(Mathf.Round(cx0), r.y + 11, profile.LevelStars[i], 1);
+                }
             }
             // порода пчёл: открывается звёздами кампании
             {
@@ -248,12 +272,36 @@ namespace Swarm.UI
                 bool has = profile.Has(ach);
                 y -= rowH;
                 _ui.Fill(new Rect(10, y, W - 20, rowH - 3), has ? new Color32(119, 70, 29, 200) : new Color32(40, 34, 44, 200));
-                _ui.Icon(Spr.IconTrophy, 22, y + rowH * 0.5f - 1, has ? (Color32?)null : new Color32(90, 90, 100, 255));
-                _ui.Text(Achievements_.Name(ach), 32, y + rowH - 12, has ? PixelUI.Honey : PixelUI.Muted, 1, 0, false);
-                if (rowH >= 22f) _ui.Text(Achievements_.Desc(ach), 32, y + 3, has ? SubText : new Color32(140, 135, 125, 255), 1, 0, false);
+                _ui.Icon((Spr)((int)Spr.Badge0 + Mathf.Min(i, 13)), 22, Mathf.Round(y + rowH * 0.5f - 1), has ? (Color32?)null : new Color32(70, 70, 80, 255));
+                _ui.Text(Achievements_.Name(ach), 36, y + rowH - 12, has ? PixelUI.Honey : PixelUI.Muted, 1, 0, false);
+                if (rowH >= 22f) _ui.Text(Achievements_.Desc(ach), 36, y + 3, has ? SubText : new Color32(140, 135, 125, 255), 1, 0, false);
             }
             if (_ui.Button(39, new Rect(Mathf.Round(W * 0.5f - 46), _ui.SafeBottom + 10, 92, 22), Strings.Back)) a = UiAction.Back;
             return a;
+        }
+
+        /// <summary>Крупная (16 px) версия значка, если она есть.</summary>
+        static Spr Big(Spr s)
+        {
+            switch (s)
+            {
+                case Spr.IconBee: return Spr.HIconBee;
+                case Spr.IconHoney: return Spr.HIconHoney;
+                case Spr.IconNectar: return Spr.HIconNectar;
+                case Spr.IconComb: return Spr.HIconComb;
+                case Spr.IconSpeed: return Spr.HIconSpeed;
+                case Spr.IconCap: return Spr.HIconCap;
+                case Spr.IconSting: return Spr.HIconSting;
+                case Spr.IconQueen: return Spr.HIconQueen;
+                case Spr.IconGuard: return Spr.HIconGuard;
+                case Spr.IconSun: return Spr.HIconSun;
+                case Spr.IconMoon: return Spr.HIconMoon;
+                case Spr.IconRain: return Spr.HIconRain;
+                case Spr.IconWind: return Spr.HIconWind;
+                case Spr.IconTrophy: return Spr.HIconTrophy;
+                case Spr.IconLock: return Spr.HIconLock;
+                default: return Spr.Count;
+            }
         }
 
         // ================================================================ ЧТО НОВОГО В СЕЗОНЕ
@@ -290,7 +338,9 @@ namespace Swarm.UI
             {
                 y -= 24;
                 _ui.Fill(new Rect(panel.x + 6, y, panel.width - 12, 21), new Color32(119, 70, 29, 70));
-                _ui.Icon(IntroIcons[level][k], panel.x + 16, y + 10, null, 2);
+                Spr big = Big(IntroIcons[level][k]);
+                if (big != Spr.Count) _ui.Icon(big, panel.x + 16, y + 10);
+                else _ui.Icon(IntroIcons[level][k], panel.x + 16, y + 10, null, 2);
                 TextWrapped(lines[k], panel.x + 28 + (panel.width - 40) * 0.5f, y + 21 - 4, (int)panel.width - 44, PixelUI.Ink, false);
             }
             float p = Mathf.Sin(time * 4f) > 0.6f ? 1f : 0f;
@@ -738,7 +788,7 @@ namespace Swarm.UI
             {
                 y -= rowH;
                 RowFrame(x0, y, x1 - x0, rowH - 3);
-                _ui.Icon(Spr.IconQueen, x0 + 12, y + rowH * 0.5f, null, 2);
+                _ui.Icon(Spr.HIconQueen, x0 + 12, Mathf.Round(y + rowH * 0.5f));
                 _ui.Text(Strings.QueenName, x0 + 24, y + 19, PixelUI.Ink, 1, 0, false);
                 bool full = sim.Swarm.SwarmCount >= col.MaxBees;
                 if (full) _ui.Text(Strings.HatchFull, x0 + 24, y + 8, PixelUI.Red, 1, 0, false);
@@ -757,7 +807,7 @@ namespace Swarm.UI
             {
                 y -= rowH;
                 RowFrame(x0, y, x1 - x0, rowH - 3);
-                _ui.Icon(Spr.SoldierA, x0 + 12, y + rowH * 0.5f);
+                _ui.Icon(Spr.HIconGuard, x0 + 12, Mathf.Round(y + rowH * 0.5f));
                 _ui.Text(Strings.DefName, x0 + 24, y + 19, PixelUI.Ink, 1, 0, false);
                 _b.Clear().Append(Strings.DefSub).Append(sim.Swarm.GuardCount).Append('/').Append(sim.Cfg.DefenderMax);
                 _ui.Text(_b, x0 + 24, y + 8, SubText, 1, 0, false);
@@ -773,7 +823,7 @@ namespace Swarm.UI
             {
                 y -= rowH;
                 RowFrame(x0, y, x1 - x0, rowH - 3);
-                _ui.Icon(Spr.BeeLoadA, x0 + 12, y + rowH * 0.5f, new Color32(200, 240, 160, 255), 2);
+                _ui.Icon(Spr.HIconWorker, x0 + 12, Mathf.Round(y + rowH * 0.5f));
                 _ui.Text(Strings.WorkerName, x0 + 24, y + 18, PixelUI.Ink, 1, 0, false);
                 _b.Clear().Append(Strings.WorkerSub).Append(sim.Swarm.WorkerCount).Append('/').Append(sim.Cfg.WorkerMax);
                 _ui.Text(_b, x0 + 24, y + 7, SubText, 1, 0, false);
@@ -805,7 +855,9 @@ namespace Swarm.UI
             var cfg = sim.Cfg;
             y -= rowH;
             RowFrame(x0, y, x1 - x0, rowH - 3);
-            _ui.Icon(icon, x0 + 12, y + rowH * 0.5f, null, 2);
+            Spr bigIcon = Big(icon);
+            if (bigIcon != Spr.Count) _ui.Icon(bigIcon, x0 + 12, Mathf.Round(y + rowH * 0.5f));
+            else _ui.Icon(icon, x0 + 12, y + rowH * 0.5f, null, 2);
             _ui.Text(name, x0 + 24, y + 19, PixelUI.Ink, 1, 0, false);
             int lv = col.Level[(int)t];
             int max = col.MaxLevel(t);

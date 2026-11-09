@@ -91,6 +91,52 @@ def frames(im, count, alpha_cut=110):
     return out
 
 
+def components(im, alpha_cut=110, min_area=40, merge=6):
+    """Отдельные объекты на листе (по связности альфы на уменьшенной копии); bbox в координатах оригинала,
+    отсортированы сверху вниз, слева направо. merge — склеить объекты, чьи рамки ближе merge px (уменьш.)."""
+    k = max(1, min(im.size) // 220)
+    sm = im.resize((im.size[0] // k, im.size[1] // k), Image.NEAREST)
+    a = sm.getchannel('A').load()
+    w, h = sm.size
+    seen = [[False] * w for _ in range(h)]
+    boxes = []
+    for y in range(h):
+        for x in range(w):
+            if seen[y][x] or a[x, y] <= alpha_cut:
+                continue
+            st = [(x, y)]
+            seen[y][x] = True
+            x0 = x1 = x
+            y0 = y1 = y
+            n = 0
+            while st:
+                cx, cy = st.pop()
+                n += 1
+                x0, x1, y0, y1 = min(x0, cx), max(x1, cx), min(y0, cy), max(y1, cy)
+                for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    nx, ny = cx + dx, cy + dy
+                    if 0 <= nx < w and 0 <= ny < h and not seen[ny][nx] and a[nx, ny] > alpha_cut:
+                        seen[ny][nx] = True
+                        st.append((nx, ny))
+            if n >= min_area:
+                boxes.append([x0, y0, x1 + 1, y1 + 1])
+    changed = True
+    while changed:
+        changed = False
+        for i in range(len(boxes)):
+            for j in range(i + 1, len(boxes)):
+                A, B = boxes[i], boxes[j]
+                if A[0] - merge < B[2] and B[0] - merge < A[2] and A[1] - merge < B[3] and B[1] - merge < A[3]:
+                    boxes[i] = [min(A[0], B[0]), min(A[1], B[1]), max(A[2], B[2]), max(A[3], B[3])]
+                    del boxes[j]
+                    changed = True
+                    break
+            if changed:
+                break
+    boxes.sort(key=lambda b: (b[1] // 40, b[0]))
+    return [im.crop((b[0] * k, b[1] * k, b[2] * k, b[3] * k)) for b in boxes], [[v * k for v in b] for b in boxes]
+
+
 def equal_frames(im, count, alpha_cut=110):
     """Режет лист на count равных по ширине кадров (когда кадры касаются друг друга)."""
     w, h = im.size
