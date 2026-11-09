@@ -232,7 +232,7 @@ namespace Swarm.UI
         static readonly Spr[][] IntroIcons =
         {
             new[] { Spr.IconBee, Spr.IconNectar, Spr.IconQueen, Spr.IconHeat, Spr.IconSkull },
-            new[] { Spr.IconGuard, Spr.IconSquad, Spr.IconHoney, Spr.IconWasp, Spr.IconRain },
+            new[] { Spr.IconGuard, Spr.IconSquad, Spr.IconSkull, Spr.IconLock, Spr.IconRain },
             new[] { Spr.IconWasp, Spr.IconScout, Spr.IconComb, Spr.IconWind },
         };
 
@@ -250,7 +250,7 @@ namespace Swarm.UI
             float y = panel.yMax - 22;
             _ui.Text(Levels.Campaign[level].Name, panel.center.x, y, PixelUI.Ink, 2, 1, false);
             y -= 13;
-            _ui.Text(level == 0 ? Strings.IntroFirst : Strings.IntroNew, panel.center.x, y, Brown, 1, 1, false);
+            _ui.Text(level == 0 ? Strings.IntroFirst : Strings.IntroNew, panel.center.x, y, PixelUI.Honey, 1, 1, true);
             y -= 8;
             for (int k = 0; k < lines.Length; k++)
             {
