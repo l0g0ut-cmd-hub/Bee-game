@@ -1,0 +1,2311 @@
+== df
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       145G   36G  110G  25% /
+Downloading game-ci CLI v0.1.72 from https://github.com/game-ci/cli/releases/download/v0.1.72/game-ci-linux-x64.tar.gz
+Checksum verified (SHA256) for game-ci-linux-x64.tar.gz
+/home/runner/work/_temp/game-ci/bin/game-ci
+[INFO] Versioning strategy: None
+[INFO] Version of this build: none
+[INFO] Versioning strategy is set to none, so android version code should not be applied.
+[INFO] linux Android 6000.0.36f1
+::group::Unity build
+[WARN] running docker process for linux (linux)
+Unable to find image 'unityci/editor:ubuntu-6000.0.36f1-android-3' locally
+ubuntu-6000.0.36f1-android-3: Pulling from unityci/editor
+9a4d47d5aa13: Pulling fs layer
+e1e0763b8b7f: Pulling fs layer
+8e578c7fd715: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+96c832531c38: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+dc7a969c82d9: Pulling fs layer
+46805e80f2d7: Pulling fs layer
+39cd9db1617e: Pulling fs layer
+a1ff4bc3f481: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+8d5d2a3e6b0f: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+d3a5feebe29b: Pulling fs layer
+a636358af2c8: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+4f4fb700ef54: Pulling fs layer
+bef3b93c3984: Pulling fs layer
+7bcf62982864: Pulling fs layer
+4f4fb700ef54: Download complete
+e1e0763b8b7f: Download complete
+7bcf62982864: Download complete
+9a4d47d5aa13: Download complete
+bef3b93c3984: Download complete
+d3a5feebe29b: Download complete
+8e578c7fd715: Download complete
+39cd9db1617e: Download complete
+a1ff4bc3f481: Download complete
+a636358af2c8: Download complete
+dc7a969c82d9: Download complete
+96c832531c38: Download complete
+54e8aef068c6: Download complete
+46805e80f2d7: Download complete
+9a4d47d5aa13: Pull complete
+96c832531c38: Pull complete
+46805e80f2d7: Pull complete
+a1ff4bc3f481: Pull complete
+dc7a969c82d9: Pull complete
+bef3b93c3984: Pull complete
+a636358af2c8: Pull complete
+d3a5feebe29b: Pull complete
+8d5d2a3e6b0f: Download complete
+4f4fb700ef54: Pull complete
+e1e0763b8b7f: Pull complete
+7bcf62982864: Pull complete
+8d5d2a3e6b0f: Pull complete
+8e578c7fd715: Pull complete
+39cd9db1617e: Pull complete
+Digest: sha256:3c18892b45bbe8448d64330521b029a8bf7b733f2038ddf45b47440273c1f22a
+Status: Downloaded newer image for unityci/editor:ubuntu-6000.0.36f1-android-3
+Updating Android SDK with auto detected target API version
+grep: /github/workspace/./ProjectSettings/ProjectSettings.asset: No such file or directory
+Loading package information...                                                  
+Loading local repository...                                                     
+[                                       ] 3% Loading local repository...        
+[                                       ] 3% Fetch remote repository...         
+[=                                      ] 3% Fetch remote repository...         
+[=                                      ] 4% Fetch remote repository...         
+[=                                      ] 5% Fetch remote repository...         
+[==                                     ] 5% Fetch remote repository...         
+[==                                     ] 6% Fetch remote repository...         
+[==                                     ] 7% Fetch remote repository...         
+[==                                     ] 7% Computing updates...               
+[===                                    ] 8% Computing updates...               
+[===                                    ] 10% Computing updates...              
+                                                                                
+[===                                    ] 10% Computing updates...              
+Warning: Failed to find package 'platforms;android-'
+Updated Android SDK.
+Running as root
+GIT_CONFIG_EXTENSIONS unset skipping
+---------- git config --list -------------
+filter.lfs.clean=git-lfs clean -- %f
+filter.lfs.smudge=git-lfs smudge -- %f
+filter.lfs.process=git-lfs filter-process
+filter.lfs.required=true
+---------- git config --list --show-origin -------------
+file:/etc/gitconfig	filter.lfs.clean=git-lfs clean -- %f
+file:/etc/gitconfig	filter.lfs.smudge=git-lfs smudge -- %f
+file:/etc/gitconfig	filter.lfs.process=git-lfs filter-process
+file:/etc/gitconfig	filter.lfs.required=true
+GIT_PRIVATE_TOKEN unset skipping
+---------- git config --list -------------
+filter.lfs.clean=git-lfs clean -- %f
+filter.lfs.smudge=git-lfs smudge -- %f
+filter.lfs.process=git-lfs filter-process
+filter.lfs.required=true
+---------- git config --list --show-origin -------------
+file:/etc/gitconfig	filter.lfs.clean=git-lfs clean -- %f
+file:/etc/gitconfig	filter.lfs.smudge=git-lfs smudge -- %f
+file:/etc/gitconfig	filter.lfs.process=git-lfs filter-process
+file:/etc/gitconfig	filter.lfs.required=true
+Changing to "/github/workspace/_activate-license~" directory.
+/github/workspace/_activate-license~ /github/workspace
+Licensing method: personal
+Requesting activation (personal license via Unity account)
+Trying to activate all seats ...
+Activation processed successfully.
+
+Seat ID: 5774143681452-UnityPersonal
+Status: [200] ASSIGN_SEAT
+
+
+Trying to update entitlement license file ...
+Successfully updated UnityEntitlementLicense.xml!
+Activation complete.
+/github/workspace
+Using project path "/github/workspace/.".
+Using build name "Swarm".
+Using build target "Android".
+Doing a default "Android" platform build.
+Using build path "build/Android" to save file "Swarm.apk".
+Using build method "Swarm.EditorTools.SwarmCiBuild.BuildAndroid".
+
+###########################
+#    Custom parameters    #
+###########################
+
+
+
+###########################
+#    Current build dir    #
+###########################
+
+Creating "/github/workspace/build/Android" if it does not exist.
+total 8.0K
+drwxr-xr-x 2 root root 4.0K Nov  9 07:02 .
+drwxr-xr-x 3 root root 4.0K Nov  9 07:02 ..
+
+###########################
+#    Project directory    #
+###########################
+
+total 72K
+drwxr-xr-x 12 1001 1001 4.0K Nov  9 07:02 .
+drwxr-xr-x  3 root root 4.0K Nov  9 07:02 ..
+drwxr-xr-x  7 1001 1001 4.0K Nov  9 06:59 .git
+drwxr-xr-x  3 1001 1001 4.0K Nov  9 06:59 .github
+-rw-r--r--  1 1001 1001  361 Nov  9 06:59 .gitignore
+drwxr-xr-x  3 1001 1001 4.0K Nov  9 06:59 Assets
+drwxr-xr-x 13 1001 1001 4.0K Nov  9 00:17 Library
+drwxr-xr-x  2 1001 1001 4.0K Nov  9 06:59 Packages
+drwxr-xr-x  2 1001 1001 4.0K Nov  9 06:59 ProjectSettings
+-rw-r--r--  1 1001 1001  18K Nov  9 06:59 README.md
+drwxr-xr-x  2 root root 4.0K Nov  9 07:02 _activate-license~
+drwxr-xr-x  3 root root 4.0K Nov  9 07:02 build
+drwxr-xr-x  2 1001 1001 4.0K Nov  9 06:59 docs
+drwxr-xr-x  5 1001 1001 4.0K Nov  9 06:59 tools
+
+###########################
+#    Building project     #
+###########################
+
+[UnityConnectServicesConfig] Local config successfully read: "/usr/share/unity3d/config/services-config.json"
+[UnityConnectServicesConfig] "clientConnectTimeoutSec" was overridden with "5"
+[UnityConnectServicesConfig] "clientHandshakeTimeoutSec" was overridden with "10"
+[UnityConnectServicesConfig] Service configuration:
+    "servicesConfigBaseUrl": "",
+    "disableServicesWindow": false,
+    "disableUserLogin": false,
+    "entitlementCacheTimeoutInSeconds": 60,
+    "clientConnectTimeoutSec": 5,
+    "clientHandshakeTimeoutSec": 10,
+    "clientResolveEntitlementsTimeoutSec": 30,
+    "clientUpdateLicenseTimeoutSec": 30,
+    "licensingServiceBaseUrl": "",
+    "enableProxyAutoconfig": "false"
+
+Unity Editor version:    6000.0.36f1 (9fe3b5f71dbb)
+Branch:                  6000.0/staging
+Build type:              Release
+Batch mode:              YES
+System name:             Linux
+Distro version:          #20-Ubuntu SMP PREEMPT Mon Oct 19 22:41:16 UTC 2026
+Kernel version:          7.0.0-1019-azure
+Architecture:            x86_64
+Available memory:        15983 MB
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Connection attempt to the License Client on channel: "LicenseClient-root" failed because channel doesn't exist; code: "0x80000002"
+[Licensing::Module] Successfully launched the LicensingClient (PId: 166)
+[Licensing::IpcConnector] Successfully connected to the License Client on channel: "LicenseClient-root" at "2026-11-09T07:02:57.929732Z"
+[SignatureVerifier] Application signature verification not supported on this platform.
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.16.2+bdef8f5
+  Session Id:              d3c57d6b104444e69036ee6a750cf488
+  Correlation Id:          710d0b2bf14a768dfd9885edb0e9c8d8
+  External correlation Id: 5730025920001872571
+  Machine Id:              D7nTUnjNAmtsUMcnoyrqkgIbYdM=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-root" (connect: 0.57s, validation: 0.07s, handshake: 0.00s)
+[Licensing::IpcConnector] Successfully connected to the License Notification on channel: "LicenseClient-root-notifications" at "2026-11-09T07:02:57.995901Z"
+[Licensing::Module] Connected to LicensingClient (PId: 166, launch time: 0.00, total connection time: 0.63s)
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Error: Code 500 while processing request (status: Unable to update licenses. Errors: No ULF license found.,Token not found in cache)
+[Licensing::Client] Error: Code 500 while updating license in client (status: Unable to update licenses. Errors: No ULF license found.,Token not found in cache)
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Serial number assigned to: "5774143681452-UnityPersXXXX"
+Pro License: NO
+The selected window backend is (null) 
+Desktop is 1280 x 1024 @ 60 Hz
+Initialize udev device monitor.
+CreateDirectory '/root/.cache/unity3d' failed:  (current dir: /github/workspace)
+[Licensing::Client] Successfully resolved entitlement details
+
+COMMAND LINE ARGUMENTS:
+/opt/unity/Editor/Unity
+-batchmode
+-logfile
+/dev/stdout
+-quit
+-customBuildName
+Swarm
+-projectPath
+/github/workspace/.
+-buildTarget
+Android
+-customBuildTarget
+Android
+-customBuildPath
+/github/workspace/build/Android/Swarm.apk
+-customBuildProfile
+
+-executeMethod
+Swarm.EditorTools.SwarmCiBuild.BuildAndroid
+-buildVersion
+none
+-androidVersionCode
+0
+-androidKeystoreName
+
+-androidKeystorePass
+
+-androidKeyaliasName
+
+-androidKeyaliasPass
+
+-androidTargetSdkVersion
+
+-androidExportType
+androidPackage
+-androidSymbolType
+none
+Successfully changed project path to: /github/workspace/.
+
+(Unity:160): Gtk-CRITICAL **: 07:02:58.306: gtk_label_set_text: assertion 'GTK_IS_LABEL (label)' failed
+
+(Unity:160): Gtk-CRITICAL **: 07:02:58.307: gtk_label_set_text: assertion 'GTK_IS_LABEL (label)' failed
+/github/workspace
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gfx=262144"
+Player connection [133386944714048]  Target information:
+
+Player connection [133386944714048]  * "[IP] 172.17.0.2 [Port] 55504 [Flags] 2 [Guid] 3881664312 [EditorId] 3881664312 [Version] 1048832 [Id] LinuxEditor(16,172.17.0.2) [Debug] 1 [PackageName] LinuxEditor [ProjectName] Editor" 
+
+Player connection [133386944714048] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [133386944714048] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+[Package Manager] Connected to IPC stream "Upm-160" after 0.2 seconds.
+Library Redirect Path: Library/
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 8 packages:
+  Built-in packages:
+    com.unity.modules.androidjni@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.androidjni)
+    com.unity.modules.audio@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.audio)
+    com.unity.modules.imageconversion@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.imageconversion)
+    com.unity.modules.imgui@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.imgui)
+    com.unity.modules.jsonserialize@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.jsonserialize)
+    com.unity.modules.ui@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.ui)
+    com.unity.modules.uielements@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.uielements)
+    com.unity.modules.hierarchycore@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.hierarchycore)
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Unable to load player prefs
+[Subsystems] No new subsystems found in resolved package list.
+Package Manager log level set to [2]
+[Package Manager] Done registering packages in 0.05 seconds
+[Package Manager] Done resolving packages in 0.70 seconds
+[Package Manager] Lock file was created
+[Package Manager] Registered 8 packages:
+  Built-in packages:
+    com.unity.modules.androidjni@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.androidjni)
+    com.unity.modules.audio@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.audio)
+    com.unity.modules.imageconversion@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.imageconversion)
+    com.unity.modules.imgui@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.imgui)
+    com.unity.modules.jsonserialize@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.jsonserialize)
+    com.unity.modules.ui@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.ui)
+    com.unity.modules.uielements@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.uielements)
+    com.unity.modules.hierarchycore@1.0.0 (location: /opt/unity/Editor/Data/Resources/PackageManager/BuiltInPackages/com.unity.modules.hierarchycore)
+[Subsystems] No new subsystems found in resolved package list.
+[Package Manager] Done registering packages in 0.00 seconds
+Artifact Garbage Collection - Removed 1 unused hashed content files[Licensing::Client] Successfully resolved entitlement details
+Targeting platform: Android
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 6000.0.36f1 (9fe3b5f71dbb)
+[Subsystems] Discovering subsystems at path /opt/unity/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path /github/workspace/Assets
+kGfxThreadingModeNonThreaded is not supported on OpenGL Core. Reverting to kGfxThreadingModeDirect instead.
+GfxDevice: creating device client; kGfxThreadingModeDirect
+GLX Extensions: GLX_ARB_context_flush_control GLX_ARB_create_context GLX_ARB_create_context_no_error GLX_ARB_create_context_profile GLX_ARB_fbconfig_float GLX_ARB_framebuffer_sRGB GLX_ARB_get_proc_address GLX_ARB_multisample GLX_EXT_create_context_es2_profile GLX_EXT_create_context_es_profile GLX_EXT_fbconfig_packed_float GLX_EXT_framebuffer_sRGB GLX_EXT_no_config_context GLX_EXT_texture_from_pixmap GLX_EXT_visual_info GLX_EXT_visual_rating GLX_MESA_copy_sub_buffer GLX_MESA_query_renderer GLX_OML_swap_method GLX_SGIS_multisample GLX_SGIX_fbconfig GLX_SGIX_pbuffer GLX_SGIX_visual_select_group GLX_SGI_make_current_read 
+Renderer: llvmpipe (LLVM 15.0.7, 256 bits)
+Vendor:   Mesa
+Version:  4.5 (Core Profile) Mesa 23.2.1-1ubuntu3.1~22.04.3
+GLES:     0
+ GL_3DFX_texture_compression_FXT1 GL_AMD_conservative_depth GL_AMD_draw_buffers_blend GL_AMD_gpu_shader_int64 GL_AMD_multi_draw_indirect GL_AMD_pinned_memory GL_AMD_query_buffer_object GL_AMD_seamless_cubemap_per_texture GL_AMD_shader_stencil_export GL_AMD_shader_trinary_minmax GL_AMD_texture_texture4 GL_AMD_vertex_shader_layer GL_AMD_vertex_shader_viewport_index GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ARB_ES2_compatibility GL_ARB_ES3_1_compatibility GL_ARB_ES3_2_compatibility GL_ARB_ES3_compatibility GL_ARB_arrays_of_arrays GL_ARB_base_instance GL_ARB_blend_func_extended GL_ARB_buffer_storage GL_ARB_clear_buffer_object GL_ARB_clear_texture GL_ARB_clip_control GL_ARB_compressed_texture_pixel_storage GL_ARB_compute_shader GL_ARB_conditional_render_inverted GL_ARB_conservative_depth GL_ARB_copy_buffer GL_ARB_copy_image GL_ARB_cull_distance GL_ARB_debug_output GL_ARB_depth_buffer_float GL_ARB_depth_clamp GL_ARB_derivative_control GL_ARB_direct_state_access GL_ARB_draw_buffers GL_A
+RB_draw_buffers_blend GL_ARB_draw_elements_base_vertex GL_ARB_draw_indirect GL_ARB_draw_instanced GL_ARB_enhanced_layouts GL_ARB_explicit_attrib_location GL_ARB_explicit_uniform_location GL_ARB_fragment_coord_conventions GL_ARB_fragment_layer_viewport GL_ARB_fragment_shader GL_ARB_framebuffer_no_attachments GL_ARB_framebuffer_object GL_ARB_framebuffer_sRGB GL_ARB_get_program_binary GL_ARB_get_texture_sub_image GL_ARB_gl_spirv GL_ARB_gpu_shader5 GL_ARB_gpu_shader_fp64 GL_ARB_gpu_shader_int64 GL_ARB_half_float_pixel GL_ARB_half_float_vertex GL_ARB_indirect_parameters GL_ARB_instanced_arrays GL_ARB_internalformat_query GL_ARB_internalformat_query2 GL_ARB_invalidate_subdata GL_ARB_map_buffer_alignment GL_ARB_map_buffer_range GL_ARB_multi_bind GL_ARB_multi_draw_indirect GL_ARB_occlusion_query2 GL_ARB_parallel_shader_compile GL_ARB_pipeline_statistics_query GL_ARB_pixel_buffer_object GL_ARB_point_sprite GL_ARB_polygon_offset_clamp GL_ARB_post_depth_coverage GL_ARB_program_interface_query GL_ARB_provoking_vertex GL
+_ARB_query_buffer_object GL_ARB_robust_buffer_access_behavior GL_ARB_robustness GL_ARB_sample_shading GL_ARB_sampler_objects GL_ARB_seamless_cube_map GL_ARB_seamless_cubemap_per_texture GL_ARB_separate_shader_objects GL_ARB_shader_atomic_counter_ops GL_ARB_shader_atomic_counters GL_ARB_shader_ballot GL_ARB_shader_bit_encoding GL_ARB_shader_clock GL_ARB_shader_draw_parameters GL_ARB_shader_group_vote GL_ARB_shader_image_load_store GL_ARB_shader_image_size GL_ARB_shader_objects GL_ARB_shader_precision GL_ARB_shader_stencil_export GL_ARB_shader_storage_buffer_object GL_ARB_shader_subroutine GL_ARB_shader_texture_image_samples GL_ARB_shader_texture_lod GL_ARB_shader_viewport_layer_array GL_ARB_shading_language_420pack GL_ARB_shading_language_include GL_ARB_shading_language_packing GL_ARB_spirv_extensions GL_ARB_stencil_texturing GL_ARB_sync GL_ARB_tessellation_shader GL_ARB_texture_barrier GL_ARB_texture_buffer_object GL_ARB_texture_buffer_object_rgb32 GL_ARB_texture_buffer_range GL_ARB_texture_compression_bptc 
+GL_ARB_texture_compression_rgtc GL_ARB_texture_cube_map_array GL_ARB_texture_filter_anisotropic GL_ARB_texture_filter_minmax GL_ARB_texture_float GL_ARB_texture_gather GL_ARB_texture_mirror_clamp_to_edge GL_ARB_texture_multisample GL_ARB_texture_non_power_of_two GL_ARB_texture_query_levels GL_ARB_texture_query_lod GL_ARB_texture_rectangle GL_ARB_texture_rg GL_ARB_texture_rgb10_a2ui GL_ARB_texture_stencil8 GL_ARB_texture_storage GL_ARB_texture_storage_multisample GL_ARB_texture_swizzle GL_ARB_texture_view GL_ARB_timer_query GL_ARB_transform_feedback2 GL_ARB_transform_feedback3 GL_ARB_transform_feedback_instanced GL_ARB_transform_feedback_overflow_query GL_ARB_uniform_buffer_object GL_ARB_vertex_array_bgra GL_ARB_vertex_array_object GL_ARB_vertex_attrib_64bit GL_ARB_vertex_attrib_binding GL_ARB_vertex_buffer_object GL_ARB_vertex_shader GL_ARB_vertex_type_10f_11f_11f_rev GL_ARB_vertex_type_2_10_10_10_rev GL_ARB_viewport_array GL_ARM_shader_framebuffer_fetch_depth_stencil GL_ATI_blend_equation_separate GL_ATI_me
+minfo GL_ATI_texture_float GL_ATI_texture_mirror_once GL_EXT_EGL_image_storage GL_EXT_EGL_sync GL_EXT_abgr GL_EXT_blend_equation_separate GL_EXT_debug_label GL_EXT_draw_buffers2 GL_EXT_draw_instanced GL_EXT_framebuffer_blit GL_EXT_framebuffer_multisample GL_EXT_framebuffer_multisample_blit_scaled GL_EXT_framebuffer_object GL_EXT_framebuffer_sRGB GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_packed_depth_stencil GL_EXT_packed_float GL_EXT_pixel_buffer_object GL_EXT_polygon_offset_clamp GL_EXT_provoking_vertex GL_EXT_shader_framebuffer_fetch GL_EXT_shader_framebuffer_fetch_non_coherent GL_EXT_shader_integer_mix GL_EXT_texture_array GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc GL_EXT_texture_filter_anisotropic GL_EXT_texture_filter_minmax GL_EXT_texture_integer GL_EXT_texture_mirror_clamp GL_EXT_texture_sRGB GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_sRGB_decode GL_EXT_texture_shadow_lod GL_EXT_texture_shared_exponent GL_EXT_texture_sno
+rm GL_EXT_texture_swizzle GL_EXT_timer_query GL_EXT_transform_feedback GL_EXT_vertex_array_bgra GL_EXT_vertex_attrib_64bit GL_IBM_multimode_draw_arrays GL_INTEL_shader_atomic_float_minmax GL_KHR_blend_equation_advanced GL_KHR_blend_equation_advanced_coherent GL_KHR_context_flush_control GL_KHR_debug GL_KHR_no_error GL_KHR_parallel_shader_compile GL_KHR_robust_buffer_access_behavior GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_KHR_texture_compression_astc_sliced_3d GL_MESA_framebuffer_flip_y GL_MESA_pack_invert GL_MESA_shader_integer_functions GL_MESA_texture_signed_rgba GL_MESA_ycbcr_texture GL_NVX_gpu_memory_info GL_NV_conditional_render GL_NV_copy_image GL_NV_depth_clamp GL_NV_packed_depth_stencil GL_NV_shader_atomic_float GL_NV_texture_barrier GL_OES_EGL_image GL_S3_s3tc
+OPENGL LOG: Creating OpenGL 4.5 graphics device ; Context level  <OpenGL 4.5> ; Context handle -842190912
+[Licensing::Client] Successfully resolved entitlement details
+Initialize mono
+Mono path[0] = '/opt/unity/Editor/Data/Managed'
+Mono path[1] = '/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-linux'
+Mono config path = '/opt/unity/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56160
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: /opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll
+Register platform support module: /opt/unity/Editor/Data/PlaybackEngines/LinuxStandaloneSupport/UnityEditor.LinuxStandalone.Extensions.dll
+Registered in 0.005414 seconds.
+- Loaded All Assemblies, in  0.536 seconds
+Native extension for LinuxStandalone target not found
+Native extension for Android target not found
+Android Extension - Scanning For ADB Devices 82 ms
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.733 seconds
+Domain Reload Profiling: 1268ms
+	BeginReloadAssembly (207ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (0ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (1ms)
+	RebuildCommonClasses (58ms)
+	RebuildNativeTypeToScriptingClass (9ms)
+	initialDomainReloadingComplete (75ms)
+	LoadAllAssembliesAndSetupDomain (186ms)
+		LoadAssemblies (207ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (181ms)
+			TypeCache.Refresh (179ms)
+				TypeCache.ScanAssembly (163ms)
+			BuildScriptInfoCaches (0ms)
+			ResolveRequiredComponents (1ms)
+	FinalizeReload (733ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (684ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (240ms)
+			SetLoadedEditorAssemblies (5ms)
+			BeforeProcessingInitializeOnLoad (75ms)
+			ProcessInitializeOnLoadAttributes (290ms)
+			ProcessInitializeOnLoadMethodAttributes (74ms)
+			AfterProcessingInitializeOnLoad (0ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (0ms)
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+[ScriptCompilation] Requested script compilation because: Assetdatabase observed changes in script compilation related files
+[40m[32minfo[39m[22m[49m: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://unix:/tmp/ilpp.sock-f07a9074cf124f978827f2e08a2ba3a4
+[40m[32minfo[39m[22m[49m: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+[40m[32minfo[39m[22m[49m: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+[40m[32minfo[39m[22m[49m: Microsoft.Hosting.Lifetime[0]
+      Content root path: /github/workspace/
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc -
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc - - 200 - application/grpc 54.4157ms
+Starting: /opt/unity/Editor/Data/bee_backend --dont-print-to-structured-log --ipc --defer-dag-verification --dagfile="Library/Bee/1300b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: /github/workspace
+DisplayProgressbar: Compiling Scripts
+ExitCode: 4 Duration: 2s360ms
+Rebuilding DAG because FileSignature timestamp changed: Library/Bee/1300b0aE-inputdata.json
+*** Tundra requires additional run (2.33 seconds), 1 items updated, 133 evaluated
+Starting: /opt/unity/Editor/Data/Tools/netcorerun/netcorerun "/opt/unity/Editor/Data/Tools/BuildPipeline/ScriptCompilationBuildProgram.exe" "Library/Bee/1300b0aE.dag.json" "Library/Bee/1300b0aE-inputdata.json" "Library/Bee/buildprogram0.traceevents"
+WorkingDir: /github/workspace
+ExitCode: 0 Duration: 0s394ms
+Starting: /opt/unity/Editor/Data/bee_backend --dont-print-to-structured-log --ipc --defer-dag-verification --dagfile="Library/Bee/1300b0aE.dag" --continue-on-failure --dagfilejson="Library/Bee/1300b0aE.dag.json" --profile="Library/Bee/backend2.traceevents" ScriptAssemblies
+WorkingDir: /github/workspace
+ExitCode: 0 Duration: 1s355ms
+Finished compiling graph: 143 nodes, 509 flattened edges (499 ToBuild, 4 ToUse), maximum node priority 18
+[129/140    0s] WriteText Library/Bee/artifacts/1300b0aE.dag/Assembly-CSharp.rsp
+[134/140    1s] Csc Library/Bee/artifacts/1300b0aE.dag/Assembly-CSharp.dll (+2 others)
+[135/140    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp.dll
+[136/140    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp.pdb
+[137/140    0s] Csc Library/Bee/artifacts/1300b0aE.dag/Assembly-CSharp-Editor.dll (+2 others)
+[138/140    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.pdb
+[139/140    0s] CopyFiles Library/ScriptAssemblies/Assembly-CSharp-Editor.dll
+*** Tundra build success (1.33 seconds), 7 items updated, 140 evaluated
+Total cache size 0
+Total cache size after purge 0, took 00:00:00.0061619
+AssetDatabase: script compilation time: 4.636296s
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.384 seconds
+Start importing ProjectSettings/ProjectSettings.asset using Guid(00000000000000004000000000000000) (LibraryAssetImporter) -> (artifact id: '9d0df4e1025c6061e891e68e4670c423') in 0.028243731 seconds
+Start importing ProjectSettings/EditorBuildSettings.asset using Guid(0000000000000000b000000000000000) (LibraryAssetImporter) -> (artifact id: '1923232d45cb936aef47cec131f33975') in 0.001042777 seconds
+Start importing Assets/Swarm using Guid(06e48d665b95e85289b0af86ec52eb32) (DefaultImporter) -> (artifact id: '37090256e238725c8ee413b87d894bc7') in 0.008265242 seconds
+Start importing Assets/Swarm/Scripts using Guid(17d063ff2b155f003b965a0c735b3c6e) (DefaultImporter) -> (artifact id: '8a6d34bb4cf9d7ea6177eff14ba46177') in 0.001058687 seconds
+Start importing Assets/Swarm/Editor using Guid(794c1b7852665a0d2a71db86e2fdffab) (DefaultImporter) -> (artifact id: 'e4c78f5bdbbcda9193e4cc669c807086') in 0.001157521 seconds
+Start importing Assets/Swarm/Resources using Guid(5e1881ab0d02720cfa884028b8aca91e) (DefaultImporter) -> (artifact id: '769ec9ac86ddbde9d66886ff75e4ca38') in 0.001141351 seconds
+Start importing Assets/Swarm/Scripts/UI using Guid(816f17d35ebc96f9e8fbaed2c376b5eb) (DefaultImporter) -> (artifact id: '3a21a705a45fea84cc5f8c125627db78') in 0.001156659 seconds
+Start importing Assets/Swarm/Scripts/Audio using Guid(b1171d9a25dd30300b6c208ea0cb3931) (DefaultImporter) -> (artifact id: '7c21027d4dcaadd573f28136d1090a9c') in 0.001236949 seconds
+Start importing Assets/Swarm/Scripts/Presentation using Guid(67f85843db2a3b640b95b7cae133d3d5) (DefaultImporter) -> (artifact id: '6e82a06ccd5b0504680f7d7e5a84d736') in 0.001088432 seconds
+Start importing Assets/Swarm/Scripts/Simulation using Guid(2ca225eecf0d4bb90aedb4f24ed2871c) (DefaultImporter) -> (artifact id: '93f017c95a28f4fd7c514806fd73ec88') in 0.00116272 seconds
+Start importing Assets/Swarm/Scripts/Game using Guid(0f291cf2c404174eba91e1ab85ef3c68) (DefaultImporter) -> (artifact id: '2570d4e9dd8234c4475cfa6300728272') in 0.001130391 seconds
+Start importing Assets/Swarm/Scripts/Presentation/Generated using Guid(71a7ff6c984da1864a8efa38dd5fae75) (DefaultImporter) -> (artifact id: 'a655a7cdc78fdb1dae5419a6be84cfeb') in 0.001248251 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Native extension for LinuxStandalone target not found
+Native extension for Android target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.768 seconds
+Domain Reload Profiling: 1151ms
+	BeginReloadAssembly (215ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (11ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (53ms)
+	RebuildCommonClasses (71ms)
+	RebuildNativeTypeToScriptingClass (17ms)
+	initialDomainReloadingComplete (45ms)
+	LoadAllAssembliesAndSetupDomain (34ms)
+		LoadAssemblies (118ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (27ms)
+			TypeCache.Refresh (23ms)
+				TypeCache.ScanAssembly (14ms)
+			BuildScriptInfoCaches (1ms)
+			ResolveRequiredComponents (1ms)
+	FinalizeReload (769ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (461ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (54ms)
+			SetLoadedEditorAssemblies (5ms)
+			BeforeProcessingInitializeOnLoad (143ms)
+			ProcessInitializeOnLoadAttributes (210ms)
+			ProcessInitializeOnLoadMethodAttributes (36ms)
+			AfterProcessingInitializeOnLoad (12ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (11ms)
+Start importing Assets/Swarm/Resources/SwarmAtlas.png using Guid(4f863ff9a7afb2660a54ec0c0a10737f) (TextureImporter) -> (artifact id: '2d0f3beabbadaa15a49fa2eef7503aca') in 0.044278236 seconds
+Start importing Assets/Swarm/Resources/SwarmSprite.shader using Guid(a736783fa5fa64ac7b01718745422673) (ShaderImporter)Launched and connected shader compiler UnityShaderCompiler after 0.02 seconds
+ -> (artifact id: 'da0cb6ec68b398512681a5a36605b42b') in 0.061206542 seconds
+Start importing Assets/Swarm/Resources/BuildInfo.txt using Guid(2493eec83b72906c1bce883d110dbd9e) (TextScriptImporter) -> (artifact id: '39c156cfb21b5eb8e65f499b7afd34c7') in 0.00271027 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Asset Pipeline Refresh (id=e7bd0cfd2bef01ae99bf877cf6480a22): Total: 6.309 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	Summary:
+		Imports: total=15 (actual=15, local cache=0, cache server=0)
+		Asset DB Process Time: managed=11 ms, native=1058 ms
+		Asset DB Callback time: managed=98 ms, native=100 ms
+		Scripting: domain reloads=1, domain reload time=392 ms, compile time=4639 ms, other=7 ms
+		Project Asset Count: scripts=47, non-scripts=12
+		Asset File Changes: new=2, changed=54, moved=0, deleted=2
+		Scan Filter Count: 1
+	InvokeCustomDependenciesCallbacks: 0.004ms
+	InvokePackagesCallback: 0.899ms
+	ApplyChangesToAssetFolders: 0.089ms
+	Scan: 63.954ms
+	OnSourceAssetsModified: 0.913ms
+	CategorizeAssetsWithTransientArtifact: 0.241ms
+	ProcessAssetsWithTransientArtifactChanges: 1.345ms
+	UnregisterDeletedAssets: 0.004ms
+	CategorizeAssets: 0.580ms
+	ImportOutOfDateAssets: 944.093ms (-3870.794ms without children)
+		ImportManagerImport: 171.109ms (11.168ms without children)
+			ImportInProcess: 159.862ms
+			UpdateCategorizedAssets: 0.079ms
+		CompileScripts: 4639.462ms
+		ReloadNativeAssets: 0.001ms
+		UnloadImportedAssets: 0.451ms
+		ReloadImportedAssets: 3.327ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 0.030ms
+		InitializingProgressBar: 0.008ms
+		PostProcessAllAssetNotificationsAddChangedAssets: 0.001ms
+		OnDemandSchedulerStart: 0.499ms
+	PostProcessAllAssets: 196.083ms
+	Hotreload: 2.012ms
+	GatherAllCurrentPrimaryArtifactRevisions: 0.000ms
+	UnloadStreamsBegin: 0.212ms
+	PersistCurrentRevisions: 0.055ms
+	UnloadStreamsEnd: 0.001ms
+	GenerateScriptTypeHashes: 0.006ms
+	Untracked: 5098.197ms
+
+Application.AssetDatabase Initial Refresh End
+Scanning for USB devices : 0.175ms
+Initializing Unity extensions:
+[Licensing::Client] Successfully resolved entitlement details
+UpdateMenuTitleForLanguage: 10
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-workspace
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 54 unused Assets / (0.8 MB). Loaded Objects now: 570.
+Memory consumption went from 76.5 MB to 75.7 MB.
+Total: 10.035887 ms (FindLiveObjects: 0.040476 ms CreateObjectMapping: 0.005621 ms MarkObjects: 7.316750 ms  DeleteObjects: 2.672119 ms)
+
+SWARM: сборка APK → /github/workspace/build/Android/Swarm.apk
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /home/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:37)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+Swarm.EditorTools.SwarmCiBuild:BuildAndroid () (at Assets/Swarm/Editor/SwarmCiBuild.cs:28)
+
+(Filename: Assets/Swarm/Editor/SwarmCiBuild.cs Line: 28)
+
+Unloading 1 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 0 unused Assets / (36.5 KB). Loaded Objects now: 576.
+Memory consumption went from 75.5 MB to 75.5 MB.
+Total: 5.785193 ms (FindLiveObjects: 0.045194 ms CreateObjectMapping: 0.004157 ms MarkObjects: 5.730151 ms  DeleteObjects: 0.004739 ms)
+
+Start importing ProjectSettings/ProjectSettings.asset using Guid(00000000000000004000000000000000) (LibraryAssetImporter) -> (artifact id: 'cb387c839e649ec41cee90d45e7f10ea') in 0.00230865 seconds
+Start importing Assets/Swarm/Scenes using Guid(766e5f34feb896119b020174b206f92d) (DefaultImporter) -> (artifact id: '4620cf26917bcee58b2204a8d26c91c7') in 0.001161529 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Asset Pipeline Refresh (id=46c1f091c91de4606941609d86deb938): Total: 0.039 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Start importing Assets/Swarm/Scenes/Main.unity using Guid(478e03e59ff56bc2c93c74755997315b) (DefaultImporter) -> (artifact id: '7418a279a6923463c78e6ea6fac9b327') in 0.001121735 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Asset Pipeline Refresh (id=f42cc978af439afeca16a956ce9a1b27): Total: 0.007 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Asset Pipeline Refresh (id=52cb03f4565efc1ada4c8d6770e8ff50): Total: 0.009 seconds - Initiated by RefreshV2(NoUpdateAssetOptions)
+Asset Pipeline Refresh (id=695ab0b0992bb19eba78ce47748d61f4): Total: 0.006 seconds - Initiated by RefreshV2(NoUpdateAssetOptions)
+PROBE|version|0.2.7 code 7
+PROBE|gfx|OpenGLCore|llvmpipe (LLVM 15.0.7, 256 bits)
+PROBE|bench|1800 шагов, старт 170 пчёл + 8 врагов: 0.748 мс/шаг (редактор, Mono), в конце пчёл 150, врагов 1
+PROBE|shots|rt 216x468 scale 5
+PROBE|shot|01_menu|bees 20 enemies 1 honey 0 carry 19.9
+PROBE|shot|02_levels|bees 20 enemies 1 honey 0 carry 19.9
+PROBE|shot|02b_levels_breed|bees 20 enemies 1 honey 0 carry 19.9
+PROBE|shot|03_achievements|bees 20 enemies 1 honey 0 carry 19.9
+PROBE|shot|04_start|bees 20 enemies 1 honey 0 carry 0.0
+PROBE|shot|05_cloud_gather|bees 70 enemies 1 honey 62 carry 6.9
+PROBE|cloud|R 32.1 speed01 1.00 gather 64 scout 0
+PROBE|shot|06_comet|bees 70 enemies 1 honey 70 carry 4.2
+PROBE|shot|07_windup|bees 70 enemies 3 honey 72 carry 1.9
+PROBE|windup|seen True after 0.05s
+PROBE|shot|08_heat_ball|bees 80 enemies 0 honey 75 carry 0.0
+PROBE|ball|balling False inBall 0 hornets 0 heatLost 0
+PROBE|ball_end|hornets 0 killed 1 heatLost 0
+PROBE|shot|09_web|bees 80 enemies 0 honey 75 carry 14.1
+PROBE|hive|atHive True defenders 9 honey 161
+PROBE|shot|11_hive_menu|bees 89 enemies 0 honey 161 carry 0.0
+PROBE|shot|12_defenders|bees 89 enemies 0 honey 161 carry 51.5
+PROBE|post|active True squad 20
+PROBE|shot|12b_post|bees 89 enemies 0 honey 181 carry 66.3
+PROBE|shot|13_perk|bees 89 enemies 0 honey 181 carry 66.3
+PROBE|shot|14_bear|bees 83 enemies 1 honey 181 carry 63.4
+PROBE|shot|14b_boss|bees 79 enemies 1 honey 181 carry 61.4
+PROBE|boss|queenHp 886 focus 0 balling True
+PROBE|shot|14c_hive_honey|bees 79 enemies 0 honey 569 carry 14.8
+PROBE|shot|15_rain_big_swarm|bees 170 enemies 0 honey 583 carry 32.0
+PROBE|shot|16_night|bees 170 enemies 0 honey 583 carry 32.0
+PROBE|shot|17_pause|bees 170 enemies 0 honey 583 carry 32.0
+PROBE|shot|18_result|bees 170 enemies 0 honey 583 carry 32.0
+PROBE|shot|20_auto_hive|bees 36 enemies 1 honey 31 carry 0.0
+PROBE|shot|21_auto_perk|bees 40 enemies 1 honey 20 carry 2.5
+PROBE|shot|22_auto_post|bees 59 enemies 5 honey 3 carry 8.3
+PROBE|shot|23_auto_field|bees 127 enemies 1 honey 202 carry 139.3
+PROBE|auto|t 384 result Running bees 118/130 honey 202 delivered 1958 hive 12 presses 54 posts 6 perks 2 brood 4 def 6 lv spd1 car2 sti2 comb3 cooked 0 boss 0 focusUid 0 workers 3
+PROBE|shot|19_endless|bees 60 enemies 64 honey 0 carry 29.0
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /home/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:37)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+Swarm.EditorTools.SwarmCiBuild:BuildAndroid () (at Assets/Swarm/Editor/SwarmCiBuild.cs:52)
+
+(Filename: Assets/Swarm/Editor/SwarmCiBuild.cs Line: 52)
+
+Start importing ProjectSettings/ProjectSettings.asset using Guid(00000000000000004000000000000000) (LibraryAssetImporter) -> (artifact id: 'a4e3c312ecb0a4044cb51b7d5dbe7827') in 0.001934101 seconds
+Start importing ProjectSettings/EditorBuildSettings.asset using Guid(0000000000000000b000000000000000) (LibraryAssetImporter) -> (artifact id: '127dec930d0990b497fe61c47afe0250') in 0.001113458 seconds
+Start importing ProjectSettings/UnityConnectSettings.asset using Guid(0000000000000000a100000000000000) (LibraryAssetImporter) -> (artifact id: '8277d23a0264aed63c0c1f77e8749aad') in 0.00108762 seconds
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Asset Pipeline Refresh (id=04dc2a33166c382e49640a723ea8b818): Total: 0.010 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+DisplayProgressbar: Checking prerequisites
+Android PostProcess task "Checking prerequisites" took 21.7682 ms
+DisplayProgressbar: Detect Java Development Kit (JDK)
+Android PostProcess task "Detect Java Development Kit (JDK)" took 73.7861 ms
+DisplayProgressbar: Detecting Android SDK
+AndroidSDKTools:
+
+	root          : /opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/SDK
+	cmdline-tools : /opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/cmdline-tools/6.0
+	platform-tools: /opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools
+	build-tools   : /opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/build-tools/34.0.0
+
+	adb           : /opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb
+
+Android PostProcess task "Detecting Android SDK" took 2194.276 ms
+DisplayProgressbar: Detect Android NDK
+Android PostProcess task "Detect Android NDK" took 2.2793 ms
+Android PostProcess task "Trying to find a suitable Android device" took 0.5953 ms
+DisplayProgressbar: Check resources
+Android PostProcess task "Check resources" took 0.2914 ms
+DisplayProgressbar: Check Android Player Settings
+Android PostProcess task "Check Android Player Settings" took 0.5497 ms
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc -
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc - - 200 - application/grpc 2.2845ms
+Starting: /opt/unity/Editor/Data/bee_backend --dont-print-to-structured-log --ipc --defer-dag-verification --dagfile="Library/Bee/1300b0aESkipCompile.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssembliesAndTypeDB
+WorkingDir: /github/workspace
+DisplayProgressbar: Compiling Scripts
+ExitCode: 0 Duration: 0s285ms
+[2/3        0s] BuildPlayerDataGenerator Library/BuildPlayerData/Editor/TypeDb-All.json
+*** Tundra build success (0.26 seconds), 1 items updated, 3 evaluated
+Total cache size 0
+Total cache size after purge 0, took 00:00:00.0065418
+Asset Pipeline Refresh (id=7693d9200942bdb088d4b7e0e2227da0): Total: 0.006 seconds - Initiated by RefreshV2(NoUpdateAssetOptions)
+[ScriptCompilation] Requested script compilation because: Recompiling scripts for player build.
+BuildPlayer: start building target 13
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc -
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc - - 200 - application/grpc 0.5580ms
+Starting: /opt/unity/Editor/Data/bee_backend --dont-print-to-structured-log --ipc --defer-dag-verification --dagfile="Library/Bee/1300b0aP.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssembliesAndTypeDB
+WorkingDir: /github/workspace
+Starting: /opt/unity/Editor/Data/Tools/netcorerun/netcorerun "/opt/unity/Editor/Data/Tools/BuildPipeline/ScriptCompilationBuildProgram.exe" "Library/Bee/1300b0aP.dag.json" "Library/Bee/1300b0aP-inputdata.json" "Library/Bee/buildprogram0.traceevents"
+WorkingDir: /github/workspace
+ExitCode: 4 Duration: 0s367ms
+Rebuilding DAG because FileSignature timestamp changed: Library/Bee/1300b0aP-inputdata.json
+*** Tundra requires additional run (0.24 seconds), 1 items updated, 48 evaluated
+ExitCode: 0 Duration: 0s388ms
+Starting: /opt/unity/Editor/Data/bee_backend --dont-print-to-structured-log --ipc --defer-dag-verification --dagfile="Library/Bee/1300b0aP.dag" --continue-on-failure --dagfilejson="Library/Bee/1300b0aP.dag.json" --profile="Library/Bee/backend2.traceevents" ScriptAssembliesAndTypeDB
+WorkingDir: /github/workspace
+ExitCode: 0 Duration: 0s696ms
+Finished compiling graph: 55 nodes, 156 flattened edges (152 ToBuild, 2 ToUse), maximum node priority 14
+[45/54      0s] WriteText Library/Bee/artifacts/1300b0aP.dag/Assembly-CSharp.rsp
+[49/54      0s] Csc Library/Bee/artifacts/1300b0aP.dag/Assembly-CSharp.dll (+2 others)
+[50/54      0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Assembly-CSharp.pdb
+[51/54      0s] CopyFiles Library/Bee/PlayerScriptAssemblies/Assembly-CSharp.dll
+[53/54      0s] BuildPlayerDataGenerator Library/BuildPlayerData/Player/RuntimeInitializeOnLoads.json (+1 other)
+*** Tundra build success (0.68 seconds), 5 items updated, 54 evaluated
+Total cache size 0
+Total cache size after purge 0, took 00:00:00.0010300
+Rebuilding Data files because Assets/Swarm/Resources/BuildInfo.txt is dirty (hash)
+Opening scene 'Assets/Swarm/Scenes/Main.unity'
+Unloading 2 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Swarm/Scenes/Main.unity'
+	Deserialize:            0.506 ms
+	Integration:            4.410 ms
+	Integration of assets:  0.001 ms
+	Thread Wait Time:       2.050 ms
+	Total Operation Time:   6.967 ms
+Unloading 23 unused Assets / (391.1 KB). Loaded Objects now: 607.
+Memory consumption went from 79.2 MB to 78.9 MB.
+Total: 7.274471 ms (FindLiveObjects: 0.066164 ms CreateObjectMapping: 0.006973 ms MarkObjects: 6.061647 ms  DeleteObjects: 1.138976 ms)
+
+Created GICache directory at /root/.cache/unity3d/GiCache. Took: 0.012s, timestamps: [30.890 - 30.901]
+
+
+Mono dependencies included in the build
+Dependency assembly - System.Net.Http.dll
+Dependency assembly - System.Resources.ResourceManager.dll
+Dependency assembly - I18N.Rare.dll
+Dependency assembly - System.Security.Cryptography.ProtectedData.dll
+Dependency assembly - System.Net.Ping.dll
+Dependency assembly - System.Runtime.CompilerServices.VisualC.dll
+Dependency assembly - System.Linq.dll
+Dependency assembly - I18N.MidEast.dll
+Dependency assembly - System.Net.Mail.dll
+Dependency assembly - I18N.dll
+Dependency assembly - System.Collections.Specialized.dll
+Dependency assembly - System.Net.Http.WebRequest.dll
+Dependency assembly - System.Web.ApplicationServices.dll
+Dependency assembly - System.IO.FileSystem.DriveInfo.dll
+Dependency assembly - System.DirectoryServices.Protocols.dll
+Dependency assembly - System.Reflection.Extensions.dll
+Dependency assembly - System.Runtime.InteropServices.RuntimeInformation.dll
+Dependency assembly - I18N.West.dll
+Dependency assembly - System.Threading.ThreadPool.dll
+Dependency assembly - System.Data.OracleClient.dll
+Dependency assembly - System.Data.DataSetExtensions.dll
+Dependency assembly - System.Linq.Expressions.dll
+Dependency assembly - System.Xml.XPath.dll
+Dependency assembly - System.Xml.dll
+Dependency assembly - System.Numerics.Vectors.dll
+Dependency assembly - System.Security.Cryptography.X509Certificates.dll
+Dependency assembly - System.Threading.Tasks.dll
+Dependency assembly - System.Net.HttpListener.dll
+Dependency assembly - System.ServiceModel.Web.dll
+Dependency assembly - System.Reflection.Primitives.dll
+Dependency assembly - System.Security.AccessControl.dll
+Dependency assembly - System.ServiceModel.Primitives.dll
+Dependency assembly - System.Data.SqlClient.dll
+Dependency assembly - System.Linq.Parallel.dll
+Dependency assembly - System.ObjectModel.dll
+Dependency assembly - System.Security.Cryptography.OpenSsl.dll
+Dependency assembly - Assembly-CSharp.dll
+Dependency assembly - System.Data.Common.dll
+Dependency assembly - System.Security.SecureString.dll
+Dependency assembly - System.Web.DynamicData.dll
+Dependency assembly - System.Reflection.Emit.dll
+Dependency assembly - System.IO.Pipes.dll
+Dependency assembly - System.Runtime.Caching.dll
+Dependency assembly - System.Web.Extensions.Design.dll
+Dependency assembly - System.Diagnostics.StackTrace.dll
+Dependency assembly - System.Security.Cryptography.Encryption.dll
+Dependency assembly - System.Runtime.InteropServices.WindowsRuntime.dll
+Dependency assembly - System.Runtime.Serialization.Formatters.dll
+Dependency assembly - System.Security.Cryptography.Hashing.Algorithms.dll
+Dependency assembly - System.ComponentModel.DataAnnotations.dll
+Dependency assembly - System.Reflection.DispatchProxy.dll
+Dependency assembly - I18N.CJK.dll
+Dependency assembly - System.IO.Compression.FileSystem.dll
+Dependency assembly - Mono.Security.dll
+Dependency assembly - System.Text.Encoding.dll
+Dependency assembly - System.AppContext.dll
+Dependency assembly - System.ComponentModel.EventBasedAsync.dll
+Dependency assembly - Microsoft.Win32.Primitives.dll
+Dependency assembly - System.IO.FileSystem.Watcher.dll
+Dependency assembly - Accessibility.dll
+Dependency assembly - System.Threading.Tasks.Extensions.dll
+Dependency assembly - System.Runtime.Numerics.dll
+Dependency assembly - System.Transactions.dll
+Dependency assembly - System.Runtime.DurableInstancing.dll
+Dependency assembly - System.Threading.Timer.dll
+Dependency assembly - System.IO.dll
+Dependency assembly - Mono.Data.Tds.dll
+Dependency assembly - System.Xml.XDocument.dll
+Dependency assembly - System.Text.Encoding.Extensions.dll
+Dependency assembly - System.Globalization.dll
+Dependency assembly - System.Net.Utilities.dll
+Dependency assembly - System.Security.Principal.dll
+Dependency assembly - System.Xml.XPath.XDocument.dll
+Dependency assembly - System.Xaml.dll
+Dependency assembly - System.Collections.dll
+Dependency assembly - System.Diagnostics.Tracing.dll
+Dependency assembly - System.Security.Cryptography.Primitives.dll
+Dependency assembly - System.ServiceModel.NetTcp.dll
+Dependency assembly - System.Security.Cryptography.Pkcs.dll
+Dependency assembly - System.EnterpriseServices.dll
+Dependency assembly - System.dll
+Dependency assembly - System.Diagnostics.Contracts.dll
+Dependency assembly - System.Net.Requests.dll
+Dependency assembly - System.Dynamic.Runtime.dll
+Dependency assembly - System.Xml.Xsl.Primitives.dll
+Dependency assembly - System.ComponentModel.Primitives.dll
+Dependency assembly - System.ServiceProcess.ServiceController.dll
+Dependency assembly - System.Security.Cryptography.Csp.dll
+Dependency assembly - System.Windows.Forms.DataVisualization.dll
+Dependency assembly - System.Threading.dll
+Dependency assembly - System.ComponentModel.dll
+Dependency assembly - System.Diagnostics.FileVersionInfo.dll
+Dependency assembly - System.Drawing.Primitives.dll
+Dependency assembly - System.Web.Services.dll
+Dependency assembly - System.Security.Cryptography.Cng.dll
+Dependency assembly - System.Xml.Serialization.dll
+Dependency assembly - System.ServiceModel.Routing.dll
+Dependency assembly - System.Security.Cryptography.Encryption.Aes.dll
+Dependency assembly - System.Design.dll
+Dependency assembly - System.ServiceModel.Activation.dll
+Dependency assembly - System.Reflection.TypeExtensions.dll
+Dependency assembly - System.Data.Linq.dll
+Dependency assembly - System.Diagnostics.TraceSource.dll
+Dependency assembly - System.Security.Cryptography.Hashing.dll
+Dependency assembly - System.Runtime.Serialization.Primitives.dll
+Dependency assembly - System.Text.Encoding.CodePages.dll
+Dependency assembly - System.Resources.Reader.dll
+Dependency assembly - System.Data.Entity.dll
+Dependency assembly - System.Reflection.Emit.ILGeneration.dll
+Dependency assembly - System.Drawing.dll
+Dependency assembly - System.Security.Claims.dll
+Dependency assembly - System.ServiceModel.dll
+Dependency assembly - System.Net.WebHeaderCollection.dll
+Dependency assembly - System.ServiceModel.Internals.dll
+Dependency assembly - System.Net.dll
+Dependency assembly - Microsoft.Win32.Registry.AccessControl.dll
+Dependency assembly - System.IO.MemoryMappedFiles.dll
+Dependency assembly - System.IO.FileSystem.Primitives.dll
+Dependency assembly - System.IO.Compression.dll
+Dependency assembly - System.Diagnostics.TraceEvent.dll
+Dependency assembly - System.Net.Security.dll
+Dependency assembly - System.IO.Compression.ZipFile.dll
+Dependency assembly - System.Security.Cryptography.DeriveBytes.dll
+Dependency assembly - System.Management.dll
+Dependency assembly - System.Data.dll
+Dependency assembly - System.Threading.Tasks.Parallel.dll
+Dependency assembly - System.Threading.AccessControl.dll
+Dependency assembly - System.Linq.Queryable.dll
+Dependency assembly - System.IdentityModel.Selectors.dll
+Dependency assembly - System.Collections.Concurrent.dll
+Dependency assembly - System.Memory.dll
+Dependency assembly - System.Resources.Writer.dll
+Dependency assembly - System.Windows.Forms.dll
+Dependency assembly - System.Collections.NonGeneric.dll
+Dependency assembly - System.Net.Sockets.dll
+Dependency assembly - System.Runtime.Serialization.dll
+Dependency assembly - System.Numerics.dll
+Dependency assembly - System.Net.AuthenticationManager.dll
+Dependency assembly - System.IO.UnmanagedMemoryStream.dll
+Dependency assembly - System.Console.dll
+Dependency assembly - System.Globalization.Calendars.dll
+Dependency assembly - System.IO.FileSystem.AccessControl.dll
+Dependency assembly - Microsoft.Win32.Registry.dll
+Dependency assembly - System.Core.dll
+Dependency assembly - System.Security.Cryptography.Encryption.ECDsa.dll
+Dependency assembly - Microsoft.CSharp.dll
+Dependency assembly - System.Runtime.Serialization.Xml.dll
+Dependency assembly - System.Net.NameResolution.dll
+Dependency assembly - System.ServiceModel.Http.dll
+Dependency assembly - System.Runtime.Remoting.dll
+Dependency assembly - System.Security.Cryptography.Encoding.dll
+Dependency assembly - System.Net.Cache.dll
+Dependency assembly - System.Runtime.InteropServices.dll
+Dependency assembly - System.Runtime.Serialization.Formatters.Soap.dll
+Dependency assembly - System.Net.ServicePoint.dll
+Dependency assembly - System.ServiceModel.Discovery.dll
+Dependency assembly - System.Security.Cryptography.Encryption.ECDiffieHellman.dll
+Dependency assembly - System.Security.Cryptography.RSA.dll
+Dependency assembly - System.ServiceModel.Duplex.dll
+Dependency assembly - System.Buffers.dll
+Dependency assembly - System.Diagnostics.Tools.dll
+Dependency assembly - Mono.Data.Sqlite.dll
+Dependency assembly - System.Json.dll
+Dependency assembly - System.Text.RegularExpressions.dll
+Dependency assembly - System.Security.dll
+Dependency assembly - System.Security.Cryptography.Algorithms.dll
+Dependency assembly - System.Runtime.dll
+Dependency assembly - System.Messaging.dll
+Dependency assembly - System.Diagnostics.Process.dll
+Dependency assembly - System.Reflection.dll
+Dependency assembly - System.Resources.ReaderWriter.dll
+Dependency assembly - System.Xml.ReaderWriter.dll
+Dependency assembly - System.Diagnostics.Debug.dll
+Dependency assembly - System.Reflection.Context.dll
+Dependency assembly - System.Drawing.Design.dll
+Dependency assembly - System.Windows.dll
+Dependency assembly - System.Data.Services.Client.dll
+Dependency assembly - System.Runtime.Loader.dll
+Dependency assembly - System.Security.Principal.Windows.dll
+Dependency assembly - System.IO.FileSystem.dll
+Dependency assembly - System.Net.NetworkInformation.dll
+Dependency assembly - System.ServiceModel.Security.dll
+Dependency assembly - System.Web.RegularExpressions.dll
+Dependency assembly - System.Xml.XPath.XmlDocument.dll
+Dependency assembly - System.ValueTuple.dll
+Dependency assembly - System.Net.WebSockets.dll
+Dependency assembly - System.Net.Primitives.dll
+Dependency assembly - System.Web.Extensions.dll
+Dependency assembly - System.Reflection.Emit.Lightweight.dll
+Dependency assembly - System.Threading.Thread.dll
+Dependency assembly - netstandard.dll
+Dependency assembly - System.Threading.Overlapped.dll
+Dependency assembly - System.Runtime.Serialization.Json.dll
+Dependency assembly - System.Security.Cryptography.RandomNumberGenerator.dll
+Dependency assembly - System.ComponentModel.Annotations.dll
+Dependency assembly - System.Diagnostics.TextWriterTraceListener.dll
+Dependency assembly - mscorlib.dll
+Dependency assembly - System.Runtime.Handles.dll
+Dependency assembly - System.Web.dll
+Dependency assembly - System.Xml.XmlDocument.dll
+Dependency assembly - System.IO.IsolatedStorage.dll
+Dependency assembly - System.Configuration.Install.dll
+Dependency assembly - System.Configuration.dll
+Dependency assembly - I18N.Other.dll
+Dependency assembly - System.ComponentModel.TypeConverter.dll
+Dependency assembly - System.Runtime.Extensions.dll
+Dependency assembly - System.ServiceProcess.dll
+Dependency assembly - System.Globalization.Extensions.dll
+Dependency assembly - System.Data.Services.dll
+Dependency assembly - System.Net.WebSockets.Client.dll
+Dependency assembly - System.DirectoryServices.dll
+Dependency assembly - System.Xml.XmlSerializer.dll
+Dependency assembly - System.IdentityModel.dll
+Dependency assembly - System.Xml.Linq.dll
+Dependency assembly - System.ComponentModel.Composition.dll
+
+DisplayProgressbar: Fetching assembly references
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 18 unused Assets / (390.6 KB). Loaded Objects now: 614.
+Memory consumption went from 79.9 MB to 79.6 MB.
+Total: 5.922618 ms (FindLiveObjects: 0.045205 ms CreateObjectMapping: 0.006472 ms MarkObjects: 5.590507 ms  DeleteObjects: 0.279622 ms)
+
+Unloading 0 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 0 unused Assets / (0 B). Loaded Objects now: 614.
+Memory consumption went from 79.6 MB to 79.6 MB.
+Total: 4.801724 ms (FindLiveObjects: 0.034164 ms CreateObjectMapping: 0.005551 ms MarkObjects: 4.758704 ms  DeleteObjects: 0.002504 ms)
+
+Unloading 1 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 167 unused Assets / (137.5 MB). Loaded Objects now: 614.
+Memory consumption went from 218.0 MB to 80.5 MB.
+Total: 19.377401 ms (FindLiveObjects: 0.044744 ms CreateObjectMapping: 0.012233 ms MarkObjects: 5.985679 ms  DeleteObjects: 13.333895 ms)
+
+Compiling shader "Swarm/Sprite" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.01 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Swarm/Sprite in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Skybox/Procedural" pass "" (vp)
+    Full variant space:         6
+    After settings filtering:   6
+    After built-in stripping:   18
+    After scriptable stripping: 18
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 18 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Skybox/Procedural in 0.00s
+    gles3 (total internal programs: 9, unique: 3)
+    vulkan (total internal programs: 9, unique: 3)
+Compiling shader "Legacy Shaders/VertexLit" pass "" (vp)
+    Full variant space:         24
+    After settings filtering:   24
+    After built-in stripping:   18
+    After scriptable stripping: 18
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 18 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Legacy Shaders/VertexLit" pass "" (vp)
+    Full variant space:         8
+    After settings filtering:   8
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Legacy Shaders/VertexLit" pass "ShadowCaster" (vp)
+    Full variant space:         8
+    After settings filtering:   8
+    After built-in stripping:   12
+    After scriptable stripping: 12
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 12 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Legacy Shaders/VertexLit in 0.00s
+    gles3 (total internal programs: 18, unique: 6)
+    vulkan (total internal programs: 18, unique: 6)
+Compiling shader "Legacy Shaders/Diffuse" pass "FORWARD" (vp)
+    Full variant space:         1328
+    After settings filtering:   1328
+    After built-in stripping:   48
+    After scriptable stripping: 48
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 48 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Legacy Shaders/Diffuse" pass "FORWARD" (vp)
+    Full variant space:         40
+    After settings filtering:   40
+    After built-in stripping:   30
+    After scriptable stripping: 30
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 30 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Legacy Shaders/Diffuse" pass "DEFERRED" (vp)
+    Full variant space:         152
+    After settings filtering:   152
+    After built-in stripping:   24
+    After scriptable stripping: 24
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 24 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Legacy Shaders/Diffuse in 0.00s
+    gles3 (total internal programs: 51, unique: 17)
+    vulkan (total internal programs: 51, unique: 17)
+Compiling shader "Hidden/Internal-StencilWrite" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-StencilWrite in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/Internal-DepthNormalsTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DepthNormalsTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DepthNormalsTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DepthNormalsTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DepthNormalsTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DepthNormalsTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DepthNormalsTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DepthNormalsTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DepthNormalsTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DepthNormalsTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-DepthNormalsTexture in 0.00s
+    gles3 (total internal programs: 30, unique: 10)
+    vulkan (total internal programs: 30, unique: 10)
+Compiling shader "Hidden/Internal-ScreenSpaceShadows" pass "" (vp)
+    Full variant space:         8
+    After settings filtering:   8
+    After built-in stripping:   24
+    After scriptable stripping: 24
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 24 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ScreenSpaceShadows" pass "" (vp)
+    Full variant space:         8
+    After settings filtering:   8
+    After built-in stripping:   24
+    After scriptable stripping: 24
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 24 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ScreenSpaceShadows" pass "" (vp)
+    Full variant space:         8
+    After settings filtering:   8
+    After built-in stripping:   24
+    After scriptable stripping: 24
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 24 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ScreenSpaceShadows" pass "" (vp)
+    Full variant space:         8
+    After settings filtering:   8
+    After built-in stripping:   24
+    After scriptable stripping: 24
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 24 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-ScreenSpaceShadows in 0.00s
+    gles3 (total internal programs: 48, unique: 16)
+    vulkan (total internal programs: 48, unique: 16)
+Compiling shader "Hidden/Internal-CombineDepthNormals" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-CombineDepthNormals in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/BlitCopy" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/BlitCopy in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/BlitCopyDepth" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/BlitCopyDepth in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/ConvertTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/ConvertTexture in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/Internal-DeferredShading" pass "" (vp)
+    Full variant space:         188
+    After settings filtering:   188
+    After built-in stripping:   156
+    After scriptable stripping: 156
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 156 (0.01s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DeferredShading" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-DeferredShading in 0.00s
+    gles3 (total internal programs: 81, unique: 53)
+    vulkan (total internal programs: 81, unique: 53)
+Compiling shader "Hidden/Internal-DeferredReflections" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DeferredReflections" pass "" (vp)
+    Full variant space:         4
+    After settings filtering:   4
+    After built-in stripping:   12
+    After scriptable stripping: 12
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 12 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-DeferredReflections in 0.00s
+    gles3 (total internal programs: 9, unique: 4)
+    vulkan (total internal programs: 9, unique: 4)
+Compiling shader "Hidden/Internal-MotionVectors" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-MotionVectors" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-MotionVectors" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-MotionVectors in 0.00s
+    gles3 (total internal programs: 9, unique: 3)
+    vulkan (total internal programs: 9, unique: 3)
+Compiling shader "Hidden/Internal-Flare" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-Flare in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/Internal-Halo" pass "" (vp)
+    Full variant space:         8
+    After settings filtering:   8
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-Halo in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/BlitCopyWithDepth" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/BlitCopyWithDepth in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/BlitToDepth" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/BlitToDepth in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/BlitToDepth_MSAA" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/BlitToDepth_MSAA in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/BlitCopyHDRTonemap" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/BlitCopyHDRTonemap in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/Internal-DebugPattern" pass "Target Color and DepthStencil" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DebugPattern" pass "Target only Color" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-DebugPattern" pass "Target only DepthStencil" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-DebugPattern in 0.00s
+    gles3 (total internal programs: 9, unique: 3)
+    vulkan (total internal programs: 9, unique: 3)
+Compiling shader "Hidden/Internal-GUITextureClip" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-GUITextureClip" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-GUITextureClip in 0.00s
+    gles3 (total internal programs: 6, unique: 1)
+    vulkan (total internal programs: 6, unique: 1)
+Compiling shader "Hidden/Internal-GUITextureClipText" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-GUITextureClipText" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-GUITextureClipText in 0.00s
+    gles3 (total internal programs: 6, unique: 1)
+    vulkan (total internal programs: 6, unique: 1)
+Compiling shader "Hidden/Internal-GUITexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-GUITexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-GUITexture in 0.00s
+    gles3 (total internal programs: 6, unique: 1)
+    vulkan (total internal programs: 6, unique: 1)
+Compiling shader "Hidden/Internal-GUITextureBlit" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-GUITextureBlit" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-GUITextureBlit in 0.00s
+    gles3 (total internal programs: 6, unique: 1)
+    vulkan (total internal programs: 6, unique: 1)
+Compiling shader "Hidden/Internal-GUIRoundedRect" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-GUIRoundedRect" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-GUIRoundedRect in 0.00s
+    gles3 (total internal programs: 6, unique: 1)
+    vulkan (total internal programs: 6, unique: 1)
+Compiling shader "Hidden/Internal-GUIRoundedRectWithColorPerBorder" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-GUIRoundedRectWithColorPerBorder" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-GUIRoundedRectWithColorPerBorder in 0.00s
+    gles3 (total internal programs: 6, unique: 1)
+    vulkan (total internal programs: 6, unique: 1)
+Compiling shader "Hidden/Internal-UIRDefault" pass "" (vp)
+    Full variant space:         4
+    After settings filtering:   4
+    After built-in stripping:   12
+    After scriptable stripping: 12
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 12 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-UIRDefault in 0.00s
+    gles3 (total internal programs: 6, unique: 2)
+    vulkan (total internal programs: 6, unique: 2)
+Compiling shader "Hidden/Internal-UIRAtlasBlitCopy" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-UIRAtlasBlitCopy in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/Internal-UIRDefaultWorld" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-UIRDefaultWorld in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Sprites/Default" pass "" (vp)
+    Full variant space:         16
+    After settings filtering:   16
+    After built-in stripping:   24
+    After scriptable stripping: 24
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 24 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Sprites/Default in 0.00s
+    gles3 (total internal programs: 12, unique: 4)
+    vulkan (total internal programs: 12, unique: 4)
+Compiling shader "Sprites/Mask" pass "" (vp)
+    Full variant space:         8
+    After settings filtering:   8
+    After built-in stripping:   24
+    After scriptable stripping: 24
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 24 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Sprites/Mask in 0.00s
+    gles3 (total internal programs: 12, unique: 4)
+    vulkan (total internal programs: 12, unique: 4)
+Compiling shader "UI/Default" pass "Default" (vp)
+    Full variant space:         8
+    After settings filtering:   8
+    After built-in stripping:   24
+    After scriptable stripping: 24
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 24 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader UI/Default in 0.00s
+    gles3 (total internal programs: 12, unique: 4)
+    vulkan (total internal programs: 12, unique: 4)
+Compiling shader "UI/DefaultETC1" pass "Default" (vp)
+    Full variant space:         8
+    After settings filtering:   8
+    After built-in stripping:   24
+    After scriptable stripping: 24
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 24 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader UI/DefaultETC1 in 0.00s
+    gles3 (total internal programs: 12, unique: 4)
+    vulkan (total internal programs: 12, unique: 4)
+Compiling shader "Hidden/CubeBlur" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/CubeBlur" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/CubeBlur in 0.00s
+    gles3 (total internal programs: 6, unique: 2)
+    vulkan (total internal programs: 6, unique: 2)
+Compiling shader "Hidden/CubeCopy" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/CubeCopy" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/CubeCopy in 0.00s
+    gles3 (total internal programs: 6, unique: 1)
+    vulkan (total internal programs: 6, unique: 1)
+Compiling shader "Hidden/CubeBlend" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/CubeBlend" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/CubeBlend in 0.00s
+    gles3 (total internal programs: 6, unique: 1)
+    vulkan (total internal programs: 6, unique: 1)
+Compiling shader "Hidden/VR/BlitTexArraySlice" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/VR/BlitTexArraySlice in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/Internal-ODSWorldTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ODSWorldTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ODSWorldTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ODSWorldTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ODSWorldTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ODSWorldTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ODSWorldTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ODSWorldTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ODSWorldTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/Internal-ODSWorldTexture" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-ODSWorldTexture in 0.00s
+    gles3 (total internal programs: 30, unique: 9)
+    vulkan (total internal programs: 30, unique: 9)
+Compiling shader "Hidden/Internal-CubemapToEquirect" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/Internal-CubemapToEquirect in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/VR/BlitFromTex2DToTexArraySlice" pass "" (vp)
+    Full variant space:         1
+    After settings filtering:   1
+    After built-in stripping:   3
+    After scriptable stripping: 3
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 3 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/VR/BlitFromTex2DToTexArraySlice" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/VR/BlitFromTex2DToTexArraySlice in 0.00s
+    gles3 (total internal programs: 6, unique: 2)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/VideoComposite" pass "Default" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/VideoComposite in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+Compiling shader "Hidden/VideoDecode" pass "YCbCr_To_RGB1" (vp)
+    Full variant space:         4
+    After settings filtering:   4
+    After built-in stripping:   12
+    After scriptable stripping: 12
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 12 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/VideoDecode" pass "YCbCrA_To_RGBAFull" (vp)
+    Full variant space:         4
+    After settings filtering:   4
+    After built-in stripping:   12
+    After scriptable stripping: 12
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 12 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/VideoDecode" pass "YCbCrA_To_RGBA" (vp)
+    Full variant space:         4
+    After settings filtering:   4
+    After built-in stripping:   12
+    After scriptable stripping: 12
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 12 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/VideoDecode" pass "Flip_RGBA_To_RGBA" (vp)
+    Full variant space:         4
+    After settings filtering:   4
+    After built-in stripping:   12
+    After scriptable stripping: 12
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 12 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/VideoDecode" pass "Flip_RGBASplit_To_RGBA" (vp)
+    Full variant space:         4
+    After settings filtering:   4
+    After built-in stripping:   12
+    After scriptable stripping: 12
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 12 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/VideoDecode" pass "Flip_NV12_To_RGB1" (vp)
+    Full variant space:         4
+    After settings filtering:   4
+    After built-in stripping:   12
+    After scriptable stripping: 12
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 12 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/VideoDecode" pass "Flip_NV12_To_RGBA" (vp)
+    Full variant space:         4
+    After settings filtering:   4
+    After built-in stripping:   12
+    After scriptable stripping: 12
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 12 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/VideoDecode" pass "Flip_P010_To_RGB1" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/VideoDecode in 0.00s
+    gles3 (total internal programs: 45, unique: 15)
+    vulkan (total internal programs: 45, unique: 15)
+Compiling shader "Hidden/VideoDecodeAndroid" pass "RGBAExternal_To_RGBA" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Compiling shader "Hidden/VideoDecodeAndroid" pass "RGBASplitExternal_To_RGBA" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/VideoDecodeAndroid in 0.00s
+    gles3 (total internal programs: 12, unique: 12)
+    vulkan (total internal programs: 0, unique: 0)
+Compiling shader "Hidden/TextCore/Distance Field SSD" pass "" (vp)
+    Full variant space:         2
+    After settings filtering:   2
+    After built-in stripping:   6
+    After scriptable stripping: 6
+    Processed in 0.00 seconds
+    starting compilation...
+    finished in 0.00 seconds. Local cache hits 6 (0.00s CPU time), remote cache hits 0 (0.00s CPU time), compiled 0 variants (0.00s CPU time), skipped 0 variants
+    Prepared data for serialisation in 0.00s
+Serialized binary data for shader Hidden/TextCore/Distance Field SSD in 0.00s
+    gles3 (total internal programs: 3, unique: 1)
+    vulkan (total internal programs: 3, unique: 1)
+DisplayProgressbar: Initializing
+Android PostProcess task "Initializing" took 1.4534 ms
+DisplayProgressbar: Check gradle project collisions
+Android PostProcess task "Check gradle project collisions" took 0.4365 ms
+DisplayProgressbar: Preparing banner
+Android PostProcess task "Preparing banner" took 0.6606 ms
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc -
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+[40m[32minfo[39m[22m[49m: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc - - 200 - application/grpc 0.3485ms
+Starting: /opt/unity/Editor/Data/bee_backend --dont-print-to-structured-log --ipc --dagfile="Library/Bee/Player0857283b.dag" --profile="Library/Bee/backend1.traceevents" Player
+WorkingDir: /github/workspace
+Rebuilding DAG because FileSignature timestamp changed: Library/Bee/Player0857283b-inputdata.json
+*** Tundra requires additional run (0.02 seconds), 0 items updated, 0 evaluated
+Starting: /opt/unity/Editor/Data/Tools/netcorerun/netcorerun "/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/AndroidPlayerBuildProgram.exe" "/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Bee:/opt/unity/Editor/Data/Tools/BuildPipeline" "Library/Bee/Player0857283b.dag.json" "Library/Bee/Player0857283b-inputdata.json" "Library/Bee/buildprogram0.traceevents"
+WorkingDir: /github/workspace
+ExitCode: 4 Duration: 0s113ms
+DisplayProgressbar: Incremental Player Build
+ExitCode: 0 Duration: 0s798ms
+Starting: /opt/unity/Editor/Data/bee_backend --dont-print-to-structured-log --ipc --dagfile="Library/Bee/Player0857283b.dag" --dagfilejson="Library/Bee/Player0857283b.dag.json" --profile="Library/Bee/backend2.traceevents" Player
+WorkingDir: /github/workspace
+Finished compiling graph: 509 nodes, 1279 flattened edges (1275 ToBuild, 4 ToUse), maximum node priority 252
+[ 20/315    0s] WriteText Library/Bee/artifacts/csharpactions/IntermediateFiles.txt_ri9j.info
+[ 27/315    0s] SplitFile Library/Bee/artifacts/Android/Split/sharedassets0.assets
+[ 28/315    0s] SplitFile Library/Bee/artifacts/Android/Split/globalgamemanagers.assets
+[ 29/315    0s] SplitFile Library/Bee/artifacts/Android/Split/level0
+[ 33/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/a736783fa5fa64ac7b01718745422673
+[ 35/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/globalgamemanagers
+[ 36/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/Resources/unity_builtin_extra
+[ 37/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/2493eec83b72906c1bce883d110dbd9e
+[ 43/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/globalgamemanagers.assets.split0
+[ 44/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/globalgamemanagers.assets.split1
+[ 45/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/globalgamemanagers.assets.split2
+[ 47/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/sharedassets0.assets
+[ 50/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/4f863ff9a7afb2660a54ec0c0a10737f
+[ 60/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/level0
+[ 62/315    0s] AddBootConfigGUID Library/Bee/artifacts/Android/boot.config
+[ 63/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/boot.config
+[ 64/315    0s] ActionGenerateProjectFiles Library/Bee/artifacts/Android/IntermediateFiles.txt (+46 others)
+[ 65/315    3s] UnityLinker /github/workspace/Library/Bee/artifacts/unitylinker_xy1a.traceevents
+/opt/unity/Editor/Data/il2cpp/build/deploy/UnityLinker --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.AIModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.ARModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.AccessibilityModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.AndroidJNIModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.AnimationModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.AssetBundleModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.AudioModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.ClothModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.ContentLoadModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.CoreModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.CrashReportingModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.DSPGraphModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.DirectorModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.GIModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.GameCenterModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.GraphicsStateCollectionSerializerModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.GridModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.HierarchyCoreModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.HotReloadModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.IMGUIModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.ImageConversionModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.InputForUIModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.InputLegacyModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.InputModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.JSONSerializeModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.LocalizationModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.MarshallingModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.MultiplayerModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.ParticleSystemModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.PerformanceReportingModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.Physics2DModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.PhysicsModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.PropertiesModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.ScreenCaptureModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.ShaderVariantAnalyticsModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.SharedInternalsModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.SpriteMaskModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.SpriteShapeModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.StreamingModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.SubstanceModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.SubsystemsModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.TLSModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.TerrainModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.TerrainPhysicsModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.TextCoreFontEngineModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.TextCoreTextEngineModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.TextRenderingModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.TilemapModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UIElementsModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UIModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UmbraModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UnityAnalyticsCommonModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UnityAnalyticsModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UnityConnectModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UnityCurlModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UnityTestProtocolModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UnityWebRequestAssetBundleModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UnityWebRequestAudioModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UnityWebRequestModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UnityWebRequestTextureModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.UnityWebRequestWWWModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.VFXModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.VRModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.VehiclesModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.VideoModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.WindModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.XRModule.dll --allowed-assembly=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed/UnityEngine.dll --allowed-assembly=/github/workspace/Library/Bee/PlayerScriptAssemblies/Assembly-CSharp.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Accessibility.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/Microsoft.Win32.Primitives.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/Microsoft.Win32.Registry.AccessControl.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/Microsoft.Win32.Registry.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.AppContext.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Buffers.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Collections.Concurrent.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Collections.NonGeneric.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Collections.Specialized.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Collections.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ComponentModel.Annotations.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ComponentModel.EventBasedAsync.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ComponentModel.Primitives.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ComponentModel.TypeConverter.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ComponentModel.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Console.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Data.Common.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Data.SqlClient.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Diagnostics.Contracts.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Diagnostics.Debug.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Diagnostics.FileVersionInfo.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Diagnostics.Process.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Diagnostics.StackTrace.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Diagnostics.TextWriterTraceListener.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Diagnostics.Tools.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Diagnostics.TraceEvent.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Diagnostics.TraceSource.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Diagnostics.Tracing.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Drawing.Primitives.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Dynamic.Runtime.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Globalization.Calendars.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Globalization.Extensions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Globalization.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.IO.Compression.ZipFile.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.IO.FileSystem.AccessControl.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.IO.FileSystem.DriveInfo.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.IO.FileSystem.Primitives.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.IO.FileSystem.Watcher.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.IO.FileSystem.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.IO.IsolatedStorage.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.IO.MemoryMappedFiles.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.IO.Pipes.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.IO.UnmanagedMemoryStream.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.IO.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Linq.Expressions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Linq.Parallel.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Linq.Queryable.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Linq.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Memory.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.AuthenticationManager.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.Cache.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.HttpListener.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.Mail.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.NameResolution.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.NetworkInformation.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.Ping.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.Primitives.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.Requests.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.Security.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.ServicePoint.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.Sockets.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.Utilities.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.WebHeaderCollection.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.WebSockets.Client.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Net.WebSockets.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ObjectModel.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Reflection.DispatchProxy.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Reflection.Emit.ILGeneration.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Reflection.Emit.Lightweight.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Reflection.Emit.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Reflection.Extensions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Reflection.Primitives.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Reflection.TypeExtensions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Reflection.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Resources.Reader.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Resources.ReaderWriter.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Resources.ResourceManager.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Resources.Writer.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.CompilerServices.VisualC.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.Extensions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.Handles.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.InteropServices.RuntimeInformation.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.InteropServices.WindowsRuntime.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.InteropServices.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.Loader.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.Numerics.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.Serialization.Formatters.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.Serialization.Json.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.Serialization.Primitives.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.Serialization.Xml.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Runtime.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.AccessControl.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Claims.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Algorithms.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Cng.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Csp.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.DeriveBytes.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Encoding.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Encryption.Aes.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Encryption.ECDiffieHellman.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Encryption.ECDsa.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Encryption.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Hashing.Algorithms.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Hashing.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.OpenSsl.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Pkcs.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.Primitives.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.ProtectedData.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.RSA.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.RandomNumberGenerator.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Cryptography.X509Certificates.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Principal.Windows.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.Principal.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Security.SecureString.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ServiceModel.Duplex.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ServiceModel.Http.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ServiceModel.NetTcp.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ServiceModel.Primitives.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ServiceModel.Security.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ServiceProcess.ServiceController.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Text.Encoding.CodePages.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Text.Encoding.Extensions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Text.Encoding.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Text.RegularExpressions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Threading.AccessControl.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Threading.Overlapped.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Threading.Tasks.Extensions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Threading.Tasks.Parallel.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Threading.Tasks.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Threading.Thread.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Threading.ThreadPool.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Threading.Timer.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Threading.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.ValueTuple.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Xml.ReaderWriter.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Xml.XDocument.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Xml.XPath.XDocument.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Xml.XPath.XmlDocument.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Xml.XPath.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Xml.XmlDocument.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Xml.XmlSerializer.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/System.Xml.Xsl.Primitives.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades/netstandard.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/I18N.CJK.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/I18N.MidEast.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/I18N.Other.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/I18N.Rare.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/I18N.West.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/I18N.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Microsoft.CSharp.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Mono.Data.Sqlite.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Mono.Data.Tds.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Mono.Security.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.ComponentModel.Composition.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.ComponentModel.DataAnnotations.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Configuration.Install.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Configuration.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Core.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Data.DataSetExtensions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Data.Entity.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Data.Linq.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Data.OracleClient.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Data.Services.Client.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Data.Services.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Data.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Design.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.DirectoryServices.Protocols.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.DirectoryServices.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Drawing.Design.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Drawing.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.EnterpriseServices.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.IO.Compression.FileSystem.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.IO.Compression.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.IdentityModel.Selectors.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.IdentityModel.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Json.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Management.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Messaging.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Net.Http.WebRequest.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Net.Http.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Net.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Numerics.Vectors.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Numerics.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Reflection.Context.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Runtime.Caching.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Runtime.DurableInstancing.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Runtime.Remoting.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Runtime.Serialization.Formatters.Soap.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Runtime.Serialization.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Security.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.ServiceModel.Activation.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.ServiceModel.Discovery.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.ServiceModel.Internals.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.ServiceModel.Routing.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.ServiceModel.Web.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.ServiceModel.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.ServiceProcess.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Transactions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Web.ApplicationServices.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Web.DynamicData.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Web.Extensions.Design.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Web.Extensions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Web.RegularExpressions.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Web.Services.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Web.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Windows.Forms.DataVisualization.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Windows.Forms.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Windows.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Xaml.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Xml.Linq.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Xml.Serialization.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.Xml.dll --allowed-assembly=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/System.dll --allowed-assembly=/opt/unity/E[W] opendir() failed: /github/workspace/Library/Bee/artifacts/Android/il2cppOutput/cpp/Symbols
+ditor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/mscorlib.dll --out=Library/Bee/artifacts/Android/ManagedStripped --include-link-xml=/github/workspace/Library/Bee/artifacts/UnityLinkerInputs/TypesInScenes.xml --include-link-xml=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Tools/AndroidNativeLink.xml --include-directory=/github/workspace/Library/Bee/PlayerScriptAssemblies --include-directory=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Variations/il2cpp/Managed --include-directory=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux --include-directory=/opt/unity/Editor/Data/MonoBleedingEdge/lib/mono/unityaot-linux/Facades --rule-set=Conservative --profiler-report --profiler-output-file=/github/workspace/Library/Bee/artifacts/unitylinker_xy1a.traceevents --dotnetprofile=unityaot-linux --dotnetruntime=Il2Cpp --platform=Android --use-editor-options --enable-engine-module-stripping --engine-modules-asset-file=/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/modules.asset --editor-data-file=/github/workspace/Library/Bee/artifacts/UnityLinkerInputs/EditorToUnityLinkerData.json --include-unity-root-assembly=/github/workspace/Library/Bee/PlayerScriptAssemblies/Assembly-CSharp.dll --print-command-line --enable-analytics
+[114/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/Managed/Assembly-CSharp.pdb
+[116/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/Managed/Assembly-CSharp.dll
+[118/315    0s] ExtractUsedFeatures Library/Bee/artifacts/Android/Features/Assembly-CSharp-FeaturesChecked.txt
+[119/315    4s] IL2CPP_CodeGen /github/workspace/Library/Bee/artifacts/il2cpp_conv_pyox.traceevents
+/opt/unity/Editor/Data/il2cpp/build/deploy/il2cpp --convert-to-cpp --assembly=Library/Bee/artifacts/Android/ManagedStripped/Assembly-CSharp.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/Mono.Security.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/System.Configuration.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/System.Core.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/System.Xml.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/System.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/UnityEngine.AIModule.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/UnityEngine.AndroidJNIModule.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/UnityEngine.AudioModule.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/UnityEngine.CoreModule.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/UnityEngine.InputLegacyModule.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/UnityEngine.JSONSerializeModule.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/UnityEngine.PropertiesModule.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/UnityEngine.SharedInternalsModule.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/UnityEngine.dll --assembly=Library/Bee/artifacts/Android/ManagedStripped/mscorlib.dll --generatedcppdir=/github/workspace/Library/Bee/artifacts/Android/il2cppOutput/cpp --symbols-folder=/github/workspace/Library/Bee/artifacts/Android/il2cppOutput/cpp/Symbols --enable-analytics --emit-null-checks --enable-array-bounds-check --dotnetprofile=unityaot-linux --usymtool-path=/opt/unity/Editor/Data/Tools/usymtool --profiler-report --profiler-output-file=/github/workspace/Library/Bee/artifacts/il2cpp_conv_pyox.traceevents --print-command-line --static-lib-il2-cpp --data-folder=/github/workspace/Library/Bee/artifacts/Android/il2cppOutput/data
+[127/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/r7zi3bh9sa90.o
+[131/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/qbnawyh8g58g.o
+[132/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/x9oqcb08riyq.o
+[135/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/wy2xdmttlmzg.o
+[136/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/6rdcyawvqzf9.o
+[140/315    4s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/phkeyyd7ryx0.o
+[141/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/9pz1upusxskk.o
+[145/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/pe0gxrtr9clk.o
+[148/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/eupwg8rp4m7e.o
+[150/315    6s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/i374el49luy9.o
+[154/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/ofi3xhlgjexs.o
+[155/315    1s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/gzz64og5hns1.o
+[159/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/540lyrqxm6wh.o
+[160/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/p6gsz50yg2sc.o
+[161/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/m9xzl6iyxud2.o
+[164/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/p0kcihxct2ie.o
+[167/315    6s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/bp7lthoboiwh.o
+[172/315    7s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/hvnou5nbishu.o
+[173/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/d81pcwerzzk1.o
+[174/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/d55u0u3v1dz9.o
+[176/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/76z9ljn8wasj.o
+[177/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/zcsijh3ydwib.o
+[179/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/j0q52yn2w3sg.o
+[180/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/5zf4i76hs2qv.o
+[182/315    1s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/kusomm5v8vs1.o
+[183/315    3s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/jm8716ox4tbm.o
+[184/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/yceq8f5jxvjp.o
+[185/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/3jetn41phw93.o
+[187/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/dgm8rn7i25nu.o
+[192/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/yin3z8hcwdr6.o
+[200/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/0fzgtaocvvd0.o
+[202/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/lpo1fo506rxj.o
+[203/315    4s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/x5svcni61wux.o
+[206/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/System.Xml_CodeGen.c
+[208/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/System.Configuration_CodeGen.c
+[213/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppGenericMethodDefinitions.c
+[214/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppCCalculateTypeValues.cpp
+[216/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppCCTypeValuesTable.cpp
+[217/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Assembly-CSharp__3.cpp
+[221/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/mscorlib_CodeGen.c
+[222/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppTypeDefinitions.c
+[227/315    0s] CopyFiles /github/workspace/Library/Bee/artifacts/Android/il2cppOutput/build/arm64-v8a/Data/Resources/mscorlib.dll-resources.dat
+[228/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/UnityEngine.JSONSerializeModule_CodeGen.c
+[230/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Assembly-CSharp__2.cpp
+[234/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppCodeRegistration.cpp
+[236/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/UnityEngine.InputLegacyModule_CodeGen.c
+[238/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/__Generated_CodeGen.c
+[239/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppMetadataRegistration.c
+[241/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/UnityEngine.PropertiesModule_CodeGen.c
+[242/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Assembly-CSharp_CodeGen.c
+[247/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/UnityEngine.AudioModule_CodeGen.c
+[248/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Assembly-CSharp__1.cpp
+[254/315    0s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/64bj60p86pln.o
+[255/315    0s] CopyFiles /github/workspace/Library/Bee/artifacts/Android/il2cppOutput/build/arm64-v8a/Data/Metadata/global-metadata.dat
+[257/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/GenericMethods__2.cpp
+[261/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Mono.Security_CodeGen.c
+[264/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppCCalculateFieldValues.cpp
+[267/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/UnityEngine.AndroidJNIModule_CodeGen.c
+[269/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppInvokerTable.cpp
+[270/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/UnityEngine.AIModule_CodeGen.c
+[272/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/Managed/Metadata/global-metadata.dat
+[275/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/UnityEngine.CoreModule_CodeGen.c
+[277/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppMetadataUsage.c
+[281/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Assembly-CSharp.cpp
+[283/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Generics__2.cpp
+[286/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/Managed/Resources/mscorlib.dll-resources.dat
+[287/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/System.Core_CodeGen.c
+[288/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppRgctxTable.c
+[290/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppGenericMethodTable.c
+[291/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Il2CppCCFieldValuesTable.cpp
+[293/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/GenericMethods__1.cpp
+[295/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/UnityEngine.SharedInternalsModule_CodeGen.c
+[297/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/System_CodeGen.c
+[299/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Il2CppBackup/il2cppOutput/Generics__3.cpp
+[301/315    0s] GuidGenerator /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/assets/bin/Data/unity_app_guid
+[302/315    3s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/y64jmxa015z2.o
+[303/315    3s] C_Android_arm64 Library/Bee/artifacts/Android/d8kzr/axn2d8r4um9j.o
+[304/315    0s] Link_Android_arm64 Library/Bee/artifacts/Android/d8kzr/libil2cpp.so
+[305/315    0s] CopyFiles /github/workspace/Library/Bee/artifacts/Android/il2cppOutput/build/arm64-v8a/libil2cpp.dbg.so
+[306/315    0s] CopyFiles Library/Bee/artifacts/objcopy_5lmi/libil2cpp.dbg.so
+[307/315    0s] NdkObjCopy Library/Bee/artifacts/objcopy_5lmi/stripped/libil2cpp.so
+[308/315    0s] NdkObjCopy Library/Bee/artifacts/objcopy_5lmi/libil2cpp.sym.so
+[309/315    0s] CopyFiles /github/workspace/Library/Bee/artifacts/Android/il2cppOutput/build/arm64-v8a/libil2cpp.sym.so
+[310/315    0s] NdkObjCopy Library/Bee/artifacts/objcopy_5lmi/libil2cpp.so
+[311/315    0s] CopyFiles /github/workspace/Library/Bee/artifacts/Android/il2cppOutput/build/arm64-v8a/libil2cpp.so
+[312/315    0s] CopyFiles /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/jniLibs/arm64-v8a/libil2cpp.so
+*** Tundra requires additional run (22.42 seconds), 108 items updated, 315 evaluated
+*** Additional run caused by: timestamp change of Library/Bee/artifacts/Android/Features/Assembly-CSharp-FeaturesChecked.txt
+Starting: /opt/unity/Editor/Data/Tools/netcorerun/netcorerun "/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/AndroidPlayerBuildProgram.exe" "/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Bee:/opt/unity/Editor/Data/Tools/BuildPipeline" "Library/Bee/Player0857283b.dag.json" "Library/Bee/Player0857283b-inputdata.json" "Library/Bee/buildprogram1.traceevents"
+WorkingDir: /github/workspace
+ExitCode: 4 Duration: 22s
+ExitCode: 0 Duration: 0s780ms
+Starting: /opt/unity/Editor/Data/bee_backend --dont-print-to-structured-log --ipc --dagfile="Library/Bee/Player0857283b.dag" --dagfilejson="Library/Bee/Player0857283b.dag.json" --profile="Library/Bee/backend3.traceevents" Player
+WorkingDir: /github/workspace
+Finished compiling graph: 509 nodes, 1279 flattened edges (1275 ToBuild, 4 ToUse), maximum node priority 252
+[314/315    0s] ModifyAndroidProjectCallback /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/launcher/src/main/AndroidManifest.xml (+8 others)
+*** Tundra build success (0.18 seconds), 1 items updated, 315 evaluated
+Total cache size 0
+Total cache size after purge 0, took 00:00:00.0004388
+DisplayProgressbar: Calling IPostGenerateGradleAndroidProject callbacks
+Calling IPostGenerateGradleAndroidProject callbacks on '/github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary':
+Android PostProcess task "Calling IPostGenerateGradleAndroidProject callbacks" took 1.3803 ms
+DisplayProgressbar: Validate Gradle Project
+Android PostProcess task "Validate Gradle Project" took 0.7628 ms
+Android PostProcess task "Cloud Diagnostics Symbol Upload" took 0.3951 ms
+DisplayProgressbar: Building Gradle project
+Starting: /opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/OpenJDK/bin/java -classpath "/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Tools/gradle/lib/gradle-launcher-8.4.jar" org.gradle.launcher.GradleMain "-Dorg.gradle.jvmargs=-Xmx4096m" "assembleRelease" 
+WorkingDir: /github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/launcher
+ExitCode: 0 Duration: 0s308ms
+Android PostProcess task "Building Gradle project" took 71407.0132 ms
+DisplayProgressbar: Building Gradle Symbols
+Android PostProcess task "Building Gradle Symbols" took 0.4259 ms
+DisplayProgressbar: Processing Mapping File
+Android PostProcess task "Processing Mapping File" took 0.4955 ms
+DisplayProgressbar: Moving output package(s)
+Copy '/github/workspace/Library/Bee/Android/Prj/IL2CPP/Gradle/launcher/build/outputs/apk/release/launcher-release.apk' -> 
+ '/github/workspace/build/Android/Swarm.apk'
+Android PostProcess task "Moving output package(s)" took 8.9746 ms
+Android PostProcess task "Checking Symbols size" took 1.136 ms
+Refreshing native plugins compatible for Editor in 0.00 ms, found 0 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+
+-------------------------------------------------------------------------------
+Build Report
+Uncompressed usage by category (Percentages based on user generated assets only):
+Textures               4.2 mb	 99.4% 
+Meshes                 0.0 kb	 0.0% 
+Animations             0.0 kb	 0.0% 
+Sounds                 0.0 kb	 0.0% 
+Shaders                19.4 kb	 0.5% 
+Other Assets           1.2 kb	 0.0% 
+Levels                 0.0 kb	 0.0% 
+File headers           2.2 kb	 0.1% 
+Total User Assets      4.2 mb	 100.0% 
+Complete build size    104.3 mb
+Used Assets and files from the Resources folder, sorted by uncompressed size:
+ 2.7 mb	 2.6% Built-in Texture2D: Splash Screen Unity Logo
+ 1.0 mb	 1.0% Assets/Swarm/Resources/SwarmAtlas.png
+ 527.0 kb	 0.5% Resources/unity_builtin_extra
+ 5.1 kb	 0.0% Assets/Swarm/Resources/SwarmSprite.shader
+ 0.4 kb	 0.0% Built-in Sprite: 
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Presentation/WorldRenderer.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Audio/AudioDirector.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Presentation/SpriteAtlas.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Presentation/QuadBatch.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Presentation/PixelScreen.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Presentation/PixelFont.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Presentation/Generated/AtlasData.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Game/GameBootstrap.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/WaveDirector.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/SpatialGrid.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/SkySystem.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/SimEvents.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/SimConfig.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/HazardSystem.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/FlowerField.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/EnemySystem.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/AutoBrain.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Presentation/Haptics.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Presentation/FxSystem.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Game/AutoPilot.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/UI/TouchInput.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/WorldMap.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/Perks.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/Levels.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/GameSim.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/FogMap.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/Colony.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/Breeds.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/BeeSwarm.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Game/Profile.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Game/GameRoot.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/UI/Strings.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/UI/PixelUI.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/UI/GameUI.cs
+ 0.1 kb	 0.0% Assets/Swarm/Scripts/Simulation/Rng.cs
+ 0.0 kb	 0.0% Assets/Swarm/Resources/BuildInfo.txt
+-------------------------------------------------------------------------------
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 21 unused Assets / (389.8 KB). Loaded Objects now: 622.
+Memory consumption went from 80.6 MB to 80.2 MB.
+Total: 7.730804 ms (FindLiveObjects: 0.062747 ms CreateObjectMapping: 0.006503 ms MarkObjects: 7.055252 ms  DeleteObjects: 0.605491 ms)
+
+Build Finished, Result: Success.
+##utp:{"type":"PlayerBuildInfo","version":2,"phase":"Immediate","time":1794207904953,"processId":160,"steps":[{"description":"Preprocess Player","duration":7},{"description":"Prepare For Build","duration":2309},{"description":"ProducePlayerScriptAssemblies","duration":1843},{"description":"Verify Build setup","duration":15},{"description":"Prepare assets for target platform","duration":0},{"description":"Prepare splash screen","duration":0},{"description":"Building scenes","duration":55},{"description":"Build scripts DLLs","duration":26},{"description":"Build GlobalGameManagers file","duration":140},{"description":"Writing asset files","duration":42},{"description":"Building Resources/unity_builtin_extra","duration":122},{"description":"Write data build dirty tracking information","duration":9},{"description":"Postprocess built player","duration":95912}],"duration":100480}
+Unloading 0 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Temp/__Backupscenes/0.backup'
+	Deserialize:            0.550 ms
+	Integration:            5.344 ms
+	Integration of assets:  0.001 ms
+	Thread Wait Time:       0.025 ms
+	Total Operation Time:   5.921 ms
+Unloading 0 unused Assets / (3.4 KB). Loaded Objects now: 615.
+Memory consumption went from 79.9 MB to 79.9 MB.
+Total: 7.176478 ms (FindLiveObjects: 0.057497 ms CreateObjectMapping: 0.013536 ms MarkObjects: 7.096689 ms  DeleteObjects: 0.007995 ms)
+
+SWARM: результат=Succeeded, ошибок=0, размер=109321438 байт
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /home/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:37)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+Swarm.EditorTools.SwarmCiBuild:BuildAndroid () (at Assets/Swarm/Editor/SwarmCiBuild.cs:64)
+
+(Filename: Assets/Swarm/Editor/SwarmCiBuild.cs Line: 64)
+
+Build succeeded!
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace () (at /home/bokken/build/output/unity/unity/Runtime/Export/Scripting/StackTrace.cs:37)
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+Swarm.EditorTools.SwarmCiBuild:BuildAndroid () (at Assets/Swarm/Editor/SwarmCiBuild.cs:67)
+
+(Filename: Assets/Swarm/Editor/SwarmCiBuild.cs Line: 67)
+
+Starting: /opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/OpenJDK/bin/java -classpath "/opt/unity/Editor/Data/PlaybackEngines/AndroidPlayer/Tools/gradle/lib/gradle-launcher-8.4.jar" org.gradle.launcher.GradleMain "-Dorg.gradle.jvmargs=-Xmx4096m" "--stop" 
+WorkingDir: 
+Killing ADB server in 0.026968 seconds.
+[Physics::Module] Cleanup current backned.
+[Physics::Module] Id: 0xf2b8ea05
+Input System module state changed to: ShutdownInProgress.
+Input System polling thread exited.
+Input System module state changed to: Shutdown.
+[Licensing::IpcConnector] License Notification channel disconnected successfully.
+[Licensing::IpcConnector] License Client channel disconnected successfully.
+AcceleratorClientConnectionCallback - disconnected - :0
+[40m[32minfo[39m[22m[49m: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+Cleanup mono
+debugger-agent: Unable to listen on 37
+[Package Manager] Server process was shutdown
+Checking for leaked weakptr:
+  Found no leaked weakptrs.
+##utp:{"type":"MemoryLeaks","version":2,"phase":"Immediate","time":1794207911049,"processId":160,"allocatedMemory":6643190,"memoryLabels":[{"Default":22013},{"Permanent":16080},{"Thread":1084616},{"Manager":17554},{"VertexData":8},{"Geometry":408},{"Texture":160},{"Shader":79547},{"Material":24},{"GfxDevice":36008},{"Animation":392},{"Audio":4032},{"FontEngine":320},{"Physics":929},{"Serialization":752},{"Input":26752},{"JobScheduler":34448},{"TextLib":32},{"Mono":32},{"ScriptingNativeRuntime":155096},{"BaseObject":1622128},{"Resource":1032},{"Renderer":2928},{"Transform":4678},{"File":3749},{"WebCam":80},{"Culling":32},{"Terrain":11298},{"Wind":24},{"String":17523},{"DynamicArray":78377},{"HashMap":81761},{"Utility":2658704},{"PoolAlloc":1568},{"AI":72},{"TypeTree":5005},{"ScriptManager":512},{"RuntimeInitializeOnLoadManager":64},{"SpriteAtlas":112},{"GI":7448},{"Director":8208},{"CloudService":8976},{"WebRequest":808},{"VR":45681},{"SceneManager":528},{"Video":64},{"LazyScriptCache":32},{"NativeArray":8},{"Camera":17},{"Secure":9945},{"SerializationCache":1576},{"APIUpdating":10320},{"Subsystems":336},{"VirtualTexturing":57552},{"StaticSafetyDebugInfo":278528},{"Analytics":816},{"Hierarchy":832},{"Gui":80},{"EditorUtility":15865},{"VersionControl":4},{"Undo":944},{"AssetDatabase":171074},{"EditorGi":328},{"UnityConnect":24792},{"Upm":1812},{"DrivenProperties":72},{"LocalIPC":196},{"ProfilerEditor":9738},{"CoreBusinessMetrics":14184},{"Licensing":3512},{"AssetReference":32},{"IPCStream":32}]}
+Build succeeded
+
+###########################
+#       Build output      #
+###########################
+
+total 12M
+drwxr-xr-x 2 root root 4.0K Nov  9 07:05 .
+drwxr-xr-x 4 root root 4.0K Nov  9 07:03 ..
+-rw-r--r-- 1 root root  12M Nov  9 07:05 Swarm.apk
+Changing to "/github/workspace/_activate-license~" directory.
+/github/workspace/_activate-license~ /github/workspace
+Returning personal license seat
+An error occured while trying to return the ULF license. Ulf license file not found (/root/.local/share/unity3d/Unity/Unity_lic.ulf) (1404)
+No ULF license file to return - this seat is entitlement-based; returning it through the editor instead.
+[UnityConnectServicesConfig] Local config successfully read: "/usr/share/unity3d/config/services-config.json"
+[UnityConnectServicesConfig] "clientConnectTimeoutSec" was overridden with "5"
+[UnityConnectServicesConfig] "clientHandshakeTimeoutSec" was overridden with "10"
+[UnityConnectServicesConfig] Service configuration:
+    "servicesConfigBaseUrl": "",
+    "disableServicesWindow": false,
+    "disableUserLogin": false,
+    "entitlementCacheTimeoutInSeconds": 60,
+    "clientConnectTimeoutSec": 5,
+    "clientHandshakeTimeoutSec": 10,
+    "clientResolveEntitlementsTimeoutSec": 30,
+    "clientUpdateLicenseTimeoutSec": 30,
+    "licensingServiceBaseUrl": "",
+    "enableProxyAutoconfig": "false"
+
+Unity Editor version:    6000.0.36f1 (9fe3b5f71dbb)
+Branch:                  6000.0/staging
+Build type:              Release
+Batch mode:              YES
+System name:             Linux
+Distro version:          #20-Ubuntu SMP PREEMPT Mon Oct 19 22:41:16 UTC 2026
+Kernel version:          7.0.0-1019-azure
+Architecture:            x86_64
+Available memory:        15983 MB
+User *** logged in successfully
+[UnityConnect::TryLogin] Request Succeeded.
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Connection attempt to the License Client on channel: "LicenseClient-root" failed because channel doesn't exist; code: "0x80000002"
+[Licensing::Module] Successfully launched the LicensingClient (PId: 1365)
+[Licensing::IpcConnector] Successfully connected to the License Client on channel: "LicenseClient-root" at "2026-11-09T07:05:13.521798Z"
+[SignatureVerifier] Application signature verification not supported on this platform.
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.16.2+bdef8f5
+  Session Id:              d52c1bf961714e4ab409adcf68dd2653
+  Correlation Id:          09dbfe960e00fe54af798f340aa18f08
+  External correlation Id: 5062205078115110827
+  Machine Id:              D7nTUnjNAmtsUMcnoyrqkgIbYdM=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-root" (connect: 0.57s, validation: 0.07s, handshake: 0.00s)
+[Licensing::IpcConnector] Successfully connected to the License Notification on channel: "LicenseClient-root-notifications" at "2026-11-09T07:05:13.588276Z"
+[Licensing::Module] Connected to LicensingClient (PId: 1365, launch time: 0.00, total connection time: 0.63s)
+[Licensing::Client] Successfully updated the access token
+[Licensing::Module] Successfully updated the access token DRnAQkjPDP...
+[Licensing::Client] Successfully processed license management request
+[Licensing::Module] Successfully returned the entitlement license
+[Licensing::Client] Successfully queried for the EntitlementGroupsDetails
+[Licensing::Module] Error: Serial number unavailable for ULF return; skipping operation
+/github/workspace
+::endgroup::
+[INFO] Build done.
