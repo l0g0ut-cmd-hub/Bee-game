@@ -94,6 +94,7 @@ namespace Swarm.EditorTools
             Snap(sim);
             Play(sim, 1.2f, s => s.Swarm.LeaderPos);
             Shot("04_start", sim, () => _gui.DrawHud(sim, _screen, _t, Dt));
+            Shot("04b_help", sim, () => { _gui.DrawHud(sim, _screen, _t, Dt); _gui.DrawHudHelp(sim, _t); });
 
             // 5. Сбор: рой 70 пчёл — «облако»
             Grow(sim, 70);

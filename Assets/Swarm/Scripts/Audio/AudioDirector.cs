@@ -60,9 +60,10 @@ namespace Swarm.Presentation
                 _voices[i] = gameObject.AddComponent<AudioSource>();
                 _voices[i].playOnAwake = false;
             }
-            _buzz = MakeLoop("buzz", 1f, (t, n) =>
-                (Saw(t * 220f) * 0.5f + Saw(t * 223f) * 0.4f + Saw(t * 446f) * 0.15f) * (0.75f + 0.25f * Sin(t * 31f)));
-            _buzzLow = MakeLoop("buzzlow", 1f, (t, n) => (Saw(t * 110f) * 0.6f + Saw(t * 113f) * 0.4f) * (0.8f + 0.2f * Sin(t * 17f)));
+            // гул роя — «хор» из многих пчёл: у каждой своя частота взмахов (~190–260 Гц), своё дрожание тона
+            // и пролёт «ближе–дальше»; плюс шорох крыльев. Получается живое облако звука, а не мотор.
+            _buzz = MakeLoop("buzz", SwarmChorus(4f, 18, 190f, 262f, 0.16f, 11), 4f, 0.55f);
+            _buzzLow = MakeLoop("buzzlow", SwarmChorus(4f, 6, 105f, 135f, 0.10f, 23), 4f, 0.35f);
             _musicCalm = MakeMusic("music_calm", CalmLoop());
             _musicThreat = MakeMusic("music_threat", ThreatLoop());
             _rain = MakeLoop("rain", 2f, (t, n) => Noise() * 0.5f * (0.85f + 0.15f * Sin(t * 3f)));
@@ -154,9 +155,11 @@ namespace Swarm.Presentation
             _rain.volume = Mathf.MoveTowards(_rain.volume, rain01 * 0.13f, k * 0.2f);
         }
 
-        AudioSource MakeLoop(string name, float len, System.Func<float, float, float> f)
+        AudioSource MakeLoop(string name, float len, System.Func<float, float, float> f) => MakeLoop(name, f, len, 0.25f);
+
+        AudioSource MakeLoop(string name, System.Func<float, float, float> f, float len, float lowpass)
         {
-            var clip = Synth(name, len, f, lowpass: 0.25f, normalizeEnds: false);
+            var clip = Synth(name, len, f, lowpass: lowpass, normalizeEnds: false);
             var src = gameObject.AddComponent<AudioSource>();
             src.clip = clip;
             src.loop = true;
@@ -191,11 +194,47 @@ namespace Swarm.Presentation
         /// <summary>Гул роя: громкость от численности, высота от скорости, низкий гул шершней.</summary>
         public void SetSwarm(int bees, float speed01, int enemies, bool active)
         {
-            float target = active ? Mathf.Clamp01(bees / 120f) * 0.22f + 0.04f : 0f;
+            float target = active ? (Mathf.Clamp01(bees / 120f) * 0.2f + 0.04f) * (0.85f + 0.25f * speed01) : 0f;
             _buzz.volume = Mathf.MoveTowards(_buzz.volume, target, Time.unscaledDeltaTime * 0.6f);
-            _buzz.pitch = 0.9f + speed01 * 0.3f;
+            _buzz.pitch = 0.97f + speed01 * 0.08f;   // тон почти не меняется (большой сдвиг звучит как мотор)
             float low = active && enemies > 0 ? Mathf.Clamp01(enemies / 6f) * 0.18f + 0.05f : 0f;
             _buzzLow.volume = Mathf.MoveTowards(_buzzLow.volume, low, Time.unscaledDeltaTime * 0.6f);
+        }
+
+        /// <summary>
+        /// Хор насекомых для бесшовной петли длиной len: частоты и модуляции кратны 1/len, поэтому петля без щелчка.
+        /// Волна — мягкий «зуд» (гармоники 1/n²), тон каждой пчелы плавает, громкость каждой — свой медленный пролёт.
+        /// </summary>
+        static System.Func<float, float, float> SwarmChorus(float len, int voices, float fMin, float fMax, float rustle, int seed)
+        {
+            var rnd = new System.Random(seed);
+            var f0 = new float[voices]; var fm = new float[voices]; var dep = new float[voices];
+            var am = new float[voices]; var aph = new float[voices]; var ph0 = new float[voices];
+            for (int v = 0; v < voices; v++)
+            {
+                f0[v] = Mathf.Round((fMin + (float)rnd.NextDouble() * (fMax - fMin)) * len) / len;
+                fm[v] = (1 + rnd.Next(12)) / len;                  // дрожание тона 0.25–3 Гц
+                dep[v] = 0.015f + (float)rnd.NextDouble() * 0.03f;  // ±1.5–4.5 %
+                am[v] = (1 + rnd.Next(4)) / len;                    // пролёт ближе–дальше
+                aph[v] = (float)rnd.NextDouble();
+                ph0[v] = (float)rnd.NextDouble();
+            }
+            float norm = 1f / Mathf.Sqrt(voices) * 0.9f;
+            float lp = 0f;
+            return (t, n) =>
+            {
+                float sum = 0f;
+                for (int v = 0; v < voices; v++)
+                {
+                    // фаза с частотной модуляцией: f(t) = f0·(1 + dep·sin(2π·fm·t))
+                    float ph = ph0[v] + f0[v] * t - f0[v] * dep[v] * Mathf.Cos(2f * Mathf.PI * fm[v] * t) / (2f * Mathf.PI * fm[v]);
+                    float w = Sin(ph) + 0.25f * Sin(ph * 2f) + 0.11f * Sin(ph * 3f) + 0.06f * Sin(ph * 4f);
+                    float a = 0.55f + 0.45f * Sin(am[v] * t + aph[v]);
+                    sum += w * a * a;
+                }
+                lp += (Noise() - lp) * 0.08f;                         // шорох крыльев — низкочастотный шум
+                return sum * norm + lp * rustle * 6f;
+            };
         }
 
         // ------------------------------------------------------------ синтез

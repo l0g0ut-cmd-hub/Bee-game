@@ -12,8 +12,9 @@ namespace Swarm.Game
     /// </summary>
     public sealed class GameRoot : MonoBehaviour
     {
-        enum State { Menu, Levels, Achievements, Playing, Hive, Perk, Paused, Result, Intro }
+        enum State { Menu, Levels, Achievements, Playing, Hive, Perk, Paused, Result, Intro, Help }
         float _introTime;
+        bool _helpFromPause;
 
         public static GameRoot Instance { get; private set; }
 
@@ -208,6 +209,7 @@ namespace Swarm.Game
             _state = State.Playing;
             // первый заход в сезон — карточка «что нового» (обучение по сезонам)
             if (mode == GameMode.Campaign && (_profile.SeenIntro & (1 << level)) == 0) { _state = State.Intro; _introTime = 0f; }
+            else if (!_profile.SeenHelp) { _state = State.Help; _introTime = 0f; }
             _acc = 0f;
             _cam = _sim.Swarm.LeaderPos;
             _fx.Clear();
@@ -255,6 +257,11 @@ namespace Swarm.Game
                 case State.Levels: act = _gameUi.DrawLevels(_profile, _time); break;
                 case State.Achievements: act = _gameUi.DrawAchievements(_profile); break;
                 case State.Perk: act = _gameUi.DrawPerk(_sim, _time); break;
+                case State.Help:
+                    _introTime += dt;
+                    act = _gameUi.DrawHudHelp(_sim, _time);
+                    if (AutoPilot.Enabled && _introTime > 5f) act = UiAction.Resume;
+                    break;
                 case State.Intro:
                     _introTime += dt;
                     act = _gameUi.DrawIntro(_level, _time);
@@ -327,6 +334,7 @@ namespace Swarm.Game
                 case State.Levels: case State.Achievements: return UiAction.Back;
                 case State.Perk: return UiAction.None;
                 case State.Intro: return UiAction.Resume;
+                case State.Help: return UiAction.Resume;
                 default: Application.Quit(); return UiAction.None;
             }
         }
@@ -337,6 +345,9 @@ namespace Swarm.Game
             {
                 case UiAction.OpenCampaign: _state = State.Levels; break;
                 case UiAction.ContinueRun: ContinueRun(); break;
+                case UiAction.ShowHelp:
+                    if (_state == State.Paused) { _helpFromPause = true; _state = State.Help; _introTime = 0f; }
+                    break;
                 case UiAction.OpenAchievements: _state = State.Achievements; break;
                 case UiAction.Back: if (_state == State.Levels || _state == State.Achievements) _state = State.Menu; break;
                 case UiAction.StartLevel: StartGame(GameMode.Campaign, _gameUi.SelectedLevel); break;
@@ -353,6 +364,16 @@ namespace Swarm.Game
                         _profile.SeenIntro |= 1 << _level;
                         _profile.Save();
                         _state = State.Playing;
+                        _input.Reset();
+                        _audio.Play(Sfx.Click);
+                        if (!_profile.SeenHelp) { _state = State.Help; _introTime = 0f; }   // сразу за карточкой — памятка по экрану
+                    }
+                    else if (_state == State.Help)
+                    {
+                        _profile.SeenHelp = true;
+                        _profile.Save();
+                        _state = _helpFromPause ? State.Paused : State.Playing;
+                        _helpFromPause = false;
                         _input.Reset();
                         _audio.Play(Sfx.Click);
                     }

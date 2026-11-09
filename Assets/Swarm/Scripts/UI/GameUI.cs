@@ -10,7 +10,7 @@ namespace Swarm.UI
     {
         None, OpenCampaign, StartLevel, PlayEndless, PlayDaily, OpenAchievements, Back,
         Pause, Resume, Restart, ToMenu, OpenHive, CloseHive, ChoosePerk,
-        ToggleSound, ToggleHaptics, ToggleShake, PostSquad, ToggleAuto, ContinueRun, CycleBreed
+        ToggleSound, ToggleHaptics, ToggleShake, PostSquad, ToggleAuto, ContinueRun, ShowHelp, CycleBreed
     }
 
     /// <summary>
@@ -277,6 +277,67 @@ namespace Swarm.UI
             return a;
         }
 
+        // ================================================================ ПАМЯТКА ПО ЭКРАНУ
+        void Frame(Rect r, Color32 c, int n)
+        {
+            _ui.Fill(new Rect(r.x, r.y, r.width, 1), c);
+            _ui.Fill(new Rect(r.x, r.yMax - 1, r.width, 1), c);
+            _ui.Fill(new Rect(r.x, r.y, 1, r.height), c);
+            _ui.Fill(new Rect(r.xMax - 1, r.y, 1, r.height), c);
+            _b.Clear().Append(n);
+            _ui.Fill(new Rect(r.x - 1, r.y - 9, 9, 9), c);
+            _ui.Text(_b, r.x + 3.5f, r.y - 8, PixelUI.Ink, 1, 1, false);
+        }
+
+        /// <summary>Подписывает элементы HUD: рамки с номерами + легенда в центре. Тап — закрыть.</summary>
+        public UiAction DrawHudHelp(GameSim sim, float time)
+        {
+            var a = UiAction.None;
+            int W = _ui.W, H = _ui.H;
+            float top = H - _ui.SafeTop;
+            float bottom = _ui.SafeBottom + 6;
+            _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 120));
+            var c = new Color32(255, 230, 120, 255);
+            float hx = Mathf.Round(W * 0.43f), tx = Mathf.Round(W * 0.58f);
+
+            var items = new List<string>(10);
+            int n = 0;
+            Frame(new Rect(2, top - 22, hx - 10, 24), c, ++n); items.Add(Strings.HelpBees);
+            Frame(new Rect(hx - 8, top - 22, tx - hx, 24), c, ++n); items.Add(Strings.HelpHoney);
+            Frame(new Rect(tx - 8, top - 22, W - 44 - tx + 8, 24), c, ++n); items.Add(Strings.HelpTime);
+            Frame(new Rect(W - 42, top - 21, 20, 22), c, ++n); items.Add(Strings.HelpAuto);
+            Frame(new Rect(3, top - 37, W - 6, 15), c, ++n); items.Add(sim.Cfg.Endless ? Strings.HelpGoalEndless : Strings.HelpGoal);
+            Frame(new Rect(5, bottom - 1, 76, 20), c, ++n); items.Add(Strings.HelpCarry);
+            if (sim.Cfg.PostEnabled) { Frame(new Rect(Mathf.Round(W * 0.5f - 30), bottom - 3, 60, 24), c, ++n); items.Add(Strings.HelpPost); }
+            items.Add(Strings.HelpFlowers);
+            items.Add(Strings.HelpArrows);
+            items.Add(Strings.HelpHold);
+            if (sim.Cfg.DefendersEnabled) items.Add(Strings.HelpUnits);
+            if (AutoPilot.Enabled) items.Add(Strings.HelpRing);
+
+            // легенда
+            int lw = W - 20;
+            float lh = 22;
+            foreach (var s in items) lh += Wrap(s, lw - 16).Length * 10 + 3;
+            var panel = new Rect(10, Mathf.Round(H * 0.5f - lh * 0.5f), lw, lh);
+            _ui.Fill(panel, new Color32(23, 18, 28, 225));
+            float y = panel.yMax - 14;
+            _ui.Text(Strings.HelpTitle, panel.center.x, y, c, 1, 1, true);
+            y -= 4;
+            for (int k = 0; k < items.Count; k++)
+            {
+                var lines = Wrap(items[k], lw - 16);
+                if (k < n) { _b.Clear().Append(k + 1); _ui.Text(_b, panel.x + 4, y - 10, c, 1, 0, false); }
+                else _ui.Text("·", panel.x + 4, y - 10, c, 1, 0, false);
+                for (int li = 0; li < lines.Length; li++) _ui.Text(lines[li], panel.x + 13, y - 10 - li * 10, PixelUI.White, 1, 0, false);
+                y -= lines.Length * 10 + 3;
+            }
+            if (Mathf.Repeat(time, 1.4f) < 1f) _ui.Text(Strings.HelpTap, W * 0.5f, panel.y - 12, PixelUI.Muted, 1, 1);
+            _ui.Blocker(new Rect(0, 0, W, H));
+            if (_ui.Up) a = UiAction.Resume;
+            return a;
+        }
+
         // ================================================================ ВЫБОР ПЕРКА
         public UiAction DrawPerk(GameSim sim, float time)
         {
@@ -459,7 +520,8 @@ namespace Swarm.UI
             var cr = new Rect(6, bottom, 74, 18);
             _ui.Fill(cr, PixelUI.InkSoft);
             _ui.Icon(Spr.IconNectar, cr.x + 7, cr.y + 9);
-            _ui.Bar(new Rect(cr.x + 14, cr.y + 7, 54, 4), frac, PixelUI.Honey, new Color32(70, 50, 40, 255));
+            _ui.Text(Strings.CarryLabel, cr.x + 14, cr.y + 10, PixelUI.Muted, 1, 0, false);   // подпись: что это за полоска
+            _ui.Bar(new Rect(cr.x + 14, cr.y + 4, 54, 4), frac, PixelUI.Honey, new Color32(70, 50, 40, 255));
             if (frac > 0.85f && !sim.SwarmAtHive && Mathf.Repeat(time * 2f, 1f) < 0.6f)
                 _ui.Text(Strings.CarryFull, cr.x, cr.yMax + 4, PixelUI.Honey);
 
@@ -766,7 +828,7 @@ namespace Swarm.UI
             int W = _ui.W, H = _ui.H;
             _ui.Fill(new Rect(0, 0, W, H), new Color32(23, 18, 28, 170));
             _ui.Blocker(new Rect(0, 0, W, H));
-            var panel = new Rect(Mathf.Round(W * 0.5f - 70), Mathf.Round(H * 0.5f - 119), 140, 238);
+            var panel = new Rect(Mathf.Round(W * 0.5f - 70), Mathf.Round(H * 0.5f - 132), 140, 264);
             _ui.Panel(panel);
             _ui.Text(Strings.Pause, panel.center.x, panel.yMax - 24, PixelUI.Ink, 2, 1, false);
             float bx = panel.center.x - 55, by = panel.yMax - 54;
@@ -776,7 +838,8 @@ namespace Swarm.UI
             if (_ui.Button(45, new Rect(bx, by - 78, 110, 22), haptics ? Strings.HapticsOn : Strings.HapticsOff)) a = UiAction.ToggleHaptics;
             if (_ui.Button(46, new Rect(bx, by - 104, 110, 22), shake ? Strings.ShakeOn : Strings.ShakeOff)) a = UiAction.ToggleShake;
             if (_ui.Button(47, new Rect(bx, by - 130, 110, 22), auto ? Strings.AutoBtnOn : Strings.AutoBtnOff, true, 1, auto ? Spr.IconCheck : Spr.Count)) a = UiAction.ToggleAuto;
-            if (_ui.Button(44, new Rect(bx, by - 156, 110, 22), Strings.ToMenu)) a = UiAction.ToMenu;
+            if (_ui.Button(48, new Rect(bx, by - 156, 110, 22), Strings.HelpBtn)) a = UiAction.ShowHelp;
+            if (_ui.Button(44, new Rect(bx, by - 182, 110, 22), Strings.ToMenu)) a = UiAction.ToMenu;
             return a;
         }
 

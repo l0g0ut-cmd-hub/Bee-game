@@ -9,6 +9,7 @@ namespace Swarm.Simulation
     public sealed class AutoBrain
     {
         public Vector2 WorldTarget;
+        public static bool NoWaspBall, NoRetreat;   // переключатели для A/B-замеров на стенде
         public bool WantHold;
         /// <summary>Кого отметить меткой-приказом (uid врага; 0 — никого).</summary>
         public int WantFocusUid;
@@ -68,6 +69,24 @@ namespace Swarm.Simulation
             }
             WantHold = false;
             WantFocusUid = 0;
+            // оценка сил: враги вокруг роя против мощи роя (число пчёл × жало × бафы)
+            float enemyPow = 0f;
+            Vector2 enemyC = Vector2.zero;
+            int wasps = 0;
+            Vector2 waspC = Vector2.zero;
+            for (int e = 0; e < en.Count; e++)
+            {
+                if (en.Mode[e] == EnemyMode.Flee || EnemySystem.IsStatic(en.Type[e])) continue;
+                float d2 = (en.Pos[e] - sw.LeaderPos).sqrMagnitude;
+                if (d2 > 120f * 120f) continue;
+                float w = PowerOf(en.Type[e], en.Mode[e]);
+                enemyPow += w;
+                enemyC += en.Pos[e] * w;
+                if (en.Type[e] == EnemyType.Wasp && d2 < 45f * 45f) { wasps++; waspC += en.Pos[e]; }
+            }
+            if (enemyPow > 0f) enemyC /= enemyPow;
+            float myPow = SwarmPower(sim);
+            bool outmatched = enemyPow > 0f && myPow < enemyPow * 1.4f;
             float queenD = queen >= 0 ? (en.Pos[queen] - sw.LeaderPos).sqrMagnitude : float.MaxValue;
             if (queen >= 0 && queenD < 160f * 160f && sw.SwarmCount >= 60)
             {
@@ -92,6 +111,18 @@ namespace Swarm.Simulation
                 Vector2 away = sw.LeaderPos - en.Pos[threat];
                 WorldTarget = sw.LeaderPos + away.normalized * 80f;
             }
+            else if (!NoRetreat && outmatched && threat >= 0 && en.Type[threat] != EnemyType.Bear)
+            {
+                // силы неравны — отходим к улью под защиту солдат, не размениваем пчёл
+                Vector2 away = (sw.LeaderPos - enemyC).normalized;
+                WorldTarget = Vector2.Lerp(hive, sw.LeaderPos + away * 60f, 0.35f);
+            }
+            else if (!NoWaspBall && wasps >= 3 && sw.SwarmCount >= 40 && sim.Sky.Thirst < 0.7f)
+            {
+                // кучка ос вплотную — тепловой шар по центру кучки: обездвижить и сварить разом
+                WorldTarget = waspC / wasps;
+                WantHold = true;
+            }
             else if (threat >= 0 && threatD < 90f * 90f)
             {
                 WorldTarget = en.Pos[threat];
@@ -110,17 +141,17 @@ namespace Swarm.Simulation
                     if ((sim.World.Ponds[i] - sw.LeaderPos).sqrMagnitude < (best - sw.LeaderPos).sqrMagnitude) best = sim.World.Ponds[i];
                 WorldTarget = best;
             }
-            else if (sw.FieldCarry >= cap * 0.85f || (_delivering && sw.FieldCarry > UnloadedCarry(sim)))
+            else if (sw.FieldCarry >= cap * DeliverAt(sim, cap) || (_delivering && sw.FieldCarry > UnloadedCarry(sim)))
             {
                 _delivering = true;
                 WorldTarget = hive;
             }
-            else if (sim.Flowers.CollectMul < 0.05f)
+            else if (sim.Sky.IsNight(sim.Time) && nest >= 0 && sw.SwarmCount >= 60)
             {
-                // ночь: цветы закрыты, осы спят — большим роем идём жечь гнездо, иначе отдыхаем у улья
+                // ночь: осы спят — большим роем идём жечь гнездо (иначе — собираем, ночью цветы дают меньше, но дают)
                 _delivering = false;
                 _flower = -1;
-                WorldTarget = nest >= 0 && sw.SwarmCount >= 60 ? en.Pos[nest] : hive + new Vector2(0f, -24f);
+                WorldTarget = en.Pos[nest];
             }
             else
             {
@@ -158,7 +189,9 @@ namespace Swarm.Simulation
                         for (int g = 0; g < fl.Count; g++)
                             if (fl.IsBlooming(g) && (fl.Pos[g] - fl.Pos[f]).sqrMagnitude < 32f * 32f) patch += fl.Nectar[g];
                         float d = (fl.Pos[f] - sw.LeaderPos).magnitude + (fl.Pos[f] - hive).magnitude * 0.5f;
-                        float score = (d + 40f) / (2f + patch);
+                        // ценна не вся поляна, а то, что рой сейчас унесёт: маленькому рою дальняя богатая поляна не нужна
+                        float room = Mathf.Max(4f, cap - sw.FieldCarry);
+                        float score = (d + 40f) / (2f + Mathf.Min(patch, room * 1.2f));
                         // цветы-усилители: мак перед боями, фиалка — когда далеко летать
                         if (fl.Kind[f] == FlowerKind.Poppy && sim.BuffSting <= 0f && en.Count > 1) score *= 0.6f;
                         if (fl.Kind[f] == FlowerKind.Violet && sim.BuffSpeed <= 0f && d > 150f) score *= 0.7f;
@@ -185,6 +218,38 @@ namespace Swarm.Simulation
                 if (d < bd) { bd = d; best = f; }
             }
             return best;
+        }
+
+        /// <summary>
+        /// Когда нести нектар: у улья — почти полным (лишний рейс дёшев), далеко — тоже полным,
+        /// но если поляна под ногами выжата, сторож прогресса отправит раньше.
+        /// </summary>
+        float DeliverAt(GameSim sim, float cap)
+        {
+            float dHive = (sim.Swarm.LeaderPos - sim.World.HivePos).magnitude;
+            return dHive < 110f ? 0.7f : 0.9f;
+        }
+
+        /// <summary>«Вес» врага в бою — сколько он стоит пчёл.</summary>
+        static float PowerOf(EnemyType t, EnemyMode m)
+        {
+            switch (t)
+            {
+                case EnemyType.Wasp: return 1f;
+                case EnemyType.Hornet: return 4f;
+                case EnemyType.Bear: return 8f;
+                case EnemyType.Queen: return 20f;
+                case EnemyType.Ant: return 0.3f;
+                case EnemyType.Rival: return m == EnemyMode.Hunt ? 0.5f : 0f;
+                default: return 0f;
+            }
+        }
+
+        /// <summary>Мощь роя в тех же единицах: ~10 пчёл с базовым жалом = 1 оса.</summary>
+        public static float SwarmPower(GameSim sim)
+        {
+            float sting = sim.Colony.StingMul * (sim.BuffSting > 0f ? sim.Cfg.PoppyStingMul : 1f);
+            return (sim.Swarm.SwarmCount - sim.Swarm.SquadCount) * sting / 10f;
         }
 
         /// <summary>Есть ли застрявшие в паутине (3+) — и где.</summary>
@@ -226,11 +291,30 @@ namespace Swarm.Simulation
             return sim.Time > 420f && bees >= 0.88f;
         }
 
-        public static int WantBrood(GameSim sim) => Saving(sim) ? 0 : 4;
+        /// <summary>
+        /// Скорость кладки. Матка не должна съедать весь мёд: когда соты почти полны и их можно расширить —
+        /// копим на соты; когда улей пуст, а рой мал — нормальная кладка, чтобы хватало на защитников и улучшения.
+        /// </summary>
+        public static int WantBrood(GameSim sim)
+        {
+            if (Saving(sim)) return 0;
+            var sw = sim.Swarm;
+            var col = sim.Colony;
+            if (sw.SwarmCount >= col.MaxBees - 4 && !col.IsMaxed(UpgradeType.Comb) && col.Honey < col.CostOf(UpgradeType.Comb)) return 0;
+            if (sim.Cfg.DefendersEnabled && sw.GuardCount < WantDefenders(sim) && col.Honey < sim.DefenderCost) return 2;
+            return 4;
+        }
 
         public static int WantDefenders(GameSim sim)
         {
             int w = sim.Time > 400f ? 18 : sim.Time > 250f ? 12 : sim.Time > 90f ? 6 : 0;
+            // враги крутятся у улья — защитников больше
+            Vector2 hive = sim.World.HivePos;
+            int near = 0;
+            var en = sim.Enemies;
+            for (int e = 0; e < en.Count; e++)
+                if (!EnemySystem.IsStatic(en.Type[e]) && en.Type[e] != EnemyType.Rival && (en.Pos[e] - hive).sqrMagnitude < 140f * 140f) near++;
+            if (near >= 2) w = Mathf.Max(w, 9);
             if (sim.Cfg.Endless) w = Mathf.Min(sim.Cfg.DefenderMax, w + 3 * sim.Waves.Cycle);
             return w;
         }
@@ -265,7 +349,7 @@ namespace Swarm.Simulation
                 if (col.Level[(int)UpgradeType.Speed] < 1 && sim.CanUpgrade(UpgradeType.Speed)) return 36;
             }
             if (sw.GuardCount < WantDefenders(sim) && sim.CanHireDefenders && free >= sim.DefenderCost + 20) return 32;
-            if (!saving && sim.Time > 40f && sim.CanHireWorkers && free >= sim.WorkerCost + 20 && (cfg.Endless || sim.TimeLeft > 150f)) return 37;
+            if (!saving && sim.Time > 20f && sim.CanHireWorkers && col.Honey >= sim.WorkerCost + 10 && (cfg.Endless || sim.TimeLeft > 150f)) return 37;
             // дальше — только из излишка
             if (sim.CanUpgrade(UpgradeType.Carry) && free >= col.CostOf(UpgradeType.Carry) + 40) return 34;
             if (sim.CanUpgrade(UpgradeType.Sting) && free >= col.CostOf(UpgradeType.Sting) + 40) return 35;

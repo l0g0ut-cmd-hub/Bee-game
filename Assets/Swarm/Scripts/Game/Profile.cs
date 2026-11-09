@@ -18,7 +18,8 @@ namespace Swarm.Game
         public int DailyDate;          // yyyymmdd последнего задания дня
         public int DailyStars;
         public int Achievements;       // битовая маска
-        public int SeenIntro;          // какие сезоны уже показали карточку «что нового»
+        public int SeenIntro;
+        public bool SeenHelp;          // памятка по экрану уже показана          // какие сезоны уже показали карточку «что нового»
         public int TotalCooked, TotalNests, TotalBears, TotalRare, TotalBosses;
         public int BreedIndex;         // выбранная порода (Swarm.Simulation.Breed)
 

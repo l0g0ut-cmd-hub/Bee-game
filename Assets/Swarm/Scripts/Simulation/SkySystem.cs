@@ -16,6 +16,7 @@ namespace Swarm.Simulation
     {
         public float DayLength = 150f;
         public float NightLength = 22f;
+        public const float NightCollect = 0.4f;
         public bool Enabled = true;
 
         public Weather Current = Weather.Clear;
@@ -38,7 +39,7 @@ namespace Swarm.Simulation
 
         public float CollectMul(float time)
         {
-            if (IsNight(time)) return 0f;
+            if (IsNight(time)) return NightCollect;   // ночью цветы дают меньше, но рой не простаивает
             float m = 1f;
             if (Current == Weather.Rain) m *= Mathf.Lerp(1f, 0.45f, WeatherBlend);
             if (Current == Weather.Heat) m *= Mathf.Lerp(1f, 0.55f, WeatherBlend * Mathf.Clamp01(Thirst * 1.6f));

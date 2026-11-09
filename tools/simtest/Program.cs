@@ -54,6 +54,8 @@ static class Program
     /// <summary>Прогон «мозга» автопилота (AutoBrain) с замером простоя роя.</summary>
     static int Brain(int seeds)
     {
+        AutoBrain.NoWaspBall = Environment.GetEnvironmentVariable("NO_WBALL") == "1";
+        AutoBrain.NoRetreat = Environment.GetEnvironmentVariable("NO_RETREAT") == "1";
         int fails = 0;
         int lvl = int.TryParse(Environment.GetEnvironmentVariable("LEVEL"), out var lv) ? lv : 1;
         for (int sd = 1; sd <= seeds; sd++)
